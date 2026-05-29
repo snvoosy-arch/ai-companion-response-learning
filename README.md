@@ -8,7 +8,7 @@
 
 ```text
 companions/
-  white/   # Discord 기반 LLM companion runtime
+  white/   # 생성형 기반 LLM companion runtime
   black/   # 예측형/계층형 응답 설계와 학습 파이프라인
 ```
 
