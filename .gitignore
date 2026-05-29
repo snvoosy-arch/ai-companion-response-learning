@@ -1,0 +1,46 @@
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+.venv-*/
+venv/
+env/
+*.egg-info/
+
+# Runtime data, logs, and generated state
+*.log
+logs/
+*.sqlite3
+*.db
+*.jsonl.tmp
+*.lock
+data/
+reports/
+
+# Model artifacts and large generated files
+models/
+model/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+*.onnx
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+

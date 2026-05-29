@@ -1,0 +1,1 @@
+"""Predictive Discord bot package."""
