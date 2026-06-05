@@ -20,6 +20,10 @@ companions/
 - 응답 품질을 점검하는 테스트와 오프라인 평가 코드
 - 실제 운영 데이터와 모델 파일을 제외한 공개용 코드 구성
 
+## 문서
+
+- [Black Companion Bot Mind Map](docs/black-mindmap.md)
+
 ## 포함한 것
 
 - 핵심 소스 코드: `companions/*/src`
