@@ -1,39 +1,39 @@
-# White Companion Model Case Study
+# White Companion Model 케이스스터디
 
-## Summary
+## 요약
 
-White is a Korean companion-model project. The goal is not just to make a Discord bot answer, but to make the model itself learn a calm, short, context-aware speaking style.
+White는 한국어 컴패니언 모델 프로젝트입니다. 목표는 디스코드 봇이 그럴듯하게 답하게 만드는 데서 끝나지 않고, 모델 자체가 차분하고 짧고 맥락을 반영하는 말투를 배우게 만드는 것입니다.
 
-The central lesson so far is simple: clean SFT data helps, but it is not enough when the model has already learned copying, generic replies, and boundary confusion. The strongest path is to keep a stable baseline, evaluate every candidate against the same holdout, and accumulate real failures into DPO data.
+지금까지의 핵심 결론은 분명합니다. 깨끗한 SFT 데이터는 필요하지만, 이미 복사 성향과 일반 반응, 경계 혼동이 생긴 모델을 고치는 데는 그것만으로 충분하지 않았습니다. 안정적인 기준선을 유지하고, 같은 holdout으로 후보를 비교하며, 실제 실패를 DPO 데이터로 누적하는 방식이 더 강합니다.
 
-## Problem
+## 문제
 
-Early White training used many short question/answer examples. That made the model look fluent on familiar prompts, but it also caused several problems:
+초기 White 학습에는 짧은 질문/답변 예시가 많았습니다. 익숙한 질문에는 그럴듯해 보였지만, 다음 문제가 생겼습니다.
 
-- It overfit to exact sentence shapes.
-- It copied user phrasing too often.
-- It generalized poorly to paraphrased prompts.
-- It sometimes leaked runtime wrapper text such as user names.
-- It produced generic acknowledgements instead of answering the actual question.
+- 정확한 문장 형태에 과적합했다.
+- 사용자 문장을 그대로 따라 쓰는 경향이 강해졌다.
+- paraphrase 질문에서 일반화가 약했다.
+- 런타임 wrapper의 사용자 이름이나 형식이 답변에 새어 나왔다.
+- 실제 질문에 답하지 않고 일반적인 수긍만 하는 경우가 생겼다.
 
-The real White runtime input is more complex than a single user prompt. It contains system instructions, a context packet, conversation history, and a final wrapper shaped like a Discord message. Training data had to match that structure.
+White의 실제 런타임 입력은 단순한 user prompt가 아닙니다. system prompt, context packet, 대화 history, Discord message wrapper가 함께 들어갑니다. 그래서 학습 데이터도 이 구조에 맞아야 했습니다.
 
-## Target Behavior
+## 목표 말투
 
-White's target style is deliberately narrow:
+White의 목표 말투는 의도적으로 좁게 잡았습니다.
 
-- calm Korean casual speech
-- one or two sentences in most cases
-- low emotional intensity, but not indifferent
-- acknowledge the user once, then answer directly
-- no emoji, decorative marks, or exaggerated reactions
-- no empty acknowledgement-only replies
+- 차분한 한국어 반말
+- 대부분 한두 문장
+- 감정 표현은 낮지만 무심하지 않음
+- 먼저 한 번 받아준 뒤 바로 답함
+- 이모지, 장식 기호, 과한 반응 없음
+- 내용 없는 수긍만 하는 답변 없음
 
-This matters because the model can pass a generic fluency check while still failing as White.
+겉보기 유창함만으로는 White답다고 보기 어렵기 때문에, 말투와 응답 습관을 별도로 평가했습니다.
 
-## Data Design
+## 데이터 설계
 
-The project moved to runtime-aligned `messages` SFT data. Each row is designed to resemble the actual inference surface:
+프로젝트는 runtime-aligned `messages` SFT 데이터로 옮겨갔습니다. 각 row는 실제 추론 입력면과 비슷하게 구성합니다.
 
 - system prompt
 - `white_context_packet`
@@ -41,78 +41,80 @@ The project moved to runtime-aligned `messages` SFT data. Each row is designed t
 - final user wrapper
 - assistant completion
 
-Rows are audited for:
+데이터를 만들 때는 다음 항목을 확인했습니다.
 
-- answer duplication
-- prompt copying
-- broken Korean
-- overly generic acknowledgements
-- formal speech leakage
-- user-name or wrapper leakage
-- mismatch between user state and assistant state
+- 답변 중복
+- prompt 복사
+- 깨진 한국어
+- 과하게 일반적인 수긍
+- 존댓말 누출
+- 사용자 이름이나 wrapper 누출
+- user-care와 assistant-care 혼동
 
-Holdout data is kept separate and paraphrased so the model is not rewarded for memorizing exact training rows.
+holdout 데이터는 학습 row와 분리하고 paraphrase 중심으로 유지했습니다. 모델이 문장을 외운 것이 아니라 의미를 따라가는지 보기 위해서입니다.
 
-## Experiment Timeline
+## 실험 흐름
 
-| Candidate | Purpose | Result | Decision |
+| 후보 | 목적 | 결과 | 판단 |
 | --- | --- | --- | --- |
-| v25 | Evaluate earlier high-context candidate | Pilot50 had 2 pass, 2 weak, 6 fail | Keep failures for DPO, do not train from only 6 rows |
-| v106 | Preference-tuned candidate baseline | 86.1 percent apparent pass on the v108 holdout | Keep as current baseline |
-| v107 | Clean runtime SFT from raw Qwen | Regressed into generic and repeated replies | Do not use as baseline |
-| v108 | Anti-generic clean restart from raw Qwen | 56.7 percent apparent pass, still too short and generic | Clean data alone was insufficient |
-| v109 | Boundary patch continued from v106 | 87.2 percent apparent pass, slight weather improvement | Useful patch, but not enough to promote |
+| v25 | 이전 고맥락 후보 평가 | Pilot50에서 pass 2, weak 2, fail 6 | 실패만 DPO 후보로 보관 |
+| v106 | preference-tuned 기준 후보 | v108 holdout에서 apparent pass 86.1% | 현재 기준선 유지 |
+| v107 | raw Qwen 기반 clean runtime SFT | 일반 반응과 반복으로 회귀 | 기준선으로 쓰지 않음 |
+| v108 | anti-generic clean restart from raw Qwen | apparent pass 56.7%, 짧고 일반적인 답변 잔존 | clean data만으로 부족 |
+| v109 | v106에서 boundary patch | apparent pass 87.2%, 날씨 경계 일부 개선 | 유의미하지만 promote 불가 |
 
-The v108 result was important because it disproved a tempting assumption: restarting from a raw base model with cleaner data did not automatically recover the desired White behavior. The dataset was cleaner, but the model did not learn enough of the full companion style from that amount and schedule.
+v108 실험은 중요했습니다. 깨끗한 데이터로 raw base에서 다시 시작하면 나아질 것이라는 가정을 깨뜨렸기 때문입니다. 데이터는 더 깨끗했지만, 해당 양과 스케줄만으로 White의 전체 말투와 경계 판단을 충분히 학습하지 못했습니다.
 
-## Evaluation Method
+## 평가 방식
 
-Candidates are compared against fixed holdouts instead of judged only by isolated examples. The review checks for hard failure categories:
+후보는 고정 holdout으로 비교했습니다. 단일 샘플이 좋아 보이는지보다, 같은 조건에서 어떤 실패가 반복되는지 보는 쪽을 우선했습니다.
 
-- exact or near prompt copy
-- repeated response templates
-- generic acknowledgement without content
-- weather and date boundary mistakes
-- assistant-care/user-care confusion
-- runtime wrapper leakage
-- broken or unnatural Korean
-- unwanted formal speech
+주요 hard failure는 다음과 같습니다.
 
-This makes the project less dependent on a single good-looking sample.
+- 질문의 정확 또는 근접 복사
+- 반복되는 답변 템플릿
+- 내용 없는 일반 수긍
+- 날씨와 날짜 경계 오해
+- assistant-care와 user-care 혼동
+- runtime wrapper 누출
+- 깨진 문장 또는 부자연스러운 한국어
+- 원치 않는 존댓말
 
-## Key Findings
+이 방식은 모델이 우연히 좋은 샘플을 낸 것과 실제로 안정적인 후보가 된 것을 구분하는 데 도움이 됐습니다.
 
-1. Runtime alignment matters more than raw dataset size.
+## 주요 발견
 
-Plain prompt/answer rows can make the model better at answering familiar test prompts while making it worse in the real runtime wrapper.
+1. runtime alignment가 단순 데이터 크기보다 중요했습니다.
 
-2. More SFT can amplify repeated openings.
+plain prompt/answer row는 익숙한 테스트 질문에는 좋아 보일 수 있지만, 실제 runtime wrapper에서는 복사와 경계 오해를 키울 수 있었습니다.
 
-When many rows begin with the same acknowledgement pattern, the model learns that pattern as a default behavior. That is why duplicate answer audits became necessary.
+2. SFT를 더 한다고 항상 좋아지지는 않았습니다.
 
-3. Clean SFT from raw Qwen was not enough.
+많은 row가 비슷한 시작 문장을 가지면 모델은 그 패턴을 기본 응답처럼 배웠습니다. 그래서 답변 중복과 시작 문장 분포를 감사해야 했습니다.
 
-v108 had clean data, but it still underperformed v106. The model needed stronger preference shaping and more coverage of real failure boundaries.
+3. raw Qwen에서 clean SFT를 다시 하는 것만으로는 부족했습니다.
 
-4. Small SFT patches can help narrow slices but may not fix behavior class-wide.
+v108은 데이터가 깨끗했지만 v106보다 낮았습니다. White 스타일을 회복하려면 더 강한 preference shaping과 실제 실패 경계 커버리지가 필요했습니다.
 
-v109 improved some weather-boundary cases, but assistant-care confusion stayed mostly unchanged. That points toward DPO from real rejected outputs rather than more broad SFT.
+4. 작은 SFT patch는 좁은 slice에는 도움을 줄 수 있지만, 실패 유형 전체를 고치지는 못했습니다.
 
-## Current Judgment
+v109는 날씨 boundary 일부를 개선했지만 assistant-care 혼동은 거의 그대로였습니다. 이 경우에는 broad SFT보다 실제 rejected output 기반 DPO가 더 적합하다고 판단했습니다.
 
-v106 remains the best baseline. v109 is a measured improvement in one slice, but it is not strong enough to replace the baseline or be promoted.
+## 현재 판단
 
-The next step is to keep collecting real failed generations, write compact chosen answers in the White style, and train preference candidates against the same regression suite.
+v106이 아직 가장 안정적인 기준선입니다. v109는 일부 개선이 있었지만 기준선을 교체하거나 active 후보로 올릴 정도는 아닙니다.
 
-## Portfolio Takeaway
+다음 작업은 실제 실패 generation을 계속 모으고, White 말투에 맞는 짧은 chosen 답변을 작성해서 같은 regression suite로 preference 후보를 비교하는 것입니다.
 
-This project is less about one finished chatbot and more about a controlled model-improvement loop:
+## 포트폴리오 관점의 핵심
 
-- define the desired behavior precisely
-- make the dataset match runtime reality
-- evaluate against fixed and paraphrased holdouts
-- diagnose regressions by failure type
-- prefer candidate reports over automatic promotion
-- protect local machine limits during experimentation
+이 프로젝트의 가치는 완성된 챗봇 하나보다, 모델 개선 루프를 통제 가능하게 만든 데 있습니다.
 
-That loop is the main engineering value of the White work.
+- 원하는 행동을 좁고 구체적으로 정의한다.
+- 데이터 형식을 실제 runtime 입력과 맞춘다.
+- 고정 holdout과 paraphrase eval로 평가한다.
+- 실패 유형별로 회귀를 진단한다.
+- 자동 promote보다 후보 리포트를 우선한다.
+- 로컬 장비 한계를 고려해 저부하 실험을 유지한다.
+
+White 작업의 핵심은 이 반복 가능한 판단 루프입니다.
