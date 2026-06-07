@@ -42,7 +42,7 @@ White Companion Model
 │  │  └─ 익숙한 질문에서만 좋아 보임
 │  ├─ 질문 복사 성향이 생김
 │  │  ├─ 사용자 문장을 그대로 따라 씀
-│  │  ├─ wrapper의 user name이 새어 나옴
+│  │  ├─ wrapper(입력 포장 형식)의 user name(사용자 이름)이 새어 나옴
 │  │  └─ 답변보다 입력 재현에 가까워짐
 │  ├─ 반복 튜닝 뒤 문장 품질이 흔들림
 │  │  ├─ 깨진 한국어
@@ -51,15 +51,15 @@ White Companion Model
 │  └─ 실제 런타임 입력과 학습 입력이 달랐음
 │
 ├─ 3. 런타임 입력 구조
-│  ├─ 실제 White 입력은 단순 user prompt가 아님
-│  ├─ system prompt
-│  ├─ white_context_packet
-│  ├─ conversation history
-│  ├─ final Discord user wrapper
-│  │  ├─ Discord user
-│  │  ├─ Message
+│  ├─ 실제 White 입력은 user prompt(사용자 원문) 하나만이 아님
+│  ├─ system prompt(역할과 말투 지시문)
+│  ├─ white_context_packet(맥락 요약 묶음)
+│  ├─ conversation history(이전 대화 기록)
+│  ├─ final Discord user wrapper(마지막 사용자 메시지 포장 형식)
+│  │  ├─ Discord user(사용자 이름 필드)
+│  │  ├─ Message(사용자 메시지 본문)
 │  │  └─ /no_think
-│  └─ 그래서 학습 데이터도 runtime-aligned messages 형식이어야 함
+│  └─ 그래서 학습 데이터도 runtime-aligned messages(실제 실행 구조에 맞춘 채팅 메시지) 형식이어야 함
 │
 ├─ 4. 목표 말투
 │  ├─ 차분한 한국어 반말
@@ -76,19 +76,19 @@ White Companion Model
 │     └─ 어색한 캐치프레이즈 만들기
 │
 ├─ 5. 데이터 설계
-│  ├─ plain prompt/completion에서 messages SFT로 전환
-│  │  ├─ plain prompt/completion
-│  │  │  ├─ prompt와 completion이 단순 문자열 두 덩어리인 형식
-│  │  │  ├─ 보통 prompt는 사용자 질문 한 줄에 가까움
+│  ├─ plain prompt/completion(단순 입력/정답 답변 쌍)에서 messages SFT로 전환
+│  │  ├─ plain prompt/completion(단순 입력/정답 답변 쌍)
+│  │  │  ├─ prompt(입력)와 completion(정답 답변)이 단순 문자열 두 덩어리인 형식
+│  │  │  ├─ 보통 prompt(입력)는 사용자 질문 한 줄에 가까움
 │  │  │  └─ 실제 White 런타임의 system/context/history/wrapper 구조를 담기 어려움
-│  │  ├─ messages SFT
-│  │  │  ├─ system / user / assistant role을 나눠 담는 채팅형 학습 형식
-│  │  │  ├─ prompt 쪽에는 system, context packet, history, Discord wrapper를 포함
-│  │  │  ├─ completion target은 마지막 assistant 답변만 둠
+│  │  ├─ messages SFT(채팅 메시지 형식 SFT)
+│  │  │  ├─ system / user / assistant role(역할)을 나눠 담는 채팅형 학습 형식
+│  │  │  ├─ prompt(입력) 쪽에는 system, context packet, history, Discord wrapper를 포함
+│  │  │  ├─ completion target(학습 정답)은 마지막 assistant 답변만 둠
 │  │  │  └─ messages 전체를 정답으로 외우게 하는 방식이 아님
 │  │  └─ 전환 이유
 │  │     ├─ 학습 입력과 실제 런타임 입력을 맞추기 위함
-│  │     ├─ wrapper leak과 user name 복사를 줄이기 위함
+│  │     ├─ wrapper leak(입력 포장 형식 누출)과 user name(사용자 이름) 복사를 줄이기 위함
 │  │     └─ 단순 문장 암기가 아니라 런타임 맥락 안에서 답하게 하기 위함
 │  ├─ pilot 데이터로 고맥락 포맷 검증
 │  ├─ 500개, 750개, 1000개 단위로 확장
@@ -98,55 +98,55 @@ White Companion Model
 │  │  ├─ 질문 복사
 │  │  ├─ 깨진 문장
 │  │  ├─ 말투 이탈
-│  │  ├─ wrapper leak
-│  │  └─ generic acknowledgement
-│  └─ clear fail은 DPO chosen/rejected 후보로 누적
+│  │  ├─ wrapper leak(입력 포장 형식 누출)
+│  │  └─ generic acknowledgement(내용 없는 일반 수긍)
+│  └─ clear fail(명확한 실패)은 DPO chosen/rejected(선호/비선호 답변) 후보로 누적
 │
 ├─ 6. 학습 실험 흐름
 │  ├─ v25
 │  │  ├─ 고맥락 pilot50 평가
-│  │  ├─ pass 2 / weak 2 / fail 6
+│  │  ├─ pass(통과) 2 / weak(약함) 2 / fail(실패) 6
 │  │  └─ 6개 실패는 DPO 후보로만 보관
 │  ├─ v106
 │  │  ├─ 현재 가장 안정적인 기준선
 │  │  └─ 이후 후보 비교의 기준으로 유지
 │  ├─ v107
-│  │  ├─ clean runtime SFT 계열
+│  │  ├─ clean runtime SFT(정제된 런타임 정렬 SFT) 계열
 │  │  ├─ 일반 반응과 반복으로 회귀
 │  │  └─ 기준선으로 부적합
 │  ├─ v108
-│  │  ├─ raw Qwen에서 clean restart
+│  │  ├─ raw Qwen(원본 Qwen base)에서 clean restart(정제 데이터 재시작)
 │  │  ├─ 데이터는 깨끗했지만 v106보다 낮음
 │  │  └─ clean SFT만으로 White 성향 회복이 부족하다는 증거
 │  └─ v109
-│     ├─ v106 기반 boundary patch
+│     ├─ v106 기반 boundary patch(경계 사례 보정)
 │     ├─ 날씨 경계 일부 개선
 │     ├─ assistant-care는 크게 개선되지 않음
 │     └─ 참고 후보로 보관하되 promote 불가
 │
 ├─ 7. 평가 체계
-│  ├─ base와 후보 adapter를 같은 holdout으로 비교
-│  ├─ apparent pass보다 hard failure를 우선 기록
+│  ├─ base(기준 모델)와 후보 adapter(어댑터)를 같은 holdout(보류 평가셋)으로 비교
+│  ├─ apparent pass(겉보기 통과)보다 hard failure(명확한 실패)를 우선 기록
 │  ├─ 주요 실패 유형
-│  │  ├─ exact copy
-│  │  ├─ repeated response
-│  │  ├─ too short
-│  │  ├─ generic acknowledgement
-│  │  ├─ wrapper leak
-│  │  ├─ broken Korean
-│  │  ├─ formal speech leak
-│  │  ├─ weather boundary mistake
-│  │  └─ assistant-care / user-care confusion
+│  │  ├─ exact copy(질문을 거의 그대로 복사)
+│  │  ├─ repeated response(같은 답변 패턴 반복)
+│  │  ├─ too short(내용이 부족할 정도로 짧음)
+│  │  ├─ generic acknowledgement(내용 없는 일반 수긍)
+│  │  ├─ wrapper leak(입력 포장 형식 누출)
+│  │  ├─ broken Korean(깨진 한국어)
+│  │  ├─ formal speech leak(원치 않는 존댓말 누출)
+│  │  ├─ weather boundary mistake(날씨/시간 경계 오해)
+│  │  └─ assistant-care / user-care confusion(assistant 상태와 사용자 상태 혼동)
 │  └─ 실패 유형별로 다음 학습 방향 결정
 │
 ├─ 8. 핵심 발견
-│  ├─ runtime alignment가 단순 데이터 크기보다 중요함
-│  ├─ 같은 시작어가 많으면 모델이 generic default로 배움
-│  ├─ raw base에서 clean SFT를 다시 해도 자동으로 좋아지지 않음
-│  ├─ SFT patch는 좁은 slice 개선에는 도움이 될 수 있음
+│  ├─ runtime alignment(실제 실행 입력과 학습 입력을 맞추는 것)가 단순 데이터 크기보다 중요함
+│  ├─ 같은 시작어가 많으면 모델이 generic default(일반 기본 응답)로 배움
+│  ├─ raw base(원본 기준 모델)에서 clean SFT(정제 데이터 SFT)를 다시 해도 자동으로 좋아지지 않음
+│  ├─ SFT patch(부분 보정 학습)는 좁은 slice(문제 구간) 개선에는 도움이 될 수 있음
 │  ├─ 반복되는 경계 실패는 DPO가 더 적합함
 │  ├─ 후보가 좋아 보여도 같은 holdout 회귀 평가가 필요함
-│  └─ 런타임은 말투 생성보다 입력 정렬, 메모리, 안전 guard에 집중하는 편이 좋음
+│  └─ 런타임은 말투 생성보다 입력 정렬, 메모리, 안전 guard(안전장치)에 집중하는 편이 좋음
 │
 ├─ 9. 인프라 제약
 │  ├─ Windows / WSL 병행
@@ -156,23 +156,23 @@ White Companion Model
 │  │  ├─ nice
 │  │  ├─ ionice
 │  │  ├─ threads=1
-│  │  └─ 낮은 GPU/CPU memory cap
+│  │  └─ 낮은 GPU/CPU memory cap(메모리 상한)
 │  ├─ 캐시 재사용
 │  └─ 불필요한 학습 산출물 정리
 │
 ├─ 10. 현재 판단
 │  ├─ v106을 기준선으로 유지
 │  ├─ v109는 참고 후보로 보관
-│  ├─ broad SFT보다 실제 실패 기반 DPO를 우선
+│  ├─ broad SFT(넓은 범위 추가 SFT)보다 실제 실패 기반 DPO를 우선
 │  ├─ assistant-care 경계 실패를 우선 보완
 │  ├─ 날씨/시간 경계 실패를 별도 보완
 │  └─ 충분한 개선 전까지 active promote 금지
 │
 └─ 11. 다음 단계
-   ├─ 실제 실패 generation 계속 수집
+   ├─ 실제 실패 generation(생성 답변) 계속 수집
    ├─ White 말투에 맞는 짧은 chosen 답변 작성
-   ├─ rejected output과 함께 DPO 데이터로 누적
-   ├─ 같은 regression suite로 v106 대비 개선 여부 확인
+   ├─ rejected output(거절/비선호 출력)과 함께 DPO 데이터로 누적
+   ├─ 같은 regression suite(회귀 평가 묶음)로 v106 대비 개선 여부 확인
    ├─ pass율만 보지 않고 실패 유형 감소를 같이 확인
    └─ 평가 리포트가 안정될 때까지 후보 상태로 유지
 ```
