@@ -26,7 +26,11 @@ Black Companion Bot
 │  │  ├─ 환각
 │  │  ├─ 캐릭터 흔들림
 │  │  ├─ 질문 복사
-│  │  └─ generic fallback 반복
+│  │  └─ generic fallback(일반 회피 답변) 반복
+│  │     ├─ 사용자의 구체 맥락을 못 잡았을 때 나오는 두루뭉술한 답변
+│  │     ├─ 예: "이해돼. 다만 무리하게 밀 필요는 없어."
+│  │     ├─ 같은 문장이 여러 상황에서 반복되어 캐릭터성이 약해짐
+│  │     └─ 고맥락 일상대화에서는 가장 먼저 줄여야 할 품질 문제
 │  ├─ 한국어 일상대화는 고맥락이 많음
 │  │  ├─ 단어 하나보다 앞뒤 상황이 중요함
 │  │  ├─ 감정/현실 행동/판단 요청이 섞임
@@ -64,7 +68,9 @@ Black Companion Bot
 │  │     │  ├─ 정해진 frame(프레임), slot(슬롯), priority(우선순위), 템플릿을 조합
 │  │     │  └─ 테스트 가능한 방식으로 응답 표면을 제어
 │  │     ├─ 첫 문장에 핵심 판단 배치
-│  │     └─ generic fallback 방지
+│  │     └─ generic fallback(일반 회피 답변) 방지
+│  │        ├─ frame과 slot을 사용해 구체 맥락을 문장에 남김
+│  │        └─ 같은 안전 문구가 모든 상황에 반복되지 않도록 제어
 │  ├─ 규칙은 최종 엔진이 아니라 silver labeler로 전환한다
 │  │  ├─ 현재 규칙은 실패 케이스를 수집하고 라벨링하는 발판
 │  │  ├─ reason을 semantic frame label로 매핑
@@ -127,7 +133,7 @@ Black Companion Bot
 │  │  └─ 상황별 템플릿/문장 은행 사용
 │  └─ 후처리
 │     ├─ 첫 문장 핵심 유지
-│     ├─ generic fallback 방지
+│     ├─ generic fallback(일반 회피 답변) 방지
 │     ├─ no-fake guard
 │     └─ copy-only 출력 제약
 │
