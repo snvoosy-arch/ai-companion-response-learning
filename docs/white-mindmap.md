@@ -100,6 +100,10 @@ White Companion Model
 │  │  ├─ 말투 이탈
 │  │  ├─ wrapper leak(입력 포장 형식 누출)
 │  │  └─ generic acknowledgement(내용 없는 일반 수긍)
+│  │     ├─ 사용자의 구체 맥락에 답하지 않고 어디에나 붙는 수긍만 하는 문제
+│  │     ├─ 나쁜 예: "알겠어.", "그럴 수 있어.", "이해돼."
+│  │     ├─ 예시 입력: "요즘 공부하기 너무 싫어"
+│  │     └─ White식 대안: "그럴 때는 크게 잡을수록 더 싫어져. 오늘은 10분만 켜놓는 정도로 낮춰도 돼."
 │  └─ clear fail(명확한 실패)은 DPO chosen/rejected(선호/비선호 답변) 후보로 누적
 │
 ├─ 6. 학습 실험 흐름
@@ -132,6 +136,8 @@ White Companion Model
 │  │  ├─ repeated response(같은 답변 패턴 반복)
 │  │  ├─ too short(내용이 부족할 정도로 짧음)
 │  │  ├─ generic acknowledgement(내용 없는 일반 수긍)
+│  │  │  ├─ 입력의 구체 내용 없이 "알겠어", "그럴 수 있어"만 내는 실패
+│  │  │  └─ 조용한 말투와 빈 답변을 구분하기 위해 따로 탐지
 │  │  ├─ wrapper leak(입력 포장 형식 누출)
 │  │  ├─ broken Korean(깨진 한국어)
 │  │  ├─ formal speech leak(원치 않는 존댓말 누출)
