@@ -10,7 +10,7 @@ Black Companion Bot
 │  ├─ deterministic DraftNLG(결정적 초안 자연어 생성)로 답변 생성
 │  │  ├─ DraftNLG = Draft Natural Language Generation
 │  │  ├─ 한글 의미 = 초안 자연어 생성
-│  │  ├─ semantic frame과 slot을 바탕으로 초안 답변을 만드는 계층
+│  │  ├─ semantic frame(의미 프레임)과 slot(슬롯/핵심 정보 칸)을 바탕으로 초안 답변을 만드는 계층
 │  │  ├─ deterministic = 결정적 / 재현 가능한 방식
 │  │  ├─ 확률 샘플링 없이 정해진 규칙/템플릿/슬롯으로 문장 구성
 │  │  └─ 같은 입력과 같은 frame이면 같은 답변 후보가 나오도록 제어
@@ -39,13 +39,16 @@ Black Companion Bot
 │  │  ├─ 입력 문장이 어떤 대화 유형인지 판단
 │  │  └─ intent / emotion / priority / no-fake 같은 축을 예측하는 역할
 │  ├─ 답변 생성은 세 단계로 나눈다
-│  │  ├─ semantic frame
+│  │  ├─ semantic frame(의미 프레임)
+│  │  │  ├─ 사용자의 말을 대화 유형과 응답 방향으로 정리한 중간 구조
 │  │  │  ├─ 이 말을 어떤 종류의 대화로 볼지 판단
 │  │  │  ├─ 감정 호소
 │  │  │  ├─ 실전 조언
 │  │  │  ├─ 선택/판단 요청
 │  │  │  └─ 메타/철학 질문
-│  │  ├─ slot
+│  │  ├─ slot(슬롯/핵심 정보 칸)
+│  │  │  ├─ 답변에 반드시 들어갈 구체 정보나 대상을 담는 자리
+│  │  │  ├─ semantic frame이 답변 방향이라면 slot은 답변 재료
 │  │  │  ├─ 답변에 반드시 들어갈 구체 정보 선택
 │  │  │  ├─ generic 답변이 되지 않게 붙잡는 역할
 │  │  │  ├─ 예: 피싱 링크
@@ -54,11 +57,11 @@ Black Companion Bot
 │  │  │  ├─ 예: 일정 조정
 │  │  │  └─ 예: 서운함
 │  │  └─ DraftNLG
-│  │     ├─ semantic frame과 slot을 실제 문장으로 바꿈
+│  │     ├─ semantic frame(의미 프레임)과 slot(슬롯)을 실제 문장으로 바꿈
 │  │     ├─ Black 말투 적용
 │  │     ├─ deterministic 문장 생성
 │  │     │  ├─ 생성형 LLM처럼 매번 새 문장을 샘플링하지 않음
-│  │     │  ├─ 정해진 frame, slot, priority, 템플릿을 조합
+│  │     │  ├─ 정해진 frame(프레임), slot(슬롯), priority(우선순위), 템플릿을 조합
 │  │     │  └─ 테스트 가능한 방식으로 응답 표면을 제어
 │  │     ├─ 첫 문장에 핵심 판단 배치
 │  │     └─ generic fallback 방지
@@ -70,7 +73,7 @@ Black Companion Bot
 │     ├─ raw 원문
 │     ├─ normalized / compact 문장
 │     ├─ 단어 의미
-│     ├─ slot
+│     ├─ slot(슬롯)
 │     ├─ 우선순위
 │     └─ 단어와 단어 사이 관계
 │
@@ -83,9 +86,11 @@ Black Companion Bot
 │  │  └─ 띄어쓰기/조사 차이를 줄인 매칭용 텍스트
 │  ├─ word sense
 │  │  └─ 단어별 의미 후보
-│  ├─ slot bank
-│  │  └─ 상황별 핵심 슬롯 추출
-│  └─ semantic frame
+│  ├─ slot bank(슬롯 은행)
+│  │  ├─ 상황별 핵심 슬롯 추출
+│  │  └─ 예: 피싱 상황에서는 링크/비밀번호/로그인 기기
+│  └─ semantic frame(의미 프레임)
+│     ├─ 입력 문장을 답변 전에 구조화한 의미 묶음
 │     ├─ intent
 │     ├─ topic
 │     ├─ emotion
@@ -113,7 +118,7 @@ Black Companion Bot
 │  │  ├─ 답변에 필요한 행동 선택
 │  │  └─ 구체 단어를 유지해 generic 답변 방지
 │  ├─ DraftNLG
-│  │  ├─ frame과 slot을 바탕으로 실제 답변 문장 생성
+│  │  ├─ frame(프레임)과 slot(슬롯)을 바탕으로 실제 답변 문장 생성
 │  │  ├─ Black 말투 적용
 │  │  ├─ 생성모델 없이 deterministic하게 구성
 │  │  │  ├─ 확률적 생성 대신 규칙/템플릿/단어 은행을 사용
