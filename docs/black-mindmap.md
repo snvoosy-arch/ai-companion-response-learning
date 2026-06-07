@@ -8,6 +8,10 @@ Black Companion Bot
 │  ├─ 생성모델 없이 한국어 일상대화 처리
 │  ├─ ModernBERT 계열 분류 모델을 응답 판단기로 사용
 │  ├─ deterministic DraftNLG로 답변 생성
+│  │  ├─ DraftNLG = Draft Natural Language Generation
+│  │  ├─ semantic frame과 slot을 바탕으로 초안 답변을 만드는 계층
+│  │  ├─ deterministic = 확률 샘플링 없이 정해진 규칙/템플릿/슬롯으로 문장 구성
+│  │  └─ 같은 입력과 같은 frame이면 같은 답변 후보가 나오도록 제어
 │  ├─ 단어/슬롯 은행으로 구체성 보강
 │  └─ Black 고유 말투 유지
 │     ├─ 반말
@@ -51,6 +55,9 @@ Black Companion Bot
 │  │     ├─ semantic frame과 slot을 실제 문장으로 바꿈
 │  │     ├─ Black 말투 적용
 │  │     ├─ deterministic 문장 생성
+│  │     │  ├─ 생성형 LLM처럼 매번 새 문장을 샘플링하지 않음
+│  │     │  ├─ 정해진 frame, slot, priority, 템플릿을 조합
+│  │     │  └─ 테스트 가능한 방식으로 응답 표면을 제어
 │  │     ├─ 첫 문장에 핵심 판단 배치
 │  │     └─ generic fallback 방지
 │  ├─ 규칙은 최종 엔진이 아니라 silver labeler로 전환한다
@@ -107,6 +114,9 @@ Black Companion Bot
 │  │  ├─ frame과 slot을 바탕으로 실제 답변 문장 생성
 │  │  ├─ Black 말투 적용
 │  │  ├─ 생성모델 없이 deterministic하게 구성
+│  │  │  ├─ 확률적 생성 대신 규칙/템플릿/단어 은행을 사용
+│  │  │  ├─ 같은 조건에서 재현 가능한 답변을 생성
+│  │  │  └─ 회귀 테스트로 품질을 잠글 수 있음
 │  │  └─ 상황별 템플릿/문장 은행 사용
 │  └─ 후처리
 │     ├─ 첫 문장 핵심 유지
