@@ -77,6 +77,19 @@ White Companion Model
 │
 ├─ 5. 데이터 설계
 │  ├─ plain prompt/completion에서 messages SFT로 전환
+│  │  ├─ plain prompt/completion
+│  │  │  ├─ prompt와 completion이 단순 문자열 두 덩어리인 형식
+│  │  │  ├─ 보통 prompt는 사용자 질문 한 줄에 가까움
+│  │  │  └─ 실제 White 런타임의 system/context/history/wrapper 구조를 담기 어려움
+│  │  ├─ messages SFT
+│  │  │  ├─ system / user / assistant role을 나눠 담는 채팅형 학습 형식
+│  │  │  ├─ prompt 쪽에는 system, context packet, history, Discord wrapper를 포함
+│  │  │  ├─ completion target은 마지막 assistant 답변만 둠
+│  │  │  └─ messages 전체를 정답으로 외우게 하는 방식이 아님
+│  │  └─ 전환 이유
+│  │     ├─ 학습 입력과 실제 런타임 입력을 맞추기 위함
+│  │     ├─ wrapper leak과 user name 복사를 줄이기 위함
+│  │     └─ 단순 문장 암기가 아니라 런타임 맥락 안에서 답하게 하기 위함
 │  ├─ pilot 데이터로 고맥락 포맷 검증
 │  ├─ 500개, 750개, 1000개 단위로 확장
 │  ├─ holdout은 paraphrase 중심으로 별도 유지
