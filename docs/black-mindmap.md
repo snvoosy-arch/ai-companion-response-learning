@@ -7,10 +7,12 @@ Black Companion Bot
 ├─ 1. 프로젝트 목표
 │  ├─ 생성모델 없이 한국어 일상대화 처리
 │  ├─ ModernBERT 계열 분류 모델을 응답 판단기로 사용
-│  ├─ deterministic DraftNLG로 답변 생성
+│  ├─ deterministic DraftNLG(결정적 초안 자연어 생성)로 답변 생성
 │  │  ├─ DraftNLG = Draft Natural Language Generation
+│  │  ├─ 한글 의미 = 초안 자연어 생성
 │  │  ├─ semantic frame과 slot을 바탕으로 초안 답변을 만드는 계층
-│  │  ├─ deterministic = 확률 샘플링 없이 정해진 규칙/템플릿/슬롯으로 문장 구성
+│  │  ├─ deterministic = 결정적 / 재현 가능한 방식
+│  │  ├─ 확률 샘플링 없이 정해진 규칙/템플릿/슬롯으로 문장 구성
 │  │  └─ 같은 입력과 같은 frame이면 같은 답변 후보가 나오도록 제어
 │  ├─ 단어/슬롯 은행으로 구체성 보강
 │  └─ Black 고유 말투 유지
