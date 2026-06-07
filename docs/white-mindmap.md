@@ -18,6 +18,18 @@ White Companion Model
 │  │  ├─ 애매한 감정 입력에서도 기본 말투를 유지하기 위함
 │  │  └─ 후보 평가에서 모델 개선과 런타임 보정 효과를 구분하기 위함
 │  ├─ SFT 이후 DPO/RL로 응답 습관 교정
+│  │  ├─ SFT
+│  │  │  ├─ Supervised Fine-Tuning
+│  │  │  ├─ 입력과 모범 답변을 직접 보여주는 학습
+│  │  │  └─ White의 기본 말투와 응답 구조를 먼저 만듦
+│  │  ├─ DPO
+│  │  │  ├─ Direct Preference Optimization
+│  │  │  ├─ 같은 입력에서 chosen 답변과 rejected 답변을 비교
+│  │  │  └─ 더 White다운 답변을 선호하도록 교정
+│  │  └─ RL
+│  │     ├─ Reinforcement Learning
+│  │     ├─ 평가 보상 기준으로 응답 습관을 더 강화
+│  │     └─ SFT/DPO 이후의 추가 교정 단계로 봄
 │  └─ active promote 금지
 │     ├─ 후보 학습
 │     ├─ 후보 평가
