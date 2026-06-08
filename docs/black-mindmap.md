@@ -212,6 +212,11 @@ Black Companion Bot
    │  ├─ micro_context_rules를 최종 답변 엔진으로 계속 키우지 않음
    │  ├─ 실패 문장을 frame / slot / no-fake / priority 라벨로 바꾸는 임시 판별기로 사용
    │  ├─ 반복되는 규칙은 semantic frame registry로 승격
+   │  │  ├─ semantic frame registry(의미 프레임 목록): 자주 등장하는 대화 패턴을 이름 붙여 모아둔 카탈로그
+   │  │  ├─ 승격 의미: if 규칙 안에 숨어 있던 판단 패턴을 독립된 frame 정의로 분리
+   │  │  ├─ frame에는 intent / topic / emotion / priority / no-fake / 필수 slot / DraftNLG route를 함께 기록
+   │  │  ├─ 예: "잠잘 때 너무 시끄럽다" -> 수면 방해 + 불편 호소 + 실전 행동 우선 frame
+   │  │  └─ 효과: 같은 패턴을 여러 문장에 재사용하고 테스트/학습 라벨로 바로 쓰기 쉬움
    │  └─ 충분히 쌓인 라벨은 ModernBERT 학습/평가 데이터로 이동
    ├─ reason -> semantic frame label 매핑
    ├─ ModernBERT multi-head frame predictor 강화
