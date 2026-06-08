@@ -2,6 +2,17 @@
 
 > 생성모델 없이 ModernBERT 계열 분류, semantic frame, slot bank, deterministic DraftNLG로 한국어 고맥락 일상대화를 처리하기 위한 설계 마인드맵입니다.
 
+## 주요 용어
+
+- `ModernBERT`: 문장의 의미를 읽고 분류 라벨을 예측하는 BERT 계열 언어모델입니다. 이 프로젝트에서는 답변을 직접 생성하지 않고, 사용자의 말을 어떤 의미 구조로 볼지 판단하는 역할을 맡습니다.
+- `semantic frame`: 의미 프레임입니다. 입력 문장을 바로 답변하지 않고 `의도`, `감정`, `주제`, `우선순위`, `no-fake 여부` 같은 중간 판단 구조로 정리한 것입니다.
+- `slot bank`: 슬롯 은행입니다. 답변에 반드시 들어가야 하는 핵심 대상, 행동, 조건, 단어를 모아둔 저장소입니다.
+- `deterministic DraftNLG`: 결정적 초안 자연어 생성입니다. 생성형 LLM처럼 매번 새 문장을 뽑는 방식이 아니라, 정해진 frame, slot, 템플릿을 조합해 재현 가능한 답변 초안을 만듭니다.
+- `frame predictor`: 입력 문장을 보고 semantic frame을 예측하는 판별기입니다.
+- `multi-head`: ModernBERT 하나의 문장 이해 결과를 공유하고, 그 위에 `intent`, `emotion`, `priority`, `no-fake`처럼 여러 분류기를 붙이는 구조입니다.
+- `no-fake`: AI가 실제 경험, 기억, 몸, 감정을 가진 척하지 않도록 막는 판단 축입니다.
+- `generic fallback`: 맥락을 제대로 읽지 못했을 때 나오는 일반적이고 반복적인 회피 답변입니다.
+
 ```text
 Black Companion Bot
 ├─ 1. 프로젝트 목표
