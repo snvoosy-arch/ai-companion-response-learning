@@ -198,12 +198,21 @@ Black Companion Bot
 ├─ 10. 한계
 │  ├─ ModernBERT가 아직 런타임 판단을 완전히 주도하지 않음
 │  ├─ micro_context_rules가 너무 커질 위험
+│  │  ├─ 의미: 특정 문장/표현마다 if 규칙을 계속 추가하는 상태
+│  │  ├─ 위험: 새 상황이 나올 때마다 규칙이 늘어나 유지보수가 어려워짐
+│  │  ├─ 위험: 비슷한 단어가 다른 맥락에서도 잡혀 false-positive가 생김
+│  │  ├─ 위험: 규칙 순서가 답변 우선순위를 우연히 바꿀 수 있음
+│  │  └─ 판단 기준: 답변을 고칠 때마다 새 규칙부터 찾게 되는 순간
 │  ├─ 단어와 단어 사이 관계 일반화가 부족함
 │  ├─ 답변은 맞아도 대화 지속 리듬이 약한 경우 있음
 │  └─ 규칙 추가가 최종 엔진처럼 보일 수 있음
 │
 └─ 11. 다음 단계
    ├─ 규칙을 silver labeler로 재배치
+   │  ├─ micro_context_rules를 최종 답변 엔진으로 계속 키우지 않음
+   │  ├─ 실패 문장을 frame / slot / no-fake / priority 라벨로 바꾸는 임시 판별기로 사용
+   │  ├─ 반복되는 규칙은 semantic frame registry로 승격
+   │  └─ 충분히 쌓인 라벨은 ModernBERT 학습/평가 데이터로 이동
    ├─ reason -> semantic frame label 매핑
    ├─ ModernBERT multi-head frame predictor 강화
    ├─ frame 기반 DraftNLG 선택으로 전환
