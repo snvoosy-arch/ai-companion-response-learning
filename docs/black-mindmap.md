@@ -215,6 +215,19 @@ Black Companion Bot
    │  └─ 충분히 쌓인 라벨은 ModernBERT 학습/평가 데이터로 이동
    ├─ reason -> semantic frame label 매핑
    ├─ ModernBERT multi-head frame predictor 강화
+   │  ├─ 의미: ModernBERT 한 개를 공유 인코더로 쓰고 여러 분류 head를 붙이는 구조
+   │  ├─ head(분류 머리): 같은 입력 문장을 보고 서로 다른 판단 축을 예측하는 작은 분류기
+   │  ├─ intent head
+   │  │  └─ 안부, 감정 호소, 조언 요청, 선택 질문, 상황극 요청 같은 발화 의도 예측
+   │  ├─ emotion head
+   │  │  └─ 불안, 서운함, 피곤함, 들뜸처럼 답변 온도에 영향을 주는 감정 예측
+   │  ├─ priority head
+   │  │  └─ 실전 행동, 감정 안정, 선택 판단, 메타 설명 중 무엇을 먼저 답할지 예측
+   │  ├─ no-fake head
+   │  │  └─ AI가 실제 경험, 기억, 몸, 감정을 꾸미면 안 되는 질문인지 예측
+   │  ├─ confidence(확신도)
+   │  │  └─ 예측이 약하면 규칙/guard로 보정하고 학습 데이터로 다시 수집
+   │  └─ 목표: 답변 문장을 바로 맞히는 모델이 아니라 semantic frame을 먼저 맞히는 모델로 강화
    ├─ frame 기반 DraftNLG 선택으로 전환
    ├─ 단어 관계 / 슬롯 관계 학습 데이터화
    ├─ 답변 문자열 테스트보다 frame 테스트 비중 확대
