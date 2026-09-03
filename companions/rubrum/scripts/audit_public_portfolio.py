@@ -157,7 +157,7 @@ def _load_evidence() -> tuple[dict[str, dict[str, object]], list[str]]:
             for metric, value in metrics.items():
                 if not isinstance(metric, str) or not metric:
                     failures.append(f"invalid metric key: {experiment_id}")
-                if value is None or isinstance(value, (dict, list)):
+                if value is None or isinstance(value, dict | list):
                     failures.append(
                         f"metric must be a scalar: {experiment_id}.{metric}"
                     )
@@ -172,7 +172,7 @@ def _metric_display_variants(value: object) -> tuple[str, ...]:
         return (str(value).lower(),)
     if isinstance(value, int):
         return (str(value), f"{value:,}")
-    if isinstance(value, (float, str)):
+    if isinstance(value, float | str):
         return (str(value),)
     return ()
 

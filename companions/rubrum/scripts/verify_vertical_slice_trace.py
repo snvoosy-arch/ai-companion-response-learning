@@ -26,10 +26,10 @@ def validate_trace(payload: object) -> list[str]:
 
     candidates = payload.get("candidates")
     verdicts = payload.get("verdicts")
-    if not isinstance(candidates, (list, tuple)) or not candidates:
+    if not isinstance(candidates, list | tuple) or not candidates:
         failures.append("trace must contain surface candidates")
         candidates = []
-    if not isinstance(verdicts, (list, tuple)) or not verdicts:
+    if not isinstance(verdicts, list | tuple) or not verdicts:
         failures.append("trace must contain candidate verdicts")
         verdicts = []
 
@@ -65,7 +65,7 @@ def validate_trace(payload: object) -> list[str]:
         if selected.get("text") != payload.get("selected_text"):
             failures.append("selected candidate text does not match trace output")
         atoms = selected.get("atoms")
-        if not isinstance(atoms, (list, tuple)) or len(atoms) < 2:
+        if not isinstance(atoms, list | tuple) or len(atoms) < 2:
             failures.append("selected surface is not represented as multiple atoms")
         selected_verdict = verdict_by_id.get(selected_id)
         if selected_verdict is None or selected_verdict.get("accepted") is not True:
@@ -84,7 +84,7 @@ def validate_trace(payload: object) -> list[str]:
         if verdict.get("accepted") is not False:
             failures.append(f"hard negative was accepted: {candidate_id}")
         reasons = verdict.get("reason_codes")
-        if not isinstance(reasons, (list, tuple)) or expected_reason not in reasons:
+        if not isinstance(reasons, list | tuple) or expected_reason not in reasons:
             failures.append(
                 f"hard negative reason mismatch: {candidate_id} -> {expected_reason}"
             )
