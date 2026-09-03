@@ -14,21 +14,23 @@
 
 ## 주장별 상태
 
-| 주장 | 상태 | 공개 가능한 정확한 표현 | 하면 안 되는 표현 |
-|---|---|---|---|
-| MeaningBERT-A가 구조화된 의미 축을 예측 | `CORE` | 여러 head와 MeaningPacket 계약이 구현됨 | 모든 일상 문장을 완전히 이해함 |
-| 일상 상태 판정 | `CORE + 혼합` | 피로·배고픔 등 일부 경로는 모델·resolver·경계 판정 혼합 | 전부 MeaningBERT가 직접 판정함 |
-| 주체·대상 grounding | `CORE 전환 중` | 독립 계약과 다수 경계 평가가 존재 | 생략·제3자·다의어를 모두 해결함 |
-| ReactionDecision | `CORE 전환 중` | 후보와 최종 결정 책임을 분리 | 모든 legacy Composer를 제거함 |
-| ContentPlan | `CORE` | 표면 전에 응답 의무와 핵심 내용을 고정 | 모든 답변이 하나의 계획기로만 생성됨 |
-| 개념·속성 기반 비유 | `CANARY` | 검토된 관계 비유 family에서 제한 출력 | 임의 개념을 범용적으로 연결함 |
-| 단어·형태소 조립 | `CANARY` | 제한된 반응군에서 실제 Discord 전달 확인 | 일상대화 전체가 원자 조립으로 전환됨 |
-| SurfaceBERT-B | `RESEARCH` | 후보 ranker를 실험했고 의미 선택 권한을 축소 | 실제 답변을 생성하거나 결정함 |
-| Verifier와 출력 권한 분리 | `CORE + CANARY` | producer·verifier·gate·output 계약을 분리 | 모든 과거 경로가 완전히 통합됨 |
-| DecisionTrace / Outcome | `CORE` | 판단·전달·최종화를 같은 turn에 연결 | 사람의 품질 판단을 완전히 자동화함 |
-| Transition model | `SHADOW` | 결정론적 예측과 관찰 비교 | 학습된 세계모델을 완성함 |
-| Learned world model | `FUTURE` | 장기 연구 계획 | 현재 구현됨 |
-| Planner / autonomous agent | `FUTURE` | 외부 실행 전 안전 계약을 준비 | 자율 장기 목표를 안정적으로 수행함 |
+운영 상태와 공개 증거 수준은 서로 다른 축입니다. `CORE`라고 해서 모델 가중치와 전체 런타임이 공개 재현된다는 뜻은 아닙니다.
+
+| 주장 | 운영 상태 | 공개 증거 | 공개 가능한 정확한 표현 | 하면 안 되는 표현 |
+|---|---|---|---|---|
+| MeaningBERT-A가 구조화된 의미 축을 예측 | `CORE` | `SANITIZED-REPORT` | 여러 head와 MeaningPacket 계약이 비공개 runtime에 구현됨 | 공개 예제가 MeaningBERT 추론을 재현함 |
+| 일상 상태 판정 | `CORE + 혼합` | `SANITIZED-REPORT` | 피로·배고픔 등 일부 경로는 모델·resolver·경계 판정 혼합 | 전부 MeaningBERT가 직접 판정함 |
+| 주체·대상 grounding | `CORE 전환 중` | `SANITIZED-REPORT` | 독립 계약과 다수 경계 평가가 존재 | 생략·제3자·다의어를 모두 해결함 |
+| ReactionDecision | `CORE 전환 중` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 후보와 최종 결정 책임을 분리 | 모든 legacy Composer를 제거함 |
+| ContentPlan | `CORE 전환 중` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 일부 전환 경로에서 표면 전에 응답 의무와 핵심 내용을 고정 | 모든 답변이 하나의 계획기로만 생성됨 |
+| 개념·속성 기반 비유 | `CANARY` | `PRIVATE-RUNTIME-AUDIT + SANITIZED-REPORT` | 검토된 관계 비유 family에서 제한 출력 | 임의 개념을 범용적으로 연결함 |
+| 단어·형태소 조립 | `CANARY` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 조립 표본과 제한 Discord 전달이 각각 확인됨 | 일상대화 전체가 원자 조립으로 전환됨 |
+| SurfaceBERT-B | `RESEARCH` | `SANITIZED-REPORT` | 후보 ranker를 실험했고 의미 선택 권한을 축소 | 실제 답변을 생성하거나 결정함 |
+| Verifier와 출력 권한 분리 | `CORE + CANARY` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 의미 gate와 비공개 delivery gate의 증거 범위를 구분 | 모든 과거 경로가 완전히 통합됨 |
+| DecisionTrace / Outcome | `CORE` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 축소 Trace와 비공개 전달 최종화를 구분 | 사람의 품질 판단을 완전히 자동화함 |
+| Transition model | `SHADOW` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 결정론적 예측과 관찰 비교 | 학습된 세계모델을 완성함 |
+| Learned world model | `FUTURE` | 없음 | 장기 연구 계획 | 현재 구현됨 |
+| Planner / autonomous agent | `FUTURE` | 없음 | 외부 실행 전 안전 계약을 준비 | 자율 장기 목표를 안정적으로 수행함 |
 
 ## 증거 수준
 

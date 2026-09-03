@@ -1,14 +1,17 @@
 {
-  "version": "rubrum_public_experiment_summary_v1_20260903",
-  "as_of": "2026-09-03",
+  "version": "rubrum_public_experiment_summary_v2_20260904",
+  "as_of": "2026-09-04",
   "scope": "sanitized_metrics_without_private_prompts_outputs_or_model_weights",
   "experiments": [
     {
       "id": "symbolic_mask_restore_v1",
       "evidence_level": "SANITIZED-REPORT",
       "metrics": {
+        "left_to_right_complete": "30/30",
         "left_to_right_top1": "30/30",
+        "confidence_greedy_complete": "30/30",
         "confidence_greedy_top1": "20/30",
+        "beam6_complete": "30/30",
         "beam6_top1": "30/30",
         "unique_surface_left_to_right": 19,
         "unique_surface_beam6": 19
@@ -20,17 +23,35 @@
       "evidence_level": "SANITIZED-REPORT",
       "metrics": {
         "dev_top1": "5/6",
-        "independent_heldout_top1": "2/6"
+        "dev_top1_ratio": 0.8333,
+        "independent_heldout_top1": "2/6",
+        "independent_heldout_top1_ratio": 0.3333
       },
       "decision": "no_promotion_remove_lexical_semantic_authority"
+    },
+    {
+      "id": "surface_bert_b_general_baseline_v1",
+      "evidence_level": "SANITIZED-REPORT",
+      "metrics": {
+        "content_plan_count": 240,
+        "candidate_count": 1920,
+        "dev_allowed_top1": 0.975,
+        "frozen_heldout_allowed_top1": 1.0,
+        "beat_deterministic_baseline": false
+      },
+      "decision": "no_promotion_without_strict_baseline_improvement"
     },
     {
       "id": "boredom_fresh_boundary40_v1",
       "evidence_level": "SANITIZED-REPORT",
       "input_sha256": "da2a67c3f0a5cb6b0d9f460241d957c576dfa58cafff8c6b3d15d8de2e4cde0d",
       "metrics": {
+        "positive_count": 16,
+        "negative_boundary_count": 24,
         "positive_recall": "1/16",
+        "positive_recall_ratio": 0.0625,
         "negative_boundary_containment": "21/24",
+        "negative_boundary_containment_ratio": 0.875,
         "overall_accuracy": 0.55
       },
       "decision": "not_even_shadow_candidate"
@@ -39,13 +60,29 @@
       "id": "daily_state_meaning_provenance_v1",
       "evidence_level": "SANITIZED-REPORT",
       "metrics": {
+        "fatigue_probe_count": 6,
+        "hunger_probe_count": 6,
+        "boredom_probe_count": 8,
         "direct_expected_state_frame": "0/20"
       },
       "decision": "separate_word_assembly_from_model_understanding_claim"
     },
     {
+      "id": "relation_metaphor_surface_bert_b_v1",
+      "evidence_level": "PRIVATE-RUNTIME-AUDIT + SANITIZED-REPORT",
+      "metrics": {
+        "pair_count": 98,
+        "zero_shot_top1": "57/98",
+        "zero_shot_accuracy": 0.5816,
+        "metaphor_preservation": 0.4783,
+        "recent_repetition_avoidance": 0.3333
+      },
+      "decision": "keep_deterministic_canary_and_deny_surface_bert_output_authority"
+    },
+    {
       "id": "ambient_word_morpheme_discord_canary_v1",
       "evidence_level": "PRIVATE-RUNTIME-AUDIT",
+      "family": "future_temperature",
       "metrics": {
         "verified_deliveries": 1,
         "candidate_output_sha_aligned": true,

@@ -30,14 +30,16 @@ Rubrum은 의미 해석, grounding, 상태, 반응 결정, 내용 계획, 표면
 - `RESEARCH`: SurfaceBERT-B. 어휘 의미 선택 heldout 실패로 실제 출력권 없음
 - `FUTURE`: learned world model, planner, broad open-domain atomic NLG
 
+<!-- evidence:surface_bert_b_lexical_fit_v1 metrics=dev_top1,independent_heldout_top1 -->
 대표적으로 SurfaceBERT-B 어휘 ranker는 dev `5/6`에서 독립 heldout `2/6`으로 무너졌습니다. 추가 epoch으로 밀어붙이지 않고 의미 적격성을 구조적 hard gate로 이동하고 모델의 책임을 동일 의미 후보의 잔여 표현 선호로 축소했습니다.
+<!-- /evidence -->
 
 ### Rubrum CPU 수직 표본
 
 공개 예제는 검수된 MeaningPacket 이후의 흐름만 재현하며, 공개되지 않은 MeaningBERT checkpoint가 추론에 성공했다고 가장하지 않습니다.
 
 ```powershell
-cd companions\black
+cd companions\rubrum
 python -m examples.rubrum_vertical_slice.demo
 python -m unittest discover -s tests -p "test_*.py" -v
 python scripts\audit_public_portfolio.py
@@ -46,7 +48,7 @@ python scripts\audit_public_portfolio.py
 - [Rubrum 아키텍처](docs/rubrum-architecture.md)
 - [Rubrum 공개 주장 상태표](docs/rubrum-claim-status.md)
 - [Rubrum 실험 원장](docs/rubrum-experiment-ledger.md)
-- [Rubrum 실행 안내](companions/black/README.md)
+- [Rubrum 실행 안내](companions/rubrum/README.md)
 
 ---
 

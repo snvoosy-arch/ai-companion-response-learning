@@ -2,7 +2,7 @@
 
 ## 요약
 
-Rubrum은 한국어 AI companion의 의미 이해, 상태, 반응 정책, 내용 계획, 문장 표현, 결과 관찰을 분리한 판단·상태 중심 시스템입니다.
+Rubrum은 한국어 AI companion의 의미 판단, 상태, 반응 정책, 내용 계획, 문장 표현, 결과 관찰을 분리하도록 개발 중인 판단·상태 중심 시스템입니다.
 
 프로젝트의 가치는 특정 BERT checkpoint나 답변 샘플 하나가 아니라 다음 개발 루프에 있습니다.
 
@@ -16,6 +16,17 @@ Rubrum은 한국어 AI companion의 의미 이해, 상태, 반응 정책, 내용
 → 제한 Canary
 → 실패 시 권한과 구조 재설계
 ```
+
+## 이 문서의 증거 범위
+
+| 범위 | 이 문서에서 의미하는 것 |
+|---|---|
+| `PUBLIC-RUNNABLE` | 검수된 MeaningPacket 이후의 축소 수직 표본을 CPU에서 재현 가능 |
+| `SANITIZED-REPORT` | 비공개 원본·가중치를 제외한 실험 조건·수치·판정 |
+| `PRIVATE-RUNTIME-AUDIT` | 개인 식별자를 제거한 Discord·전달·Canary 감사 요약 |
+| `FUTURE` | learned world model과 장기 planner처럼 아직 현재 능력으로 주장하지 않는 계획 |
+
+따라서 공개 수직 표본은 전체 비공개 런타임의 복제품이 아니며 MeaningBERT-A 추론이나 open-domain Discord 대화를 증명하지 않습니다.
 
 ## 문제
 
@@ -50,7 +61,7 @@ Rubrum은 한국어 AI companion의 의미 이해, 상태, 반응 정책, 내용
 → 완성 답변 반환
 ```
 
-현재 목표:
+현재 운영 전환 방향:
 
 ```text
 조건 또는 모델 신호
@@ -93,21 +104,27 @@ Producer
 → Delivery Audit
 ```
 
-각 계층은 후보 ID와 hash를 비교하며 불일치하면 기존 경로로 실패 폐쇄합니다.
+비공개 runtime Canary는 각 계층의 후보 ID와 hash를 비교하며 불일치하면 기존 경로로 실패 폐쇄합니다. 공개 CPU 표본은 후보 ID 정렬과 의미 gate까지만 재현하고 실제 Discord delivery hash를 재현하지 않습니다.
 
 ## 대표 실패에서 얻은 결론
 
 ### 탐색 개선은 다양성 개선이 아니다
 
+<!-- evidence:symbolic_mask_restore_v1 metrics=beam6_top1,unique_surface_beam6 -->
 symbolic mask restoration에서 beam search는 기준 후보 복원을 `30/30`까지 회복했지만 고유 표면 수는 `19`로 변하지 않았습니다. 후보 검색과 표현 자산의 다양성은 다른 병목이라는 결론을 냈습니다.
+<!-- /evidence -->
 
 ### dev 성공은 의미 일반화가 아니다
 
+<!-- evidence:surface_bert_b_lexical_fit_v1 metrics=dev_top1,independent_heldout_top1 -->
 SurfaceBERT-B lexical ranker는 dev `5/6`이었지만 heldout `2/6`으로 떨어졌습니다. 문형이 자연스러워도 핵심 단어 속성이 틀린 후보를 선택했습니다. 이 결과로 의미 선택은 hard contract가 담당하도록 변경했습니다.
+<!-- /evidence -->
 
 ### 조립 문장과 모델 이해는 다르다
 
-제한된 피로·배고픔 답변은 단어·형태소 조립으로 실제 출력되지만, 최근 provenance 감사에서는 운영 MeaningBERT-A의 해당 상태 직접 frame 적중이 확인되지 않았습니다. 그래서 `DailyStateMeaningProvenance`를 추가해 모델 신호와 lexical/schema bridge를 구분했습니다.
+<!-- evidence:daily_state_meaning_provenance_v1 metrics=direct_expected_state_frame -->
+피로·배고픔용 단어·형태소 조립 경로가 존재하지만, 최근 provenance 감사에서는 운영 MeaningBERT-A의 기대 상태 frame 직접 적중이 `0/20`이었습니다. 그래서 `DailyStateMeaningProvenance`를 추가해 모델 신호와 lexical/schema bridge를 구분했습니다.
+<!-- /evidence -->
 
 이 경계를 숨기지 않는 것이 Rubrum의 평가 원칙입니다.
 

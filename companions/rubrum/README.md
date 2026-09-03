@@ -1,6 +1,6 @@
 # Rubrum Companion
 
-Rubrum은 한국어 AI companion의 의미 판단, 상태, 반응 정책, 내용 계획, 표면 표현, 결과 관찰을 독립 계약으로 분리하는 연구 프로젝트입니다. `black` 디렉터리명은 기존 경로 호환을 위해 유지합니다.
+Rubrum은 한국어 AI companion의 의미 판단, 상태, 반응 정책, 내용 계획, 표면 표현, 결과 관찰을 독립 계약으로 분리하는 연구 프로젝트입니다.
 
 ## 이 공개 디렉터리가 보여주는 것
 
@@ -26,7 +26,7 @@ Rubrum은 한국어 AI companion의 의미 판단, 상태, 반응 정책, 내용
 Python 3.11 이상만 필요합니다.
 
 ```powershell
-cd companions\black
+cd companions\rubrum
 python -m examples.rubrum_vertical_slice.demo
 ```
 
@@ -34,6 +34,8 @@ python -m examples.rubrum_vertical_slice.demo
 
 ```powershell
 python -m examples.rubrum_vertical_slice.demo --json
+python -m examples.rubrum_vertical_slice.demo --json --output rubrum-trace.json
+python scripts\verify_vertical_slice_trace.py rubrum-trace.json
 ```
 
 테스트와 공개 안전성 감사:
@@ -42,6 +44,8 @@ python -m examples.rubrum_vertical_slice.demo --json
 python -m unittest discover -s tests -p "test_*.py" -v
 python scripts\audit_public_portfolio.py
 ```
+
+감사 스크립트는 비밀정보·금지 파일·링크뿐 아니라 evidence JSON의 실험 ID와 README·케이스스터디·실험 원장에 표시된 수치도 대조합니다.
 
 ## 예제에서 확인할 수 있는 계약
 
@@ -73,9 +77,12 @@ examples/rubrum_vertical_slice/
 
 tests/
   test_vertical_slice.py
+  test_vertical_slice_trace_verifier.py
+  test_evidence_contract.py
 
 scripts/
   audit_public_portfolio.py
+  verify_vertical_slice_trace.py
 
 evidence/
   rubrum-experiment-summary.json

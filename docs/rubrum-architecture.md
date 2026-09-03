@@ -47,7 +47,7 @@ Rubrum은 생성형 모델의 존재 여부만으로 companion을 구분하지 �
 
 ### WorldState / Memory
 
-대화와 외부 사건을 구조화된 사실·상태로 보관합니다. 기억 문장을 그대로 prompt에 붙이는 방식과 달리 source, confidence, lifecycle, owner를 명시합니다.
+비공개 runtime은 대화와 외부 사건을 구조화된 사실·상태로 보관하며 source, confidence, lifecycle, owner를 구분합니다. 공개 CPU 표본의 축소 WorldState는 topic, target time, predicate, comparison, source만 재현하므로 전체 기억 계약을 공개 코드가 증명한다고 해석하면 안 됩니다.
 
 ### ReactionCandidate / ReactionDecision
 
@@ -110,6 +110,8 @@ frame, lexical sense, 생략, 조사, 연결어, 어미, register를 하나의 �
 - 검토된 Trace와 승인 상태 확인
 - 허용 채널·반응 family 확인
 - 불일치 시 기존 경로로 실패 폐쇄
+
+후보 hash와 Discord delivery 정렬은 `PRIVATE-RUNTIME-AUDIT` 범위입니다. 공개 CPU 표본은 candidate ID와 의미·형태 경계만 직접 재현합니다.
 
 ### Outcome / Transition Shadow
 
