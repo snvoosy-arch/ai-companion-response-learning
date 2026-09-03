@@ -13,16 +13,13 @@
 
 Rubrum은 의미 해석, grounding, 상태, 반응 결정, 내용 계획, 표면 표현, 결과 관찰을 독립된 계약으로 분리합니다. 검증되지 않은 모델과 후보에는 실제 출력권을 주지 않습니다.
 
-```mermaid
-flowchart TB
-    A["1. 입력 의미 해석<br/>User / Event · MeaningBERT-A · MeaningPacket"]
-    B["2. 사실과 상태 확정<br/>Grounding · WorldState"]
-    C["3. 반응과 표현 계획<br/>ReactionDecision · ContentPlan · Concept / Lexical Planning"]
-    D["4. 후보 검증과 실행<br/>Surface Candidates · Semantic / Morphology Gate<br/>Verifier / Authority Gate · Discord / Action"]
-    E["5. 결과 관찰<br/>Outcome / Transition Shadow"]
-
-    A --> B --> C --> D --> E
-```
+| 단계 | 책임 | 주요 구성요소 |
+|---:|---|---|
+| 1 | 입력 의미 해석 | User / Event, MeaningBERT-A, MeaningPacket |
+| 2 | 사실과 상태 확정 | Grounding, WorldState |
+| 3 | 반응과 표현 계획 | ReactionDecision, ContentPlan, Concept / Lexical Planning |
+| 4 | 후보 검증과 실행 | Surface Candidates, Semantic / Morphology Gate, Verifier / Authority Gate, Discord / Action |
+| 5 | 결과 관찰 | Outcome, Transition Shadow |
 
 ### Rubrum의 현재 경계
 
