@@ -2,6 +2,7 @@
 
 관련 자료: [External-First 아키텍처](sapphirus-architecture.md) ·
 [평가·승격 원장](sapphirus-evaluation-ledger.md) ·
+[공개 주장 상태표](sapphirus-claim-status.md) ·
 [CPU 재현 예제](../examples/sapphirus_external_first/README.md) ·
 [공개 근거 요약](../evidence/README.md)
 
@@ -62,9 +63,10 @@ enum을 먼저 추가하면 모델 오류와 계약 오류를 구분하기 어�
 
 ## 2. Contract SFT
 
-clean Qwen3-8B 계열 기준선의 200개 출력은 자동 의미 판정기를 쓰지 않고 직접
-검토했습니다. 기준선의 수동 통과는 `84/200`이었고, 별도의 최신
-unsealed 비교 세트에서는 `70/200`이었습니다.
+공개 비교에 사용한 clean Qwen3-8B 계열 기준선과 SFT candidate의 unsealed 출력은
+자동 의미 판정기로 대체하지 않고 Codex가 건별로 판정했습니다. 이 비교 세트에서
+clean 기준선의 수동 통과는 `70/200`이었습니다. 별도의 초기 lineage 선택 평가
+`84/200`은 같은 평가 세트가 아니므로 성능 곡선처럼 직접 연결하지 않습니다.
 
 실패를 다음 8개 분야로 분류했습니다.
 
@@ -78,8 +80,9 @@ unsealed 비교 세트에서는 `70/200`이었습니다.
 8. 도구 선택과 live 정보 정직성
 
 이 분류에서 평가 문장이나 모델 출력을 재사용하지 않고, Codex가 각 행을 개별
-작성·검토한 640행의 SFT 자료를 만들었습니다. 320개의 최소대조쌍이며 일괄
-템플릿 확장은 사용하지 않았습니다.
+작성하고 같은 절차로 검토한 640행의 SFT 자료를 만들었습니다. 이는 사람 작성
+자료라는 뜻이 아닙니다. 320개의 최소대조쌍이며 일괄 템플릿 확장은 사용하지
+않았습니다.
 
 ### 결과
 
@@ -183,9 +186,10 @@ Actor 추론이나 외부 검색 문서는 runtime authority로 승격하지 않
 이는 이미 본 실패의 책임 분리가 맞는지 확인한 development replay이며 일반화
 증거로 사용하지 않습니다.
 
-### 신규 통합 fixture
+### 신규 synthetic 통합 fixture
 
-평가 입력과 겹치지 않는 16개 수동 fixture에서 다음 경계를 확인했습니다.
+평가 입력과 exact 중복이 없는 16개 수동 synthetic fixture에서 다음 경계를
+확인했습니다.
 
 - authority spoofing
 - snapshot contradiction
@@ -196,7 +200,8 @@ Actor 추론이나 외부 검색 문서는 runtime authority로 승격하지 않
 - 중복·잘못된 Discord target
 - trace 원문 누출
 
-결과는 `16/16`이었지만 실제 모델 품질이나 Discord 전달을 측정한 것은 아닙니다.
+결과는 `16/16`이었지만 scripted Actor와 fixture executor를 사용한 외부 계약
+시험이며, 실제 모델 품질이나 Discord 전달을 측정한 것은 아닙니다.
 
 ### Discord shadow와 V5
 
@@ -213,8 +218,8 @@ V5는 한 번의 제약 보정과 좁은 deterministic fallback을 추가했습�
 
 ## 6. Discord capability canary
 
-Actor와 별개로 외부 body가 실제 Discord에서 읽기 전용 기능을 안전하게 제공하는지
-검증했습니다.
+Actor와 별개로 외부 기능 계층의 허용된 Discord command callback이 제한된 범위에서
+완료되는지 검증했습니다.
 
 ```text
 recall · summary · dashboard · companion_trace
@@ -229,8 +234,9 @@ companion_probe · voice_status · signals · checkins
 - 영속 운영 메모리 접근: 0
 - raw Discord ID 로그: 0
 
-LLM 호출 0건은 결함이 아니라 격리 조건입니다. 이 실험은 Actor가 아니라 외부
-capability와 개인정보 경계를 검증했습니다.
+LLM 호출 0건은 결함이 아니라 격리 조건입니다. `8/8`은 callback 완료 수이고 exact
+응답 문구는 저장하지 않았으므로 출력의 의미 정확도 점수가 아닙니다. 이 실험은
+Actor가 아니라 외부 capability와 개인정보 경계를 검증했습니다.
 
 ## 현재 결론
 

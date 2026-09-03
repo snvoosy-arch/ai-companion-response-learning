@@ -15,6 +15,7 @@
   "accepted": 8,
   "completed": 8,
   "denied": 0,
+  "completion_semantics": "Discord command callback completion; exact reply text and semantic quality were not retained for review.",
   "isolation": {
     "model_loads": 0,
     "llm_requests": 0,

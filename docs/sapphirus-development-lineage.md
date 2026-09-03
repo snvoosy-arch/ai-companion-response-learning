@@ -1,7 +1,8 @@
 # Sapphirus 개발 계보
 
-`White`는 Sapphirus의 초기 개발 명칭입니다. 이 문서는 오래된 v106/v109 중심
-설명 대신 현재 포트폴리오의 의사결정 계보를 간단히 보존합니다.
+이 문서는 초기 response-tuning 계보부터 현재 External-First 구조까지의
+의사결정 흐름을 간단히 보존합니다. 공개 명칭과 경로는 Sapphirus로 통일하되,
+초기 source snapshot의 일부 내부 식별자는 실험 계보를 추적할 수 있도록 유지합니다.
 
 ```text
 한국어 생성형 컴패니언
@@ -39,7 +40,7 @@
 │
 ├─ Shadow and bounded canary
 │  ├─ known-failure replay
-│  ├─ 신규 16개 통합 fixture
+│  ├─ 신규 16개 synthetic 통합 fixture
 │  ├─ V4/V5 shadow 평가
 │  ├─ P11A delivery: 0 observations, 판정 보류
 │  └─ P11B read-only capability: 8/8
@@ -51,6 +52,6 @@
    └─ 로그가 필요성을 입증할 때만 추가 Actor 학습
 ```
 
-세부 내용은 [케이스스터디](white-case-study.md),
+세부 내용은 [케이스스터디](sapphirus-case-study.md),
 [아키텍처](sapphirus-architecture.md),
 [평가 원장](sapphirus-evaluation-ledger.md)을 참고하세요.

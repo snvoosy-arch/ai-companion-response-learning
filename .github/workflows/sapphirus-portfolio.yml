@@ -5,8 +5,7 @@ on:
     paths:
       - "README.md"
       - "companions/README.md"
-      - "companions/white/**"
-      - "docs/white-*"
+      - "companions/sapphirus_legacy/**"
       - "docs/sapphirus-*"
       - "evidence/**"
       - "examples/sapphirus_external_first/**"
@@ -16,8 +15,7 @@ on:
     paths:
       - "README.md"
       - "companions/README.md"
-      - "companions/white/**"
-      - "docs/white-*"
+      - "companions/sapphirus_legacy/**"
       - "docs/sapphirus-*"
       - "evidence/**"
       - "examples/sapphirus_external_first/**"

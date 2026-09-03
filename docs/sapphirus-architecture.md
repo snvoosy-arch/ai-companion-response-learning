@@ -123,4 +123,7 @@ MockActorBackend
 ```
 
 실제 Discord, 모델 서버, 네트워크, 영속 DB에는 연결하지 않으므로 포트폴리오
-검토자가 외부 부작용 없이 계약과 실패 폐쇄 동작을 확인할 수 있습니다.
+검토자가 외부 부작용 없이 계약과 실패 폐쇄 동작을 확인할 수 있습니다. 이는 private
+runtime의 복제본이나 실제 모델 품질 증거가 아니라, 같은 3-action·1-tool-call 핵심
+계약을 독립적으로 실행하는 공개 reference slice입니다. 수치별 증거 범위는
+[공개 주장 상태표](sapphirus-claim-status.md)에 고정합니다.

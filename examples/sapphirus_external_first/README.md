@@ -27,6 +27,10 @@ python -m examples.sapphirus_external_first.demo
 
 표준 라이브러리만 사용하며 외부 부작용이 없습니다.
 
+CI는 이 예제의 3-action 계약과 turn당 tool-call 예산이 공개 evidence의
+Contract SFT·External-First 요약과 일치하는지도 검사합니다. 따라서 문서 수치뿐 아니라
+공개 실행 예제가 설명하는 계약이 바뀌는 경우에도 검사가 실패합니다.
+
 ## 예제 흐름
 
 ```text

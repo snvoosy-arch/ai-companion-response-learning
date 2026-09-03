@@ -2,13 +2,13 @@
 
 Canonical companion entry points:
 
-- `white`: physical White companion project
+- `sapphirus_legacy`: Sapphirus initial public runtime snapshot
 - `black`: physical Black companion project
 
 Legacy compatibility links are kept at the workspace root:
 
-- `../discodebot` -> `companions/white`
+- private legacy launcher -> Sapphirus runtime source
 - `../predictive-discord-bot` -> `companions/black`
 
-Use this folder as the top-level mental model for White and Black. Older launchers
-and scripts may still use the legacy names through the compatibility links.
+Use the project README as the canonical map. Historical source identifiers may still
+appear inside the Sapphirus snapshot, but they are not the public companion name.

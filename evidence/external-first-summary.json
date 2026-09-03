@@ -1,6 +1,13 @@
 {
   "schema_version": "sapphirus.portfolio.external_first_summary.v1",
   "evidence_scope": "offline_replay_mock_integration_and_bounded_shadow_reviews",
+  "public_slice_contract": {
+    "actor_actions": ["reply", "silence", "use_tool"],
+    "maximum_tool_calls_per_turn": 1,
+    "executor": "fixture_read_only",
+    "external_side_effects": false,
+    "private_runtime_reproduction": false
+  },
   "known_failure_replay": {
     "date": "2026-08-26",
     "candidate_outputs": 200,
@@ -17,6 +24,8 @@
     "date": "2026-08-26",
     "cases": 16,
     "passed": 16,
+    "evaluation_text_exact_overlap": 0,
+    "synthetic_contract_test": true,
     "real_model_quality_evaluated": false,
     "discord_delivery_evaluated": false
   },

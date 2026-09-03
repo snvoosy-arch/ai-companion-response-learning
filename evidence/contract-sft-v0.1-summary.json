@@ -10,12 +10,27 @@
     "bulk_template_expansion": false,
     "evaluation_text_reuse": false
   },
+  "actor_contract": {
+    "actions": ["reply", "silence", "use_tool"],
+    "envelope_fields": ["action", "speech", "tool_calls", "memory_candidates"],
+    "maximum_tool_calls_per_turn": 1
+  },
+  "historical_baseline": {
+    "evaluation_date": "2026-08-25",
+    "evaluation_total": 200,
+    "clean_base_manual_pass": 84,
+    "response_tuning_manual_pass": 35,
+    "scope": "separate_initial_lineage_selection_not_the_unsealed_comparison_below"
+  },
+  "evaluation_total": 200,
   "clean_base": {
     "actor_envelope_valid": 200,
     "structural_pass": 149,
     "manual_pass": 70,
     "manual_dev_pass": 57,
-    "manual_critical_boundary_pass": 13
+    "manual_critical_boundary_pass": 13,
+    "critical_severity_pass": 23,
+    "critical_severity_total": 95
   },
   "contract_candidate": {
     "actor_envelope_valid": 200,
@@ -23,6 +38,8 @@
     "manual_pass": 136,
     "manual_dev_pass": 110,
     "manual_critical_boundary_pass": 26,
+    "critical_severity_pass": 66,
+    "critical_severity_total": 95,
     "critical_severity_failures": 29
   },
   "promotion_gate": {

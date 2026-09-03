@@ -1,7 +1,7 @@
 # Sapphirus Runtime
 
-이 디렉터리는 Sapphirus의 초기 `White` 런타임 계보를 공개용으로 정리한 코드입니다.
-경로와 일부 내부 이름은 기존 실행기와의 호환성을 위해 `white`로 유지합니다.
+이 디렉터리는 Sapphirus의 초기 런타임 계보를 공개용으로 정리한 코드입니다.
+일부 내부 식별자는 당시 구현과의 추적 가능성을 위해 그대로 두었습니다.
 
 현재 프로젝트의 중심은 단순한 Discord → LLM 연결이 아니라 다음 책임 분리입니다.
 
@@ -42,7 +42,7 @@ External-First 계약을 의존성 없이 살펴보고 실행하려면 저장소
 검토하는 것과 실제 봇을 시작하는 것은 서로 다른 작업입니다.
 
 ```powershell
-cd companions\white
+cd companions\sapphirus_legacy
 python -m venv .venv
 .\.venv\Scripts\pip install -r requirements.txt
 copy .env.example .env
@@ -55,5 +55,5 @@ copy .env.example .env
 - P11B read-only canary는 외부 capability 계층을 검증했으며 Actor 품질 시험이 아닙니다.
 - 영속 기억 쓰기, 네트워크 도구, 선제 연락과 장기 자율성은 공개 실행 범위가 아닙니다.
 
-자세한 판단은 [케이스스터디](../../docs/white-case-study.md)와
+자세한 판단은 [케이스스터디](../../docs/sapphirus-case-study.md)와
 [평가 원장](../../docs/sapphirus-evaluation-ledger.md)을 참고하세요.
