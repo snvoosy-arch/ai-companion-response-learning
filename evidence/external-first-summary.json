@@ -2,8 +2,16 @@
   "schema_version": "sapphirus.portfolio.external_first_summary.v1",
   "evidence_scope": "offline_replay_mock_integration_and_bounded_shadow_reviews",
   "public_slice_contract": {
+    "revision": "external_first_v2",
     "actor_actions": ["reply", "silence", "use_tool"],
     "maximum_tool_calls_per_turn": 1,
+    "json_scalar_types_strict": true,
+    "tool_outcome_statuses": ["failed", "resolved", "unresolved"],
+    "tool_and_evidence_identifiers_are_safe": true,
+    "tool_outcome_identity_must_match_request": true,
+    "boundary_exceptions_are_structured": true,
+    "post_tool_reply_required": true,
+    "memory_candidate_status": "authorized_not_persisted",
     "executor": "fixture_read_only",
     "external_side_effects": false,
     "private_runtime_reproduction": false
@@ -30,6 +38,7 @@
     "discord_delivery_evaluated": false
   },
   "v4_discord_shadow": {
+    "public_label": "lexical_constraint_shadow",
     "date": "2026-08-31",
     "observations": 6,
     "semantic_pass": 5,
@@ -38,6 +47,7 @@
     "failure": "explicit_lexical_exclusion_not_preserved"
   },
   "v5_local_structure_review": {
+    "public_label": "constraint_preservation_local_review",
     "date": "2026-08-31",
     "observations": 6,
     "semantic_pass": 5,

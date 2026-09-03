@@ -1,8 +1,8 @@
 # Sapphirus 개발 계보
 
 이 문서는 초기 response-tuning 계보부터 현재 External-First 구조까지의
-의사결정 흐름을 간단히 보존합니다. 공개 명칭과 경로는 Sapphirus로 통일하되,
-초기 source snapshot의 일부 내부 식별자는 실험 계보를 추적할 수 있도록 유지합니다.
+의사결정 흐름을 간단히 보존합니다. 현재 구조와 직접 관련 없는 초기 source snapshot은
+main에서 제거하고 `sapphirus-legacy-snapshot-v1` 태그에 고정했습니다.
 
 ```text
 한국어 생성형 컴패니언
@@ -41,7 +41,7 @@
 ├─ Shadow and bounded canary
 │  ├─ known-failure replay
 │  ├─ 신규 16개 synthetic 통합 fixture
-│  ├─ V4/V5 shadow 평가
+│  ├─ lexical constraint / constraint-preservation shadow 평가
 │  ├─ P11A delivery: 0 observations, 판정 보류
 │  └─ P11B read-only capability: 8/8
 │
@@ -55,3 +55,7 @@
 세부 내용은 [케이스스터디](sapphirus-case-study.md),
 [아키텍처](sapphirus-architecture.md),
 [평가 원장](sapphirus-evaluation-ledger.md)을 참고하세요.
+
+전체 초기 runtime은
+[`sapphirus-legacy-snapshot-v1`](https://github.com/snvoosy-arch/ai-companion-response-learning/tree/sapphirus-legacy-snapshot-v1/companions/sapphirus_legacy)
+태그에서 계보 자료로만 확인할 수 있습니다.

@@ -7,6 +7,7 @@ import unittest
 from examples.sapphirus_external_first.external_first import (
     ACTOR_ACTIONS,
     MAX_TOOL_CALLS,
+    TOOL_OUTCOME_STATUSES,
 )
 
 
@@ -39,6 +40,21 @@ class PublicEvidenceContractTests(unittest.TestCase):
         self.assertEqual(
             public_contract["maximum_tool_calls_per_turn"],
             MAX_TOOL_CALLS,
+        )
+        self.assertTrue(public_contract["json_scalar_types_strict"])
+        self.assertEqual(
+            set(public_contract["tool_outcome_statuses"]),
+            set(TOOL_OUTCOME_STATUSES),
+        )
+        self.assertTrue(
+            public_contract["tool_outcome_identity_must_match_request"]
+        )
+        self.assertTrue(public_contract["tool_and_evidence_identifiers_are_safe"])
+        self.assertTrue(public_contract["boundary_exceptions_are_structured"])
+        self.assertTrue(public_contract["post_tool_reply_required"])
+        self.assertEqual(
+            public_contract["memory_candidate_status"],
+            "authorized_not_persisted",
         )
         self.assertEqual(public_contract["executor"], "fixture_read_only")
         self.assertFalse(public_contract["external_side_effects"])

@@ -5,15 +5,19 @@
 
 ## 포함하는 계약
 
-- 정확히 네 필드를 요구하는 Actor envelope
+- 정확히 네 필드와 문자열 scalar type을 요구하는 Actor envelope
 - `reply`, `silence`, `use_tool`의 action별 불변식
 - runtime-owned capability와 permission
 - INITIAL 단계의 read-only tool 1회 제한
 - tool outcome을 받은 POST_TOOL Actor 재호출
+- 요청 tool과 outcome identity, 안전한 evidence ID, status enum 검증
+- tool 실행 후 결과를 설명하는 reply 의무
 - 해결되지 않은 tool 결과를 확정 사실로 바꾸는 답변 차단
 - 민감한 tool query와 memory candidate 차단
 - ledger 없는 외부 실행 완료 주장 차단
 - permission 기반 최종 delivery
+- Actor·executor·delivery 예외의 structured fail-closed trace
+- memory candidate의 정책상 authorization과 실제 persistence 구분
 - 원문 대신 SHA-256을 남기는 public trace
 
 ## 실행

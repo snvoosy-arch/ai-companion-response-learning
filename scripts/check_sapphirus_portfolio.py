@@ -16,13 +16,13 @@ if str(ROOT) not in sys.path:
 from examples.sapphirus_external_first.external_first import (  # noqa: E402
     ACTOR_ACTIONS,
     MAX_TOOL_CALLS,
+    TOOL_OUTCOME_STATUSES,
 )
 
 
 SCOPED_MARKDOWN = (
     ROOT / "README.md",
     ROOT / "companions" / "README.md",
-    ROOT / "companions" / "sapphirus_legacy" / "README.md",
     ROOT / "docs" / "sapphirus-case-study.md",
     ROOT / "docs" / "sapphirus-claim-status.md",
     ROOT / "docs" / "sapphirus-development-lineage.md",
@@ -35,13 +35,54 @@ EVIDENCE_FILES = tuple(sorted((ROOT / "evidence").glob("*.json")))
 PUBLIC_CODE = tuple(
     sorted((ROOT / "examples" / "sapphirus_external_first").rglob("*.py"))
 )
+PUBLIC_TEXT_SUFFIXES = {
+    ".example",
+    ".json",
+    ".md",
+    ".py",
+    ".svg",
+    ".toml",
+    ".txt",
+    ".yaml",
+    ".yml",
+}
+
+
+def _collect_public_boundary_files() -> tuple[Path, ...]:
+    files = {
+        ROOT / "README.md",
+        ROOT / "companions" / "README.md",
+        ROOT / ".github" / "workflows" / "sapphirus-portfolio.yml",
+        ROOT / "scripts" / "check_sapphirus_portfolio.py",
+    }
+    roots = (
+        ROOT / "examples" / "sapphirus_external_first",
+        ROOT / "evidence",
+    )
+    for directory in roots:
+        files.update(
+            path
+            for path in directory.rglob("*")
+            if path.is_file() and path.suffix.lower() in PUBLIC_TEXT_SUFFIXES
+        )
+    files.update((ROOT / "docs").glob("sapphirus-*"))
+    files.update((ROOT / "docs" / "assets").glob("sapphirus-*"))
+    return tuple(sorted(path for path in files if path.is_file()))
+
+
+PUBLIC_BOUNDARY_FILES = _collect_public_boundary_files()
 
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+HTML_SRC = re.compile(
+    r"<(?:img|source)\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"']",
+    re.IGNORECASE,
+)
 FORBIDDEN_PATTERNS = {
-    "windows_user_path": re.compile(r"[A-Za-z]:\\Users\\", re.IGNORECASE),
-    "workspace_absolute_path": re.compile(r"[A-Za-z]:\\bot(?:\\|\b)", re.IGNORECASE),
+    "windows_absolute_path": re.compile(r"(?<![A-Za-z0-9])[A-Za-z]:\\"),
     "discord_snowflake": re.compile(r"(?<!\d)\d{17,20}(?!\d)"),
     "openai_style_secret": re.compile(r"\bsk-[A-Za-z0-9_-]{16,}\b"),
+    "github_token": re.compile(r"\b(?:gh[opusr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b"),
+    "private_key": re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
 }
 
 
@@ -59,7 +100,7 @@ def main() -> None:
     print(
         "Sapphirus portfolio checks passed: "
         f"markdown={len(SCOPED_MARKDOWN)} evidence={len(EVIDENCE_FILES)} "
-        f"python={len(PUBLIC_CODE)}"
+        f"python={len(PUBLIC_CODE)} boundary_files={len(PUBLIC_BOUNDARY_FILES)}"
     )
 
 
@@ -77,9 +118,12 @@ def _check_markdown_links() -> list[str]:
         if not source.is_file():
             continue
         text = source.read_text(encoding="utf-8")
-        for raw_target in MARKDOWN_LINK.findall(text):
+        raw_targets = (*MARKDOWN_LINK.findall(text), *HTML_SRC.findall(text))
+        for raw_target in raw_targets:
             target = unquote(raw_target.strip().split("#", 1)[0])
-            if not target or target.startswith(("http://", "https://", "mailto:")):
+            if not target or target.startswith(
+                ("http://", "https://", "mailto:", "data:")
+            ):
                 continue
             resolved = (source.parent / target).resolve()
             try:
@@ -281,6 +325,23 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             errors.append("CPU slice tool budget drifted from external evidence")
         if actor_contract.get("maximum_tool_calls_per_turn") != MAX_TOOL_CALLS:
             errors.append("CPU slice tool budget drifted from Contract SFT evidence")
+        if sorted(public_contract.get("tool_outcome_statuses", [])) != sorted(
+            TOOL_OUTCOME_STATUSES
+        ):
+            errors.append("CPU slice tool statuses drifted from external evidence")
+        required_v2_contract = {
+            "json_scalar_types_strict": True,
+            "tool_outcome_identity_must_match_request": True,
+            "tool_and_evidence_identifiers_are_safe": True,
+            "boundary_exceptions_are_structured": True,
+            "post_tool_reply_required": True,
+            "memory_candidate_status": "authorized_not_persisted",
+        }
+        for field, expected in required_v2_contract.items():
+            if public_contract.get(field) != expected:
+                errors.append(
+                    f"CPU slice v2 contract evidence drifted at {field}"
+                )
 
     claim_strings = {
         ROOT / "README.md": (
@@ -315,7 +376,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             f"Critical boundary `{clean_critical}/{critical_total} → {candidate_critical}/{critical_total}`",
             f"Known-failure `{contained}/{blockable}`",
             f"Synthetic fixture `{fixture_passed}/{fixture_cases}`",
-            f"V5 의미 사례 `{v5_passed}/{v5_observations}`",
+            f"Constraint-preservation 의미 사례 `{v5_passed}/{v5_observations}`",
             f"P11B callback `{p11b_completed}/{p11b_accepted}`",
         ),
     }
@@ -343,9 +404,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
 
 def _check_public_boundaries() -> list[str]:
     errors: list[str] = []
-    for path in (*SCOPED_MARKDOWN, *EVIDENCE_FILES, *PUBLIC_CODE):
-        if not path.is_file():
-            continue
+    for path in PUBLIC_BOUNDARY_FILES:
         text = path.read_text(encoding="utf-8")
         for name, pattern in FORBIDDEN_PATTERNS.items():
             if pattern.search(text):

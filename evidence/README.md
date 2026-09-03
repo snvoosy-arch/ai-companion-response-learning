@@ -7,7 +7,7 @@
 | 파일 | 범위 |
 | --- | --- |
 | `contract-sft-v0.1-summary.json` | clean base와 SFT candidate 비교 및 승격 결정 |
-| `external-first-summary.json` | known-failure replay, 신규 fixture, V4/V5 결과 |
+| `external-first-summary.json` | known-failure replay, 신규 fixture, constraint-preservation shadow 결과 |
 | `p11b-readonly-canary-summary.json` | 격리된 Discord read-only 기능 시험 |
 
 이 요약은 원본 private artifact를 대신해 실험을 재실행할 수 있는 자료가 아닙니다.

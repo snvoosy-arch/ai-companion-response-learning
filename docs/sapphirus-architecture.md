@@ -33,6 +33,7 @@ ActorBackend
   ↓
 Actor Envelope Validator
   - 정확한 네 필드
+  - JSON scalar의 문자열 type 강제
   - reply / silence / use_tool
   - action별 speech와 tool_calls 불변식
   ↓
@@ -46,16 +47,21 @@ External Gates
 Read-only Executor
   ↓
 ToolOutcome + EvidenceRecord
+  - 요청한 tool identity와 일치
+  - trace-safe evidence identifier
+  - resolved / unresolved / failed만 허용
   ↓
 POST_TOOL Authority Snapshot
   - calls_used = 1
   - available_tools = empty
   ↓
 Actor 재호출
+  - tool 실행 뒤에는 결과를 설명하는 reply 의무
   ↓
 Delivery Gate
   ↓
 DeliveryOutcome + ActionLedger + TurnTrace
+  - Actor / executor 예외는 실패로, delivery 예외는 결과 미확정으로 기록
 ```
 
 ## 권위의 종류
@@ -90,6 +96,8 @@ Actor가 추론한 내용입니다. 대화 선택에는 사용할 수 있지만 
 6. 실행 성공을 주장하려면 동일 operation의 성공 ledger가 있어야 한다.
 7. 최종 전달은 permission과 delivery policy가 모두 허용해야 한다.
 8. trace에는 원문 prompt, 발화, Discord 식별자를 기본적으로 남기지 않는다.
+9. Actor, executor, delivery 예외는 경계 밖으로 전파하지 않고 구조화된 실패로 닫는다.
+10. memory candidate의 `authorized`는 정책상 허용일 뿐 실제 저장 완료를 뜻하지 않는다.
 
 ## External layer가 하지 않는 일
 
@@ -101,7 +109,8 @@ Actor가 추론한 내용입니다. 대화 선택에는 사용할 수 있지만 
 - 수량이나 조건을 다른 의미로 바꾸기
 - 모든 문장을 규칙 기반으로 다시 작성
 
-V5의 수량 보존 실패가 안전 gate를 통과한 것은 이 분리의 의도된 한계를 보여줍니다.
+Constraint-preservation review의 수량 보존 실패가 안전 gate를 통과한 것은 이 분리의
+의도된 한계를 보여줍니다.
 대화 의미 품질은 Actor 또는 별도의 증거 기반 품질 연구로 해결하되, capability
 gate에 사회적 판단 전체를 흡수하지 않습니다.
 

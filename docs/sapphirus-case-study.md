@@ -104,6 +104,10 @@ clean 기준선의 수동 통과는 `70/200`이었습니다. 별도의 초기 li
 - Critical boundary: 실제 `26/40`, 요구 `40/40`
 - Critical-severity failure: 실제 29건, 요구 0건
 
+Critical boundary는 존재하지 않는 권한·기억·도구 결과를 사실로 확정할 수 있는
+항목입니다. 한 건의 실패도 외부 실행 계약을 깨므로 평균 개선으로 상쇄하지 않고
+`40/40`을 요구했습니다.
+
 일반 대화와 감정 지지의 clean 대비 회귀는 없었지만, 외부 행동 권한, 미래 연락,
 화자 역할, 기억 종류, 민감 기억, 도구 결과 정직성에서 중대 실패가 남았습니다.
 
@@ -203,13 +207,14 @@ Actor 추론이나 외부 검색 문서는 runtime authority로 승격하지 않
 결과는 `16/16`이었지만 scripted Actor와 fixture executor를 사용한 외부 계약
 시험이며, 실제 모델 품질이나 Discord 전달을 측정한 것은 아닙니다.
 
-### Discord shadow와 V5
+### Discord shadow와 constraint-preservation review
 
 V4 shadow에서는 6건 중 5건이 의미상 통과했습니다. 한 출력이 사용자가 명시적으로
 제외한 표현을 그대로 포함했고, 외부 lexical constraint가 없어 전체 gate를
 실패했습니다.
 
-V5는 한 번의 제약 보정과 좁은 deterministic fallback을 추가했습니다. 로컬 6건
+V5 계보의 constraint-preservation review는 한 번의 제약 보정과 좁은 deterministic
+fallback을 추가했습니다. 로컬 6건
 평가에서는 권한·형식·침묵 경계를 통과했지만, “절반도 못 했다”를 “완료된 절반”으로
 바꾸고 감정을 먼저 인정하지 않은 답변 때문에 다시 `5/6`에서 중단했습니다.
 
@@ -254,3 +259,8 @@ Sapphirus는 “학습된 모델이 모든 것을 올바르게 판단한다”�
 다음 기술 관문은 새로운 SFT가 아니라, 공개 예제와 같은 전체 수직 경로를 제한된
 환경에서 실제 Actor로 관찰하고 각 단계의 evidence를 같은 turn trace에 연결하는
 것입니다.
+
+초기 Discord runtime 전체 snapshot은 private dependency가 빠진 상태에서 main의
+현재 코드보다 훨씬 큰 비중을 차지해 구조를 흐렸습니다. 해당 상태는
+[`sapphirus-legacy-snapshot-v1`](https://github.com/snvoosy-arch/ai-companion-response-learning/tree/sapphirus-legacy-snapshot-v1/companions/sapphirus_legacy)
+태그에 그대로 보존하고, main은 현재 External-First 계약과 재현 코드에 집중합니다.

@@ -59,8 +59,10 @@ Sapphirus는 생성형 LLM에게 대화와 `reply · silence · use_tool` 제안
 분리한 한국어 AI 컴패니언 프로젝트입니다.
 
 이 저장소는 공개용 포트폴리오입니다. 모델 가중치, 원본 학습 데이터, Discord
-식별자, 개인 대화 로그, 토큰, 로컬 DB는 포함하지 않습니다. 초기 runtime snapshot은
-`companions/sapphirus_legacy`에 분리했으며, 내부의 옛 식별자는 계보 보존을 위해 유지합니다.
+식별자, 개인 대화 로그, 토큰, 로컬 DB는 포함하지 않습니다. 불완전한 초기 runtime
+snapshot은 현재 구조와 혼동되지 않도록 main에서 제거하고
+[`sapphirus-legacy-snapshot-v1`](https://github.com/snvoosy-arch/ai-companion-response-learning/tree/sapphirus-legacy-snapshot-v1/companions/sapphirus_legacy)
+태그에 계보 자료로 보존했습니다.
 
 ## 핵심 질문
 
@@ -87,16 +89,19 @@ Actor의 발화가 “검색했다”, “기억했다”, “보냈다”고 �
 | 단계 | 증거 범위 | 결과 | 결정 |
 | --- | --- | ---: | --- |
 | Contract SFT 수동 계약 평가 | 동일 조건 모델 출력 수동 검토 | clean `70/200` → candidate `136/200` | 개선됐지만 승격 거절 |
-| Critical boundary | 동일 unsealed 평가의 중대 경계 | `13/40` → `26/40` | 요구값 `40/40` 미달 |
+| Critical boundary | 동일 unsealed 평가의 실행 사실성·권한 경계 | `13/40` → `26/40` | zero-tolerance 요구값 `40/40` 미달 |
 | External-First known-failure replay | 이미 판정한 실패의 development replay | 외부 차단 가능 실패 `22/22` 격리 | 유용한 복구는 `5/22`로 제한적 |
 | 신규 외부 통합 fixture | 실제 모델·Discord가 없는 mock 계약 시험 | `16/16` 통과 | 외부 경계 구현만 검증 |
-| V5 로컬 구조 평가 | 로컬 모델 출력 6건 수동 검토 | 의미 사례 `5/6` | 감정 인정·수량 보존 실패로 중단 |
+| Constraint-preservation review (V5 계보) | 로컬 모델 출력 6건 수동 검토 | 의미 사례 `5/6` | 감정 인정·수량 보존 실패로 중단 |
 | Discord read-only capability canary | LLM을 끈 live Discord callback 시험 | 명령 callback `8/8` 완료 | 출력 의미 품질은 평가하지 않음 |
 
 마지막 canary는 Actor를 연결하기 전에 외부 Discord capability 계층을 격리 검증한
 시험입니다. 의도적으로 LLM 요청, 네트워크 도구 호출, 영속 상태 변경을 모두
 `0`으로 유지했으므로 Actor의 대화 품질 증거로 사용하지 않습니다. `8/8`은 명령
 callback 완료 수이며, 응답 원문을 보존해 의미 품질을 판정한 점수가 아닙니다.
+
+Critical boundary는 존재하지 않는 권한·기억·도구 결과를 실제 사실처럼 만들 수 있는
+항목이므로 평균 점수로 상쇄하지 않고 단 한 건의 실패도 허용하지 않았습니다.
 
 수치의 정의와 해석 한계는 [평가 원장](docs/sapphirus-evaluation-ledger.md)과
 [공개용 근거 요약](evidence/README.md)에 기록했습니다.
@@ -122,8 +127,9 @@ LLM이 행동을 제안한다
 
 외부 계층은 일반 대화의 감정·농담·주제를 결정하거나 문장을 전면 재작성하지
 않습니다. 실행 가능 여부, 실제 수행 여부, 민감한 영속 기억, 전달 범위처럼 외부에서
-검증 가능한 경계만 소유합니다. V5에서 안전하고 구조적으로 올바른 답변이 수량
-의미를 잘못 보존한 사례는 이 경계를 의도적으로 넓히지 않은 이유이기도 합니다.
+검증 가능한 경계만 소유합니다. Constraint-preservation review에서 안전하고 구조적으로
+올바른 답변이 수량 의미를 잘못 보존한 사례는 이 경계를 의도적으로 넓히지 않은
+이유이기도 합니다.
 
 ## 비공개 개발 저장소에서 구현한 범위
 
@@ -155,7 +161,7 @@ P11A delivery canary는 모델과 listener를 기동했지만 허용 입력 관�
 - [평가·승격 원장](docs/sapphirus-evaluation-ledger.md)
 - [공개 주장 상태표](docs/sapphirus-claim-status.md)
 - [CPU 재현 예제](examples/sapphirus_external_first/README.md)
-- [초기 runtime snapshot 안내](companions/sapphirus_legacy/README.md)
+- [초기 runtime snapshot 태그](https://github.com/snvoosy-arch/ai-companion-response-learning/tree/sapphirus-legacy-snapshot-v1/companions/sapphirus_legacy)
 - [개발 계보 메모](docs/sapphirus-development-lineage.md)
 
 ## CPU 예제 실행

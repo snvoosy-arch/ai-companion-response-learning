@@ -75,9 +75,9 @@
 - 의미상 통과: 5건
 - 실패: 명시적으로 제외한 표현을 최종 답변이 포함
 - side effect: 0
-- 결정: delivery canary로 진행하지 않고 V5 제약 gate 설계
+- 결정: delivery canary로 진행하지 않고 constraint-preservation gate 설계
 
-### 2026-08-31 — V5 local structure review
+### 2026-08-31 — Constraint-preservation local review (V5 lineage)
 
 - 관찰: 6건
 - 의미상 통과: 5건

@@ -16,7 +16,9 @@ from typing import Any, Mapping, Protocol, Sequence
 
 ACTOR_ACTIONS = frozenset({"reply", "silence", "use_tool"})
 MEMORY_KINDS = frozenset({"profile", "ongoing", "open_loop", "episodic", "other"})
+TOOL_OUTCOME_STATUSES = frozenset({"resolved", "unresolved", "failed"})
 MAX_TOOL_CALLS = 1
+_SAFE_IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_.:-]{0,63}\Z")
 
 
 class ContractError(ValueError):
@@ -29,8 +31,12 @@ class ToolCall:
     query: str
 
     def __post_init__(self) -> None:
+        if not isinstance(self.name, str) or not isinstance(self.query, str):
+            raise ContractError("tool name and query must be strings")
         if not self.name.strip() or not self.query.strip():
             raise ContractError("tool name and query are required")
+        if not _SAFE_IDENTIFIER.fullmatch(self.name):
+            raise ContractError("tool name must be a safe identifier")
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +45,8 @@ class MemoryCandidate:
     text: str
 
     def __post_init__(self) -> None:
+        if not isinstance(self.kind, str) or not isinstance(self.text, str):
+            raise ContractError("memory kind and text must be strings")
         if self.kind not in MEMORY_KINDS:
             raise ContractError(f"unsupported memory kind: {self.kind}")
         if not self.text.strip():
@@ -53,6 +61,18 @@ class ActorEnvelope:
     memory_candidates: tuple[MemoryCandidate, ...] = ()
 
     def __post_init__(self) -> None:
+        if not isinstance(self.action, str) or not isinstance(self.speech, str):
+            raise ContractError("action and speech must be strings")
+        if not isinstance(self.tool_calls, tuple) or not all(
+            isinstance(item, ToolCall) for item in self.tool_calls
+        ):
+            raise ContractError("tool_calls must be a tuple of ToolCall objects")
+        if not isinstance(self.memory_candidates, tuple) or not all(
+            isinstance(item, MemoryCandidate) for item in self.memory_candidates
+        ):
+            raise ContractError(
+                "memory_candidates must be a tuple of MemoryCandidate objects"
+            )
         if self.action not in ACTOR_ACTIONS:
             raise ContractError(f"unsupported actor action: {self.action}")
         if self.action == "reply":
@@ -71,6 +91,8 @@ class ActorEnvelope:
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, Any]) -> "ActorEnvelope":
+        if not isinstance(payload, Mapping):
+            raise ContractError("actor envelope must be an object")
         expected = {"action", "speech", "tool_calls", "memory_candidates"}
         if set(payload) != expected:
             raise ContractError("actor envelope must contain exactly four fields")
@@ -87,17 +109,30 @@ class ActorEnvelope:
             arguments = item["arguments"]
             if not isinstance(arguments, Mapping) or set(arguments) != {"query"}:
                 raise ContractError("tool arguments must contain only query")
-            tools.append(ToolCall(str(item["name"]), str(arguments["query"])))
+            name = item["name"]
+            query = arguments["query"]
+            if not isinstance(name, str) or not isinstance(query, str):
+                raise ContractError("tool name and query must be strings")
+            tools.append(ToolCall(name, query))
 
         memories: list[MemoryCandidate] = []
         for item in raw_memories:
             if not isinstance(item, Mapping) or set(item) != {"kind", "text"}:
                 raise ContractError("memory candidate shape is invalid")
-            memories.append(MemoryCandidate(str(item["kind"]), str(item["text"])))
+            kind = item["kind"]
+            text = item["text"]
+            if not isinstance(kind, str) or not isinstance(text, str):
+                raise ContractError("memory kind and text must be strings")
+            memories.append(MemoryCandidate(kind, text))
+
+        action = payload["action"]
+        speech = payload["speech"]
+        if not isinstance(action, str) or not isinstance(speech, str):
+            raise ContractError("action and speech must be strings")
 
         return cls(
-            action=str(payload["action"]),
-            speech=str(payload["speech"]),
+            action=action,
+            speech=speech,
             tool_calls=tuple(tools),
             memory_candidates=tuple(memories),
         )
@@ -109,6 +144,18 @@ class ToolOutcome:
     status: str
     evidence_id: str
     summary: str
+
+    def __post_init__(self) -> None:
+        values = (self.tool_name, self.status, self.evidence_id, self.summary)
+        if not all(isinstance(value, str) for value in values):
+            raise ContractError("tool outcome fields must be strings")
+        if not self.tool_name.strip() or not self.evidence_id.strip():
+            raise ContractError("tool outcome identity and evidence_id are required")
+        identifiers = (self.tool_name, self.evidence_id)
+        if not all(_SAFE_IDENTIFIER.fullmatch(value) for value in identifiers):
+            raise ContractError("tool outcome identifiers are invalid")
+        if self.status not in TOOL_OUTCOME_STATUSES:
+            raise ContractError(f"unsupported tool outcome status: {self.status}")
 
     @property
     def resolved(self) -> bool:
@@ -215,8 +262,8 @@ class TurnTrace:
     delivery_attempted: bool = False
     delivered: bool = False
     final_speech_sha256: str = ""
-    accepted_memories: int = 0
-    rejected_memories: int = 0
+    authorized_memory_candidates: int = 0
+    rejected_memory_candidates: int = 0
     issues: list[str] = field(default_factory=list)
     ledger: list[LedgerEntry] = field(default_factory=list)
 
@@ -227,8 +274,8 @@ class TurnTrace:
             "delivery_attempted": self.delivery_attempted,
             "delivered": self.delivered,
             "final_speech_sha256": self.final_speech_sha256,
-            "accepted_memories": self.accepted_memories,
-            "rejected_memories": self.rejected_memories,
+            "authorized_memory_candidates": self.authorized_memory_candidates,
+            "rejected_memory_candidates": self.rejected_memory_candidates,
             "issues": list(self.issues),
             "ledger": [
                 {
@@ -271,6 +318,8 @@ class ExternalFirstRuntime:
 
         context = ActorContext(user_text, authority.available_tools)
         turn = self._call_actor(context, trace)
+        if turn is None:
+            return RuntimeResult("blocked", "", trace)
         self._gate_memories(turn, authority, trace)
         tool_outcome: ToolOutcome | None = None
 
@@ -286,25 +335,23 @@ class ExternalFirstRuntime:
                 trace.issues.append("SENSITIVE_TOOL_QUERY")
                 return RuntimeResult("blocked", "", trace)
 
-            outcome = self._executor.execute(call)
+            outcome = self._execute_tool(call, trace)
+            if outcome is None:
+                return RuntimeResult("blocked", "", trace)
             tool_outcome = outcome
-            trace.tool_calls += 1
-            trace.ledger.append(
-                LedgerEntry(
-                    operation=f"tool:{call.name}",
-                    status=outcome.status,
-                    evidence_id=outcome.evidence_id,
-                    target_sha256=_sha256(call.query),
-                )
-            )
             post_tool = ActorContext(user_text, (), tool_outcome=outcome)
             turn = self._call_actor(post_tool, trace)
+            if turn is None:
+                return RuntimeResult("blocked", "", trace)
             self._gate_memories(turn, authority, trace)
             if turn.action == "use_tool":
                 trace.issues.append("TOOL_BUDGET_EXHAUSTED")
                 return RuntimeResult("blocked", "", trace)
 
         if turn.action == "silence":
+            if tool_outcome is not None:
+                trace.issues.append("TOOL_RESULT_DISCLOSURE_REQUIRED")
+                return RuntimeResult("blocked", "", trace)
             return RuntimeResult("silence", "", trace)
 
         if tool_outcome is not None and not tool_outcome.resolved:
@@ -321,8 +368,32 @@ class ExternalFirstRuntime:
             return RuntimeResult("blocked", "", trace)
 
         trace.delivery_attempted = True
-        trace.delivered = self._delivery.deliver(turn.speech)
         trace.final_speech_sha256 = _sha256(turn.speech)
+        try:
+            delivered = self._delivery.deliver(turn.speech)
+        except Exception:
+            trace.issues.append("DELIVERY_ERROR")
+            trace.ledger.append(
+                LedgerEntry(
+                    operation="discord_delivery",
+                    status="unknown",
+                    evidence_id="delivery-1",
+                    target_sha256=trace.final_speech_sha256,
+                )
+            )
+            return RuntimeResult("delivery_unknown", "", trace)
+        if not isinstance(delivered, bool):
+            trace.issues.append("DELIVERY_INVALID_RESULT")
+            trace.ledger.append(
+                LedgerEntry(
+                    operation="discord_delivery",
+                    status="unknown",
+                    evidence_id="delivery-1",
+                    target_sha256=trace.final_speech_sha256,
+                )
+            )
+            return RuntimeResult("delivery_unknown", "", trace)
+        trace.delivered = delivered
         trace.ledger.append(
             LedgerEntry(
                 operation="discord_delivery",
@@ -337,12 +408,73 @@ class ExternalFirstRuntime:
             trace,
         )
 
-    def _call_actor(self, context: ActorContext, trace: TurnTrace) -> ActorEnvelope:
-        turn = self._actor.generate(context)
+    def _call_actor(
+        self, context: ActorContext, trace: TurnTrace
+    ) -> ActorEnvelope | None:
         trace.actor_calls += 1
         if trace.actor_calls > MAX_TOOL_CALLS + 1:
-            raise ContractError("Actor call budget exceeded")
+            trace.issues.append("ACTOR_BUDGET_EXHAUSTED")
+            return None
+        try:
+            turn = self._actor.generate(context)
+        except Exception:
+            trace.issues.append("ACTOR_ERROR")
+            return None
+        if not isinstance(turn, ActorEnvelope):
+            trace.issues.append("ACTOR_INVALID_OUTPUT")
+            return None
         return turn
+
+    def _execute_tool(
+        self, call: ToolCall, trace: TurnTrace
+    ) -> ToolOutcome | None:
+        trace.tool_calls += 1
+        operation = f"tool:{call.name}"
+        target_sha256 = _sha256(call.query)
+        try:
+            outcome = self._executor.execute(call)
+        except Exception:
+            trace.issues.append("EXECUTOR_ERROR")
+            trace.ledger.append(
+                LedgerEntry(
+                    operation=operation,
+                    status="error",
+                    evidence_id=f"tool-attempt-{trace.tool_calls}",
+                    target_sha256=target_sha256,
+                )
+            )
+            return None
+        if not isinstance(outcome, ToolOutcome):
+            trace.issues.append("EXECUTOR_INVALID_OUTCOME")
+            trace.ledger.append(
+                LedgerEntry(
+                    operation=operation,
+                    status="invalid",
+                    evidence_id=f"tool-attempt-{trace.tool_calls}",
+                    target_sha256=target_sha256,
+                )
+            )
+            return None
+        if outcome.tool_name != call.name:
+            trace.issues.append("TOOL_OUTCOME_IDENTITY_MISMATCH")
+            trace.ledger.append(
+                LedgerEntry(
+                    operation=operation,
+                    status="identity_mismatch",
+                    evidence_id=outcome.evidence_id,
+                    target_sha256=target_sha256,
+                )
+            )
+            return None
+        trace.ledger.append(
+            LedgerEntry(
+                operation=operation,
+                status=outcome.status,
+                evidence_id=outcome.evidence_id,
+                target_sha256=target_sha256,
+            )
+        )
+        return outcome
 
     @staticmethod
     def _gate_memories(
@@ -351,22 +483,25 @@ class ExternalFirstRuntime:
         trace: TurnTrace,
     ) -> None:
         for candidate in turn.memory_candidates:
-            accepted = (
+            authorized = (
                 authority.persistent_memory_allowed
                 and candidate.kind in authority.allowed_memory_kinds
                 and not _contains_sensitive_memory(candidate.text)
             )
-            if accepted:
-                trace.accepted_memories += 1
-                status = "accepted"
+            if authorized:
+                trace.authorized_memory_candidates += 1
+                status = "authorized"
             else:
-                trace.rejected_memories += 1
+                trace.rejected_memory_candidates += 1
                 status = "blocked"
             trace.ledger.append(
                 LedgerEntry(
                     operation="memory_candidate",
                     status=status,
-                    evidence_id=f"memory-{trace.accepted_memories + trace.rejected_memories}",
+                    evidence_id=(
+                        "memory-"
+                        f"{trace.authorized_memory_candidates + trace.rejected_memory_candidates}"
+                    ),
                     target_sha256=_sha256(candidate.text),
                 )
             )

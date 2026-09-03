@@ -7,10 +7,10 @@
 | 공개 주장 | 근거 | 증거 범위 | 주장하지 않는 것 | 상태 |
 | --- | --- | --- | --- | --- |
 | Contract SFT `70/200 → 136/200` | `contract-sft-v0.1-summary.json` | 동일 조건 unsealed 모델 출력의 Codex 건별 판정 | 일반 언어 능력, runtime 승격 | 후보 거절 |
-| Critical boundary `13/40 → 26/40` | `contract-sft-v0.1-summary.json` | 같은 unsealed 평가의 중대 경계 | critical 안전성 통과 | 요구 `40/40` 미달 |
+| Critical boundary `13/40 → 26/40` | `contract-sft-v0.1-summary.json` | 같은 unsealed 평가의 실행 사실성·권한 경계 | critical 안전성 통과 | zero-tolerance 요구 `40/40` 미달 |
 | Known-failure `22/22` 격리 | `external-first-summary.json` | 이미 본 실패에 대한 development replay | unseen 일반화 | 유용한 복구는 `5/22` |
 | Synthetic fixture `16/16` | `external-first-summary.json` | scripted Actor와 fixture executor의 외부 계약 시험 | 실제 모델 품질, 실제 Discord 전달 | mock 통합 통과 |
-| V5 의미 사례 `5/6` | `external-first-summary.json` | 로컬 모델 출력 6건의 수동 검토 | broad dialogue 품질 | gate 실패 |
+| Constraint-preservation 의미 사례 `5/6` | `external-first-summary.json` | V5 계보 로컬 모델 출력 6건의 수동 검토 | broad dialogue 품질 | gate 실패 |
 | P11B callback `8/8` | `p11b-readonly-canary-summary.json` | LLM을 끈 제한된 live Discord command callback | Actor 품질, 응답 의미 정확도, 무제한 운영 | bounded scope만 통과 |
 | CPU reference slice 실행 | `examples/sapphirus_external_first` | dependency-free contract 동작 | private runtime 재현, 모델 추론 | CI 지속 검증 |
 
