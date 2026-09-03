@@ -130,4 +130,3 @@ SurfaceBERT-B lexical ranker는 dev `5/6`이었지만 heldout `2/6`으로 떨어
 ## 포트폴리오 결론
 
 Rubrum은 “BERT로 문장을 생성했다”는 프로젝트가 아닙니다. 모델·상태·정책·표현의 책임과 실제 출력 권한을 분리하고, 실패한 실험 결과에 따라 그 책임을 다시 배치한 AI engineering 프로젝트입니다.
-

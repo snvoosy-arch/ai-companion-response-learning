@@ -41,4 +41,3 @@
 | `PRIVATE-RUNTIME-AUDIT` | 개인 식별자를 제거한 실제 Discord 운영 감사 요약 |
 
 공개 수직 표본은 `PUBLIC-RUNNABLE`이지만 MeaningBERT 추론 자체를 재현하지 않습니다. 모델 평가 수치는 가중치와 원본 데이터가 공개되지 않으므로 `SANITIZED-REPORT`입니다. 실제 Discord Canary 전달은 `PRIVATE-RUNTIME-AUDIT`이며 개인 메시지를 공개하지 않습니다.
-

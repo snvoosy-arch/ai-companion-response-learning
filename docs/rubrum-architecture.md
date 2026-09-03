@@ -138,4 +138,3 @@ ReactionDecision
 | 전달 실패를 성공으로 기록 | Outcome |
 
 이 분리가 Rubrum의 주된 연구 결과입니다.
-

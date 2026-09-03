@@ -106,4 +106,3 @@ SurfacePlan
 - no-fake·abstain·주체 경계
 - Shadow에서 실제 불일치 관찰
 - rollback 가능한 제한 Canary
-
