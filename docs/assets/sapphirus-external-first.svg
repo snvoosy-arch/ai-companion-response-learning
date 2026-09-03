@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title description">
+  <title id="title">Sapphirus External-First Runtime</title>
+  <desc id="description">입력과 Actor 제안, 외부 권한 검증과 실행, 결과 전달과 감사 기록을 세 개의 큰 영역으로 구분한 구조도</desc>
+  <style>
+    .canvas { fill: #f6f8fa; }
+    .panel { fill: #ffffff; stroke: #d0d7de; stroke-width: 2; }
+    .panel-blue { stroke: #54aeff; }
+    .panel-violet { stroke: #a475f9; }
+    .panel-green { stroke: #57ab5a; }
+    .badge-blue { fill: #0969da; }
+    .badge-violet { fill: #8250df; }
+    .badge-green { fill: #1a7f37; }
+    .item { fill: #f6f8fa; stroke: #d8dee4; stroke-width: 1.5; }
+    .title { fill: #1f2328; font: 700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .subtitle { fill: #57606a; font: 500 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .badge { fill: #ffffff; font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .phase { fill: #1f2328; font: 700 23px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .phase-note { fill: #57606a; font: 500 15px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .item-label { fill: #1f2328; font: 650 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .footer { fill: #57606a; font: 600 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  </style>
+
+  <rect class="canvas" width="1200" height="520" rx="24"/>
+  <text class="title" x="48" y="54">Sapphirus External-First Runtime</text>
+  <text class="subtitle" x="48" y="84">생성형 Actor의 제안과 실제 세계의 권한을 분리합니다.</text>
+
+  <rect class="panel panel-blue" x="42" y="116" width="350" height="330" rx="20"/>
+  <circle class="badge-blue" cx="78" cy="156" r="22"/>
+  <text class="badge" x="72" y="163">1</text>
+  <text class="phase" x="112" y="162">입력과 Actor 제안</text>
+  <text class="phase-note" x="66" y="194">자연스러운 대화와 행동 후보를 생성</text>
+  <rect class="item" x="66" y="220" width="302" height="44" rx="10"/>
+  <text class="item-label" x="86" y="248">User event</text>
+  <rect class="item" x="66" y="278" width="302" height="44" rx="10"/>
+  <text class="item-label" x="86" y="306">Context builder</text>
+  <rect class="item" x="66" y="336" width="302" height="44" rx="10"/>
+  <text class="item-label" x="86" y="364">Generative Actor</text>
+  <rect class="item" x="66" y="394" width="302" height="44" rx="10"/>
+  <text class="item-label" x="86" y="422">Actor envelope</text>
+
+  <rect class="panel panel-violet" x="425" y="116" width="350" height="330" rx="20"/>
+  <circle class="badge-violet" cx="461" cy="156" r="22"/>
+  <text class="badge" x="455" y="163">2</text>
+  <text class="phase" x="495" y="162">권한 검증과 실행</text>
+  <text class="phase-note" x="449" y="194">허용된 읽기 전용 행동만 실제로 수행</text>
+  <rect class="item" x="449" y="220" width="302" height="44" rx="10"/>
+  <text class="item-label" x="469" y="248">Schema validator</text>
+  <rect class="item" x="449" y="278" width="302" height="44" rx="10"/>
+  <text class="item-label" x="469" y="306">Runtime authority snapshot</text>
+  <rect class="item" x="449" y="336" width="302" height="44" rx="10"/>
+  <text class="item-label" x="469" y="364">Permission · evidence gates</text>
+  <rect class="item" x="449" y="394" width="302" height="44" rx="10"/>
+  <text class="item-label" x="469" y="422">Read-only executor</text>
+
+  <rect class="panel panel-green" x="808" y="116" width="350" height="330" rx="20"/>
+  <circle class="badge-green" cx="844" cy="156" r="22"/>
+  <text class="badge" x="838" y="163">3</text>
+  <text class="phase" x="878" y="162">결과 전달과 감사</text>
+  <text class="phase-note" x="832" y="194">실제 결과와 전달 여부를 근거로 기록</text>
+  <rect class="item" x="832" y="220" width="302" height="44" rx="10"/>
+  <text class="item-label" x="852" y="248">Tool outcome</text>
+  <rect class="item" x="832" y="278" width="302" height="44" rx="10"/>
+  <text class="item-label" x="852" y="306">Delivery gate</text>
+  <rect class="item" x="832" y="336" width="302" height="44" rx="10"/>
+  <text class="item-label" x="852" y="364">Action ledger</text>
+  <rect class="item" x="832" y="394" width="302" height="44" rx="10"/>
+  <text class="item-label" x="852" y="422">Turn trace</text>
+
+  <text class="footer" x="600" y="486" text-anchor="middle">Actor는 제안하고, runtime은 허가하며, executor는 실제 결과를 증명합니다.</text>
+</svg>

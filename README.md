@@ -70,20 +70,11 @@ Sapphirus는 생성형 LLM에게 대화와 `reply · silence · use_tool` 제안
 보고 승격하지 않고, 모델의 제안과 실제 세계의 권위를 분리하는 External-First
 구조로 전환했습니다.
 
-```mermaid
-flowchart LR
-    U[User event] --> C[Context builder]
-    C --> A[Generative Actor]
-    A --> E[Actor envelope]
-    E --> V[Schema validator]
-    V --> R[Runtime authority snapshot]
-    R --> G[Permission and evidence gates]
-    G --> X[Read-only executor]
-    X --> O[Tool outcome]
-    O --> A
-    G --> D[Delivery gate]
-    D --> L[Action ledger and turn trace]
-```
+<img
+  src="docs/assets/sapphirus-external-first.svg"
+  alt="Sapphirus External-First 구조: 입력과 Actor 제안, 외부 권한 검증과 실행, 결과 전달과 감사 기록의 세 단계"
+  width="100%"
+>
 
 Actor의 발화가 “검색했다”, “기억했다”, “보냈다”고 주장하는 것만으로 실제 사건이
 되지는 않습니다. 외부 `CapabilityState`, `PermissionState`, `ToolOutcome`,
