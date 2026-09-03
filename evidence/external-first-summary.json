@@ -1,0 +1,45 @@
+{
+  "schema_version": "sapphirus.portfolio.external_first_summary.v1",
+  "evidence_scope": "offline_replay_mock_integration_and_bounded_shadow_reviews",
+  "known_failure_replay": {
+    "date": "2026-08-26",
+    "candidate_outputs": 200,
+    "candidate_manual_failures": 64,
+    "externally_blockable_failures": 22,
+    "contained_failures": 22,
+    "safe_useful_recoveries": 5,
+    "suppression_only": 17,
+    "residual_model_failures": 59,
+    "false_output_blocks": 0,
+    "generalization_evidence": false
+  },
+  "fresh_integration_fixtures": {
+    "date": "2026-08-26",
+    "cases": 16,
+    "passed": 16,
+    "real_model_quality_evaluated": false,
+    "discord_delivery_evaluated": false
+  },
+  "v4_discord_shadow": {
+    "date": "2026-08-31",
+    "observations": 6,
+    "semantic_pass": 5,
+    "side_effects": 0,
+    "global_pass": false,
+    "failure": "explicit_lexical_exclusion_not_preserved"
+  },
+  "v5_local_structure_review": {
+    "date": "2026-08-31",
+    "observations": 6,
+    "semantic_pass": 5,
+    "side_effects": 0,
+    "global_pass": false,
+    "failure": "emotion_acknowledgement_and_quantity_preservation"
+  },
+  "decision": {
+    "external_first_direction_retained": true,
+    "actor_training_resumed": false,
+    "model_promoted": false,
+    "unbounded_discord_ready": false
+  }
+}

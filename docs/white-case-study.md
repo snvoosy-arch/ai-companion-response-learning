@@ -1,120 +1,250 @@
-# White Companion Model 케이스스터디
+# Sapphirus 케이스스터디
+
+관련 자료: [External-First 아키텍처](sapphirus-architecture.md) ·
+[평가·승격 원장](sapphirus-evaluation-ledger.md) ·
+[CPU 재현 예제](../examples/sapphirus_external_first/README.md) ·
+[공개 근거 요약](../evidence/README.md)
 
 ## 요약
 
-White는 한국어 컴패니언 모델 프로젝트입니다. 목표는 디스코드 봇이 그럴듯하게 답하게 만드는 데서 끝나지 않고, 모델 자체가 차분하고 짧고 맥락을 반영하는 말투를 배우게 만드는 것입니다.
+Sapphirus는 생성형 LLM이 자연스러운 대화와 제한된 행동을 제안하되, 실제 권한과
+실행 사실은 외부 런타임이 소유하도록 설계한 한국어 AI 컴패니언입니다.
 
-지금까지의 핵심 결론은 분명합니다. 깨끗한 SFT 데이터는 필요하지만, 이미 복사 성향과 일반 반응, 경계 혼동이 생긴 모델을 고치는 데는 그것만으로 충분하지 않았습니다. 안정적인 기준선을 유지하고, 같은 holdout으로 후보를 비교하며, 실제 실패를 DPO 데이터로 누적하는 방식이 더 강합니다.
+이 프로젝트의 핵심 결과는 특정 후보 점수가 오른 사실보다 다음 의사결정입니다.
+
+```text
+Contract SFT로 70/200 → 136/200 개선
+                ↓
+critical boundary는 26/40에 머묾
+                ↓
+사전 정의한 승격 gate에 따라 후보 거절
+                ↓
+추가 학습보다 실패 책임을 먼저 분리
+                ↓
+External-First runtime 구현과 격리 검증
+```
 
 ## 문제
 
-초기 White 학습에는 짧은 질문/답변 예시가 많았습니다. 익숙한 질문에는 그럴듯해 보였지만, 다음 문제가 생겼습니다.
+생성형 컴패니언은 자연스럽게 답할 수 있지만, 다음 문장을 생성했다고 해서 실제
+능력이나 사건이 생기지는 않습니다.
 
-- 정확한 문장 형태에 과적합했다.
-- 사용자 문장을 그대로 따라 쓰는 경향이 강해졌다.
-- paraphrase 질문에서 일반화가 약했다.
-- 런타임 wrapper의 사용자 이름이나 형식이 답변에 새어 나왔다.
-- 실제 질문에 답하지 않고 일반적인 수긍만 하는 경우가 생겼다.
+- “나중에 먼저 알려줄게.”
+- “계정 설정에 저장했어.”
+- “공지 메시지를 보냈어.”
+- “검색해 봤는데 결과가 이래.”
 
-White의 실제 런타임 입력은 단순한 user prompt가 아닙니다. system prompt, context packet, 대화 history, Discord message wrapper가 함께 들어갑니다. 그래서 학습 데이터도 이 구조에 맞아야 했습니다.
+스케줄러, 저장 권한, 메시지 executor, 검색 결과가 없는데도 이런 답을 만들 수
+있습니다. 반대로 모든 판단을 규칙에 옮기면 생성형 Actor가 가진 대화 유연성과
+즉흥성이 사라집니다.
 
-## 목표 말투
+연구 질문을 다음처럼 좁혔습니다.
 
-White의 목표 말투는 의도적으로 좁게 잡았습니다.
+> Actor에게 무엇을 말하고 어떤 행동을 제안할지는 맡기되, 외부에서 검증할 수 있는
+> 사실은 어떻게 모델 밖에서 강제할 수 있는가?
 
-- 차분한 한국어 반말
-- 대부분 한두 문장
-- 감정 표현은 낮지만 무심하지 않음
-- 먼저 한 번 받아준 뒤 바로 답함
-- 이모지, 장식 기호, 과한 반응 없음
-- 내용 없는 수긍만 하는 답변 없음
+## 1. 생성형 Actor 계약
 
-겉보기 유창함만으로는 White답다고 보기 어렵기 때문에, 말투와 응답 습관을 별도로 평가했습니다.
+첫 계약은 세 가지 행동만 허용합니다.
 
-## 데이터 설계
+```json
+{
+  "action": "reply | silence | use_tool",
+  "speech": "최종 한국어 발화 또는 빈 문자열",
+  "tool_calls": [],
+  "memory_candidates": []
+}
+```
 
-프로젝트는 runtime-aligned `messages` SFT 데이터로 옮겨갔습니다. 각 row는 실제 추론 입력면과 비슷하게 구성합니다.
+`wait`, `notify`, `request_approval`, `finish`, `abort` 같은 장기 에이전트 행동은
+학습 자료에 없으므로 v0.1 Actor에게 노출하지 않았습니다. 현재 능력을 넘어서는
+enum을 먼저 추가하면 모델 오류와 계약 오류를 구분하기 어렵기 때문입니다.
 
-- system prompt
-- `white_context_packet`
-- conversation history
-- final user wrapper
-- assistant completion
+## 2. Contract SFT
 
-데이터를 만들 때는 다음 항목을 확인했습니다.
+clean Qwen3-8B 계열 기준선의 200개 출력은 자동 의미 판정기를 쓰지 않고 직접
+검토했습니다. 기준선의 수동 통과는 `84/200`이었고, 별도의 최신
+unsealed 비교 세트에서는 `70/200`이었습니다.
 
-- 답변 중복
-- prompt 복사
-- 깨진 한국어
-- 과하게 일반적인 수긍
-- 존댓말 누출
-- 사용자 이름이나 wrapper 누출
-- user-care와 assistant-care 혼동
+실패를 다음 8개 분야로 분류했습니다.
 
-holdout 데이터는 학습 row와 분리하고 paraphrase 중심으로 유지했습니다. 모델이 문장을 외운 것이 아니라 의미를 따라가는지 보기 위해서입니다.
+1. capability와 외부 행동 권한
+2. 정체성과 화자 분리
+3. 기억 지속성
+4. 일반 대화
+5. 민감한 기억 제외
+6. 답변과 침묵의 경계
+7. 감정 지지
+8. 도구 선택과 live 정보 정직성
 
-## 실험 흐름
+이 분류에서 평가 문장이나 모델 출력을 재사용하지 않고, Codex가 각 행을 개별
+작성·검토한 640행의 SFT 자료를 만들었습니다. 320개의 최소대조쌍이며 일괄
+템플릿 확장은 사용하지 않았습니다.
 
-| 후보 | 목적 | 결과 | 판단 |
-| --- | --- | --- | --- |
-| v25 | 이전 고맥락 후보 평가 | Pilot50에서 pass 2, weak 2, fail 6 | 실패만 DPO 후보로 보관 |
-| v106 | preference-tuned 기준 후보 | v108 holdout에서 apparent pass 86.1% | 현재 기준선 유지 |
-| v107 | raw Qwen 기반 clean runtime SFT | 일반 반응과 반복으로 회귀 | 기준선으로 쓰지 않음 |
-| v108 | anti-generic clean restart from raw Qwen | apparent pass 56.7%, 짧고 일반적인 답변 잔존 | clean data만으로 부족 |
-| v109 | v106에서 boundary patch | apparent pass 87.2%, 날씨 경계 일부 개선 | 유의미하지만 promote 불가 |
+### 결과
 
-v108 실험은 중요했습니다. 깨끗한 데이터로 raw base에서 다시 시작하면 나아질 것이라는 가정을 깨뜨렸기 때문입니다. 데이터는 더 깨끗했지만, 해당 양과 스케줄만으로 White의 전체 말투와 경계 판단을 충분히 학습하지 못했습니다.
+| 지표 | Clean base | SFT candidate | 변화 |
+| --- | ---: | ---: | ---: |
+| Actor envelope valid | 200/200 | 200/200 | 동일 |
+| Structural pass | 149/200 | 173/200 | +24 |
+| 전체 수동 계약 평가 | 70/200 | 136/200 | +66 |
+| Dev 수동 평가 | 57/160 | 110/160 | +53 |
+| Critical boundary | 13/40 | 26/40 | +13 |
+| Critical-severity pass | 23/95 | 66/95 | +43 |
 
-## 평가 방식
+### 승격 결정
 
-후보는 고정 holdout으로 비교했습니다. 단일 샘플이 좋아 보이는지보다, 같은 조건에서 어떤 실패가 반복되는지 보는 쪽을 우선했습니다.
+후보는 다음 사전 정의 gate를 통과하지 못했습니다.
 
-주요 hard failure는 다음과 같습니다.
+- Dev 수동 평가: 실제 `110/160`, 요구 `≥144/160`
+- 분야별 Dev: 8개 분야 각각 요구 `≥18/20`, 모두 미달
+- Critical boundary: 실제 `26/40`, 요구 `40/40`
+- Critical-severity failure: 실제 29건, 요구 0건
 
-- 질문의 정확 또는 근접 복사
-- 반복되는 답변 템플릿
-- 내용 없는 일반 수긍
-- 날씨와 날짜 경계 오해
-- assistant-care와 user-care 혼동
-- runtime wrapper 누출
-- 깨진 문장 또는 부자연스러운 한국어
-- 원치 않는 존댓말
+일반 대화와 감정 지지의 clean 대비 회귀는 없었지만, 외부 행동 권한, 미래 연락,
+화자 역할, 기억 종류, 민감 기억, 도구 결과 정직성에서 중대 실패가 남았습니다.
 
-이 방식은 모델이 우연히 좋은 샘플을 낸 것과 실제로 안정적인 후보가 된 것을 구분하는 데 도움이 됐습니다.
+```text
+Candidate promotion: REJECTED
+Additional actor training: PAUSED
+Active runtime replacement: NOT PERFORMED
+```
 
-## 주요 발견
+## 3. 실패 책임 분리
 
-1. runtime alignment가 단순 데이터 크기보다 중요했습니다.
+64개의 후보 실패를 모델 의미 문제와 외부에서 강제로 막을 수 있는 문제로 다시
+분해했습니다.
 
-plain prompt/answer row는 익숙한 테스트 질문에는 좋아 보일 수 있지만, 실제 runtime wrapper에서는 복사와 경계 오해를 키울 수 있었습니다.
+```text
+외부에서 검증 가능한 경계
+- 존재하지 않는 capability
+- 허용되지 않은 tool과 memory write
+- 실행 ledger 없는 완료 주장
+- 민감하거나 일시적인 기억 후보
+- 명백한 Discord 대상·침묵 경계
 
-2. SFT를 더 한다고 항상 좋아지지는 않았습니다.
+Actor에 남겨야 하는 의미 품질
+- 감정 인정
+- 수량과 조건 보존
+- 자연스러운 관련성
+- 대화의 주제와 태도
+```
 
-많은 row가 비슷한 시작 문장을 가지면 모델은 그 패턴을 기본 응답처럼 배웠습니다. 그래서 답변 중복과 시작 문장 분포를 감사해야 했습니다.
+Known-failure replay에서는 외부 차단 대상으로 분류한 22건을 모두 격리했지만,
+유용한 답변으로 복구한 것은 5건뿐이었습니다. 17건은 안전한 억제에 그쳤고,
+59개의 모델 실패가 여전히 남았습니다.
 
-3. raw Qwen에서 clean SFT를 다시 하는 것만으로는 부족했습니다.
+이 결과는 guard가 모델 품질을 대체하지 못한다는 근거입니다.
 
-v108은 데이터가 깨끗했지만 v106보다 낮았습니다. White 스타일을 회복하려면 더 강한 preference shaping과 실제 실패 경계 커버리지가 필요했습니다.
+## 4. External-First 전환
 
-4. 작은 SFT patch는 좁은 slice에는 도움을 줄 수 있지만, 실패 유형 전체를 고치지는 못했습니다.
+```mermaid
+sequenceDiagram
+    participant U as User event
+    participant A as Actor
+    participant G as External gates
+    participant X as Executor
+    participant L as Ledger
+    participant D as Delivery
 
-v109는 날씨 boundary 일부를 개선했지만 assistant-care 혼동은 거의 그대로였습니다. 이 경우에는 broad SFT보다 실제 rejected output 기반 DPO가 더 적합하다고 판단했습니다.
+    U->>A: context + runtime authority
+    A->>G: reply / silence / use_tool
+    G->>G: schema + permission check
+    G->>X: one allowed read-only call
+    X->>L: tool outcome + evidence id
+    X->>A: trusted result status
+    A->>G: final reply or silence
+    G->>D: only if delivery is allowed
+    D->>L: actual delivery outcome
+```
 
-## 현재 판단
+외부 계층이 소유하는 권위는 다음과 같습니다.
 
-v106이 아직 가장 안정적인 기준선입니다. v109는 일부 개선이 있었지만 기준선을 교체하거나 active 후보로 올릴 정도는 아닙니다.
+- `CapabilityState`: 현재 존재하는 기능
+- `PermissionState`: 이번 요청에서 사용할 수 있는 기능
+- `ToolState`: 사용 가능한 도구와 한 번의 호출 예산
+- `MemoryPolicyState`: 영속 저장 가능 여부와 허용 종류
+- `ActionLedger`: 실제 성공·실패·차단 기록
+- `DeliveryOutcome`: 최종 전달 성공 여부
 
-다음 작업은 실제 실패 generation을 계속 모으고, White 말투에 맞는 짧은 chosen 답변을 작성해서 같은 regression suite로 preference 후보를 비교하는 것입니다.
+Actor 추론이나 외부 검색 문서는 runtime authority로 승격하지 않습니다. 도구 결과는
+발화 근거가 될 수 있지만, 권한 자체를 바꿀 수는 없습니다.
 
-## 포트폴리오 관점의 핵심
+## 5. External-First 검증
 
-이 프로젝트의 가치는 완성된 챗봇 하나보다, 모델 개선 루프를 통제 가능하게 만든 데 있습니다.
+### Known-failure replay
 
-- 원하는 행동을 좁고 구체적으로 정의한다.
-- 데이터 형식을 실제 runtime 입력과 맞춘다.
-- 고정 holdout과 paraphrase eval로 평가한다.
-- 실패 유형별로 회귀를 진단한다.
-- 자동 promote보다 후보 리포트를 우선한다.
-- 로컬 장비 한계를 고려해 저부하 실험을 유지한다.
+- 외부 차단 가능 실패: 22건
+- 격리: `22/22`
+- 안전하고 유용한 복구: `5/22`
+- 억제만 수행: 17건
+- 잘못 차단한 원래 통과 답변: 0건
 
-White 작업의 핵심은 이 반복 가능한 판단 루프입니다.
+이는 이미 본 실패의 책임 분리가 맞는지 확인한 development replay이며 일반화
+증거로 사용하지 않습니다.
+
+### 신규 통합 fixture
+
+평가 입력과 겹치지 않는 16개 수동 fixture에서 다음 경계를 확인했습니다.
+
+- authority spoofing
+- snapshot contradiction
+- post-tool loop
+- ledger 없는 실행 주장
+- 민감한 tool query
+- 영속 기억 경계
+- 중복·잘못된 Discord target
+- trace 원문 누출
+
+결과는 `16/16`이었지만 실제 모델 품질이나 Discord 전달을 측정한 것은 아닙니다.
+
+### Discord shadow와 V5
+
+V4 shadow에서는 6건 중 5건이 의미상 통과했습니다. 한 출력이 사용자가 명시적으로
+제외한 표현을 그대로 포함했고, 외부 lexical constraint가 없어 전체 gate를
+실패했습니다.
+
+V5는 한 번의 제약 보정과 좁은 deterministic fallback을 추가했습니다. 로컬 6건
+평가에서는 권한·형식·침묵 경계를 통과했지만, “절반도 못 했다”를 “완료된 절반”으로
+바꾸고 감정을 먼저 인정하지 않은 답변 때문에 다시 `5/6`에서 중단했습니다.
+
+외부 gate는 이 답을 안전하고 구조적으로 유효하다고 판단했습니다. 수량 의미와
+감정 반응은 외부 권한 계층이 대신 결정하지 않는다는 경계를 확인한 사례입니다.
+
+## 6. Discord capability canary
+
+Actor와 별개로 외부 body가 실제 Discord에서 읽기 전용 기능을 안전하게 제공하는지
+검증했습니다.
+
+```text
+recall · summary · dashboard · companion_trace
+companion_probe · voice_status · signals · checkins
+```
+
+- 허용된 명령: 8
+- 완료된 명령: `8/8`
+- LLM 요청: 0
+- 네트워크 도구 호출: 0
+- runtime 상태 변경: 0
+- 영속 운영 메모리 접근: 0
+- raw Discord ID 로그: 0
+
+LLM 호출 0건은 결함이 아니라 격리 조건입니다. 이 실험은 Actor가 아니라 외부
+capability와 개인정보 경계를 검증했습니다.
+
+## 현재 결론
+
+Sapphirus는 “학습된 모델이 모든 것을 올바르게 판단한다”는 가정에서 출발하지
+않습니다. Actor가 대화와 행동을 제안하고, 외부 런타임이 실제 세계에 대한 최소한의
+진실만 강제합니다.
+
+현재 다음은 아직 완료되지 않았습니다.
+
+- 실제 Actor의 tool 선택부터 Discord 최종 전달까지 이어지는 live end-to-end 증명
+- 네트워크 검색과 영속 기억 write canary
+- 선제 알림과 장기 목표 계약
+- 대화 품질 acceptance와 모델 승격
+
+다음 기술 관문은 새로운 SFT가 아니라, 공개 예제와 같은 전체 수직 경로를 제한된
+환경에서 실제 Actor로 관찰하고 각 단계의 evidence를 같은 turn trace에 연결하는
+것입니다.

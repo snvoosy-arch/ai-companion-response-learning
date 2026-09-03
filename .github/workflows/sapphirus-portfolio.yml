@@ -1,0 +1,45 @@
+name: Sapphirus portfolio checks
+
+on:
+  push:
+    paths:
+      - "README.md"
+      - "companions/README.md"
+      - "companions/white/**"
+      - "docs/white-*"
+      - "docs/sapphirus-*"
+      - "evidence/**"
+      - "examples/sapphirus_external_first/**"
+      - "scripts/check_sapphirus_portfolio.py"
+      - ".github/workflows/sapphirus-portfolio.yml"
+  pull_request:
+    paths:
+      - "README.md"
+      - "companions/README.md"
+      - "companions/white/**"
+      - "docs/white-*"
+      - "docs/sapphirus-*"
+      - "evidence/**"
+      - "examples/sapphirus_external_first/**"
+      - "scripts/check_sapphirus_portfolio.py"
+      - ".github/workflows/sapphirus-portfolio.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify-public-slice:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Run contract tests
+        run: python -m unittest discover -s examples/sapphirus_external_first/tests -v
+      - name: Validate links, evidence, and public boundaries
+        run: python scripts/check_sapphirus_portfolio.py
+      - name: Run the CPU demonstration
+        run: python -m examples.sapphirus_external_first.demo
