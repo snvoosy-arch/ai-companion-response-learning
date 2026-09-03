@@ -1,47 +1,94 @@
-# Black Companion
+# Rubrum Companion
 
-Black companion은 사용자 입력을 의도, 맥락, 관계 신호로 나누어 해석하고, 그 결과를 바탕으로 응답 계획을 만드는 예측형 companion 실험입니다.
+Rubrum은 한국어 AI companion의 의미 판단, 상태, 반응 정책, 내용 계획, 표면 표현, 결과 관찰을 독립 계약으로 분리하는 연구 프로젝트입니다. `black` 디렉터리명은 기존 경로 호환을 위해 유지합니다.
 
-핵심은 모델 하나를 호출하는 것보다, 입력을 어떻게 구조화하고 어떤 데이터로 학습/평가하느냐에 있습니다.
+## 이 공개 디렉터리가 보여주는 것
 
-## 핵심 구성
+```text
+검수된 MeaningPacket fixture
+→ WorldState
+→ ReactionDecision
+→ ContentPlan
+→ 단어·형태소 SurfaceCandidate
+→ hard semantic/morphology gate
+→ deterministic selection
+→ Transition Shadow
+```
 
-- `src/predictive_bot/core/classifier.py`: 입력 의도와 대화 신호 분류
-- `src/predictive_bot/core/meaning_resolver.py`: 문맥 기반 의미 해석
-- `src/predictive_bot/core/policy.py`: 응답 행동 선택
-- `src/predictive_bot/core/renderer.py`: 응답 계획을 실제 문장으로 변환
-- `src/predictive_bot/core/trace_builder.py`: 판단 과정을 추적 가능한 형태로 구성
-- `src/predictive_bot/llm/`: KoBART, causal model, OpenAI-compatible client 연동
-- `scripts/`: 데이터 생성, 정제, 평가, probe 스크립트
-- `training/`: intent/response model 학습 실험 코드
-- `docs/`: 설계와 실험 기록
-- `tests/`: 분류기, policy, renderer, runtime 흐름 검증
+공개 예제는 전체 비공개 Discord runtime의 복제품이 아닙니다. 모델 가중치나 개인 데이터를 포함하지 않으면서 현재 책임 구조를 CPU에서 확인하기 위한 의존성 없는 reference slice입니다.
 
-## 실행 개요
+프로덕션 모듈을 줄 단위로 복사한 코드도 아닙니다. 실제 계약의 책임 경계와 실패 폐쇄 동작을 공개용으로 축소한 교육·검증 표본이며, 전체 runtime 능력의 대리 지표로 사용하지 않습니다.
+
+특히 fixture가 MeaningBERT 추론 결과인 것처럼 가장하지 않습니다. `meaning_inference_executed=false`와 `provenance=fixture:human_reviewed_public`을 Trace에 남깁니다.
+
+## 실행
+
+Python 3.11 이상만 필요합니다.
 
 ```powershell
 cd companions\black
-python -m venv .venv
-.\.venv\Scripts\pip install -e .
-copy .env.example .env
+python -m examples.rubrum_vertical_slice.demo
 ```
 
-`.env`에 Discord token, 생성 backend, 상태 저장소 경로를 채운 뒤 실행합니다.
+전체 구조화 Trace:
 
 ```powershell
-.\.venv\Scripts\python -m predictive_bot.main
+python -m examples.rubrum_vertical_slice.demo --json
 ```
 
-## 포트폴리오 포인트
+테스트와 공개 안전성 감사:
 
-- 입력을 단순 문장으로 보지 않고 의도, 주제, 관계 맥락, 행동 후보로 분해
-- handcrafted rule, classifier, LLM rewrite를 조합한 계층형 응답 구조
-- 실패 케이스를 다시 데이터로 만들고 재평가하는 반복 개선 루프
-- 실제 대화 로그와 모델 산출물은 제외하고, 구조와 실험 코드 중심으로 공개
+```powershell
+python -m unittest discover -s tests -p "test_*.py" -v
+python scripts\audit_public_portfolio.py
+```
 
-## 데이터 안내
+## 예제에서 확인할 수 있는 계약
 
-이 공개 저장소에는 실제 대화 기록, 대량 학습 데이터, SQLite 상태 DB, 모델 파일을 포함하지 않습니다.
+- 완성 문장 은행이 아니라 시간·조사·정도·비교·서술·추측·종결 원자를 조립합니다.
+- 시간과 비교 방향이 다른 hard negative 후보도 함께 만듭니다.
+- 자연스러움 점수가 높아도 의미가 틀리면 hard gate에서 탈락합니다.
+- 후보 점수는 학습 모델 confidence가 아니라 공개 예제에 선언된 결정론적 preference prior입니다.
+- 의미가 맞고 자연스러워도 Rubrum의 register와 다르면 탈락합니다.
+- Transition Shadow는 예상과 관찰을 비교하지만 정책과 출력을 바꾸지 않습니다.
+- 각 dataclass를 JSON Trace로 직렬화할 수 있습니다.
 
-학습/평가 스크립트는 구조를 보여주기 위한 공개용 코드이며, 실행하려면 각 스크립트의 입력 경로를 로컬 데이터셋 위치에 맞게 조정해야 합니다.
+## 예제에서 확인할 수 없는 것
 
+- 비공개 MeaningBERT checkpoint의 실제 추론
+- 전체 Discord runtime과 개인 운영 설정
+- open-domain 일상대화 품질
+- learned world model이나 장기 planner
+- SurfaceBERT-B의 모델 추론
+
+이 경계는 의도적입니다. 재현할 수 없는 모델 능력을 작은 예제가 대신 증명하는 것처럼 보이지 않게 하기 위한 것입니다.
+
+## 디렉터리
+
+```text
+examples/rubrum_vertical_slice/
+  contracts.py       공개 책임 계약
+  pipeline.py        후보 생성·검증·선택·전이 비교
+  demo.py            사람용/JSON 실행 진입점
+
+tests/
+  test_vertical_slice.py
+
+scripts/
+  audit_public_portfolio.py
+
+evidence/
+  rubrum-experiment-summary.json
+
+```
+
+초기 프로토타입은 현재 실행 경로와 혼동되지 않도록 현재 트리에서 제거하고 Git 이력으로 보존했습니다. 전용 초기 encoder와 선택적 생성기 실험은 현재 기술 스택이 아닙니다.
+
+## 자세한 문서
+
+- [아키텍처](../../docs/rubrum-architecture.md)
+- [케이스스터디](../../docs/rubrum-case-study.md)
+- [공개 주장 상태표](../../docs/rubrum-claim-status.md)
+- [실험 원장](../../docs/rubrum-experiment-ledger.md)
+- [공개 근거 JSON](evidence/rubrum-experiment-summary.json)
+- [초기 실험 안내](../../docs/rubrum-early-experiments.md)

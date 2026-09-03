@@ -1,0 +1,57 @@
+{
+  "version": "rubrum_public_experiment_summary_v1_20260903",
+  "as_of": "2026-09-03",
+  "scope": "sanitized_metrics_without_private_prompts_outputs_or_model_weights",
+  "experiments": [
+    {
+      "id": "symbolic_mask_restore_v1",
+      "evidence_level": "SANITIZED-REPORT",
+      "metrics": {
+        "left_to_right_top1": "30/30",
+        "confidence_greedy_top1": "20/30",
+        "beam6_top1": "30/30",
+        "unique_surface_left_to_right": 19,
+        "unique_surface_beam6": 19
+      },
+      "decision": "search_repaired_local_selection_but_did_not_increase_surface_diversity"
+    },
+    {
+      "id": "surface_bert_b_lexical_fit_v1",
+      "evidence_level": "SANITIZED-REPORT",
+      "metrics": {
+        "dev_top1": "5/6",
+        "independent_heldout_top1": "2/6"
+      },
+      "decision": "no_promotion_remove_lexical_semantic_authority"
+    },
+    {
+      "id": "boredom_fresh_boundary40_v1",
+      "evidence_level": "SANITIZED-REPORT",
+      "input_sha256": "da2a67c3f0a5cb6b0d9f460241d957c576dfa58cafff8c6b3d15d8de2e4cde0d",
+      "metrics": {
+        "positive_recall": "1/16",
+        "negative_boundary_containment": "21/24",
+        "overall_accuracy": 0.55
+      },
+      "decision": "not_even_shadow_candidate"
+    },
+    {
+      "id": "daily_state_meaning_provenance_v1",
+      "evidence_level": "SANITIZED-REPORT",
+      "metrics": {
+        "direct_expected_state_frame": "0/20"
+      },
+      "decision": "separate_word_assembly_from_model_understanding_claim"
+    },
+    {
+      "id": "ambient_word_morpheme_discord_canary_v1",
+      "evidence_level": "PRIVATE-RUNTIME-AUDIT",
+      "metrics": {
+        "verified_deliveries": 1,
+        "candidate_output_sha_aligned": true,
+        "private_identifiers_published": false
+      },
+      "decision": "keep_scope_limited_and_fail_closed"
+    }
+  ]
+}
