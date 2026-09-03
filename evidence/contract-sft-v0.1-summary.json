@@ -1,0 +1,45 @@
+{
+  "schema_version": "sapphirus.portfolio.contract_sft_summary.v1",
+  "evaluation_date": "2026-08-26",
+  "evidence_scope": "offline_same-condition_model_comparison_with_direct_manual_review",
+  "dataset": {
+    "rows": 640,
+    "minimal_contrast_pairs": 320,
+    "domains": 8,
+    "authorship": "codex_individually_authored_and_reviewed",
+    "bulk_template_expansion": false,
+    "evaluation_text_reuse": false
+  },
+  "clean_base": {
+    "actor_envelope_valid": 200,
+    "structural_pass": 149,
+    "manual_pass": 70,
+    "manual_dev_pass": 57,
+    "manual_critical_boundary_pass": 13
+  },
+  "contract_candidate": {
+    "actor_envelope_valid": 200,
+    "structural_pass": 173,
+    "manual_pass": 136,
+    "manual_dev_pass": 110,
+    "manual_critical_boundary_pass": 26,
+    "critical_severity_failures": 29
+  },
+  "promotion_gate": {
+    "manual_dev_required": 144,
+    "manual_dev_total": 160,
+    "per_domain_required": 18,
+    "per_domain_total": 20,
+    "critical_boundary_required": 40,
+    "critical_boundary_total": 40,
+    "critical_severity_failures_allowed": 0
+  },
+  "decision": "rejected_before_sealed",
+  "model_promoted": false,
+  "runtime_changed": false,
+  "limitations": [
+    "This is contract-behavior evaluation, not general language-model accuracy.",
+    "Raw prompts and model outputs are private and are not included in this portfolio.",
+    "The exposed sealed set was treated as spent and was not used for this decision."
+  ]
+}

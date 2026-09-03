@@ -1,21 +1,45 @@
-# White Companion Runtime
+# Sapphirus Runtime
 
-White는 한국어 LLM assistant를 위한 Discord companion runtime입니다. 대화 맥락을 정리해 로컬 OpenAI-compatible 모델 서버로 보내고, 생성된 출력의 반복과 형식 문제를 점검하며, 가벼운 메모리와 런타임 상태를 관리합니다.
+이 디렉터리는 Sapphirus의 초기 `White` 런타임 계보를 공개용으로 정리한 코드입니다.
+경로와 일부 내부 이름은 기존 실행기와의 호환성을 위해 `white`로 유지합니다.
 
-이 공개 폴더에는 런타임 코드와 테스트 코드만 포함했습니다. 모델 가중치, 개인 데이터셋, 로그, 로컬 DB, 학습 산출물은 제외했습니다.
+현재 프로젝트의 중심은 단순한 Discord → LLM 연결이 아니라 다음 책임 분리입니다.
 
-## 구성 요소
+```text
+Generative Actor
+  └─ reply / silence / use_tool 제안
 
-- `src/discord_lmstudio_bot/main.py`: Discord 진입점과 메시지 처리 흐름
-- `src/discord_lmstudio_bot/context_packer.py`: 최근 대화와 메모리를 모델 입력 맥락으로 정리
-- `src/discord_lmstudio_bot/llm_client.py`: OpenAI-compatible 로컬 모델 client
-- `src/discord_lmstudio_bot/output_guard.py`: 반복, 깨진 문장, 위험한 출력 패턴 점검
-- `src/discord_lmstudio_bot/memory_store.py`: 가벼운 메모리 저장소
+External runtime
+  ├─ 입력 범위와 중복 검사
+  ├─ capability / permission 검사
+  ├─ 도구 실행과 결과 증거화
+  ├─ 영속 기억 후보 검사
+  ├─ 실행되지 않은 행동 주장 차단
+  └─ 최종 전달과 trace 기록
+```
+
+이 공개 폴더의 기존 Discord 코드는 개발 계보와 기반 runtime을 보여주는 부분
+snapshot입니다. private workspace에서 함께 쓰던 `bot_shared`와 일부 음성 도구는
+공개 범위에서 제외했으므로 이 snapshot의 전체 legacy test suite는 단독 실행 대상이
+아닙니다. 최신
+External-First 계약을 의존성 없이 살펴보고 실행하려면 저장소 루트의
+[CPU reference slice](../../examples/sapphirus_external_first/README.md)를 먼저 보세요.
+
+## 기존 공개 런타임 구성
+
+- `src/discord_lmstudio_bot/main.py`: Discord 진입점과 메시지 처리
+- `src/discord_lmstudio_bot/context_packer.py`: 대화와 메모리의 입력 문맥 구성
+- `src/discord_lmstudio_bot/llm_client.py`: OpenAI-compatible local model client
+- `src/discord_lmstudio_bot/output_guard.py`: 반복·형식 이상 탐지
+- `src/discord_lmstudio_bot/memory_store.py`: 로컬 메모리 저장소
 - `src/discord_lmstudio_bot/runtime_state.py`: 런타임 상태 helper
 - `src/discord_lmstudio_bot/startup_lock.py`: 중복 실행 방지
-- `tests/`: context packing, guard, runtime path, client, speech helper 테스트
 
-## 로컬 실행
+## 로컬 실행 준비
+
+아래 설정은 기존 runtime 계보를 이해하기 위한 참고입니다. 실제 Discord 연결에는
+공개 저장소에 없는 shared runtime과 별도 모델 서버가 필요합니다. 공개 예제를
+검토하는 것과 실제 봇을 시작하는 것은 서로 다른 작업입니다.
 
 ```powershell
 cd companions\white
@@ -24,17 +48,12 @@ python -m venv .venv
 copy .env.example .env
 ```
 
-`.env`에 Discord와 로컬 모델 서버 설정을 채운 뒤 실행합니다.
+## 현재 한계
 
-```powershell
-.\.venv\Scripts\python -m discord_lmstudio_bot
-```
+- Contract SFT candidate는 승격되지 않았습니다.
+- 공개 코드만으로 모델 평가 수치를 재생성할 수는 없습니다.
+- P11B read-only canary는 외부 capability 계층을 검증했으며 Actor 품질 시험이 아닙니다.
+- 영속 기억 쓰기, 네트워크 도구, 선제 연락과 장기 자율성은 공개 실행 범위가 아닙니다.
 
-## 모델 학습 메모
-
-현재 White 모델 학습 흐름은 포트폴리오 문서로 정리했습니다.
-
-- [White 마인드맵](../../docs/white-mindmap.md)
-- [White 케이스스터디](../../docs/white-case-study.md)
-
-학습 방향은 후보 기반입니다. 새 어댑터는 학습, 평가, 리포트까지만 진행하고 자동으로 active runtime에 promote하지 않습니다.
+자세한 판단은 [케이스스터디](../../docs/white-case-study.md)와
+[평가 원장](../../docs/sapphirus-evaluation-ledger.md)을 참고하세요.

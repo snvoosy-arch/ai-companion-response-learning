@@ -1,0 +1,39 @@
+{
+  "schema_version": "sapphirus.portfolio.p11b_readonly_canary_summary.v1",
+  "date": "2026-09-01",
+  "evidence_scope": "bounded_live_discord_read_only_capability_layer",
+  "commands": [
+    "recall",
+    "summary",
+    "dashboard",
+    "companion_trace",
+    "companion_probe",
+    "voice_status",
+    "signals",
+    "checkins"
+  ],
+  "accepted": 8,
+  "completed": 8,
+  "denied": 0,
+  "isolation": {
+    "model_loads": 0,
+    "llm_requests": 0,
+    "network_tool_calls": 0,
+    "operational_memory_accesses": 0,
+    "runtime_state_mutations": 0,
+    "proactive_deliveries": 0,
+    "voice_joins_or_leaves": 0,
+    "raw_discord_ids_stored": false
+  },
+  "decision": {
+    "bounded_functional_canary_pass": true,
+    "actor_quality_evaluated": false,
+    "unbounded_discord_ready": false,
+    "operational_memory_write_ready": false,
+    "network_search_ready": false
+  },
+  "limitations": [
+    "LLM calls were intentionally disabled to isolate the external capability layer.",
+    "Exact live reply text and command arguments were intentionally not persisted."
+  ]
+}
