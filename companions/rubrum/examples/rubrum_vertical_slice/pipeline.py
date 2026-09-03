@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import isfinite
 
 from .contracts import (
     CandidateVerdict,
@@ -17,9 +18,13 @@ _TIME = {
     "yesterday": ("어제", "는"),
     "tomorrow": ("내일", "은"),
 }
-_DEGREE = {
-    "slight": "조금",
-    "slight_casual": "좀",
+# Demonstration threshold for the sanitized public fixture, not a private-model
+# calibration claim.
+MIN_MEANING_CONFIDENCE = 0.8
+_DEGREE_FORMS = {
+    "slight": ("조금", "slight"),
+    "slight_casual": ("좀", "slight"),
+    "strong": ("훨씬", "strong"),
 }
 _COMPARISON = {
     "less": "덜",
@@ -29,10 +34,11 @@ _PREDICATE = {
     "cold": "추울",
     "hot": "더울",
 }
-_EVIDENTIAL = {
-    "seem": ("것", "같아", False),
-    "seem_concise": ("듯", "해", True),
-    "seem_polite": ("것", "같아요", False),
+_EVIDENTIAL_FORMS = {
+    "seem": ("것", "같아", False, "seem", "casual_banmal"),
+    "seem_concise": ("듯", "해", True, "seem", "casual_banmal"),
+    "seem_polite": ("것", "같아요", False, "seem", "polite_haeyo"),
+    "certain_casual": ("거", "야", True, "certain", "casual_banmal"),
 }
 
 
@@ -45,8 +51,20 @@ class _SurfaceSpec:
     degree: str
     evidentiality: str
     register: str
+    degree_form: str
+    evidential_form: str
     naturalness: float
     clarity: float
+
+
+@dataclass(frozen=True, slots=True)
+class _SurfaceProjection:
+    text: str
+    atoms: tuple[str, ...]
+    atom_roles: tuple[str, ...]
+    degree: str
+    evidentiality: str
+    register: str
 
 
 def reviewed_public_fixture() -> tuple[str, MeaningPacket, WorldState]:
@@ -85,6 +103,16 @@ def decide(
     world_state: WorldState,
 ) -> ReactionDecision:
     reasons: list[str] = []
+    confidence = meaning.confidence
+    if (
+        isinstance(confidence, bool)
+        or not isinstance(confidence, int | float)
+        or not isfinite(confidence)
+        or not 0.0 <= confidence <= 1.0
+    ):
+        reasons.append("reaction:meaning_confidence_invalid")
+    elif confidence < MIN_MEANING_CONFIDENCE:
+        reasons.append("reaction:meaning_confidence_below_threshold")
     if meaning.grounding != "explicit_input_and_sanitized_observation":
         reasons.append("reaction:grounding_not_verified")
     if meaning.topic != world_state.topic:
@@ -106,7 +134,7 @@ def decide(
     return ReactionDecision(
         reaction_type="grounded_outlook",
         priority_axis="answer_first",
-        confidence=1.0,
+        confidence=float(confidence),
         abstained=False,
         reason_codes=(
             "reaction:meaning_world_state_aligned",
@@ -132,36 +160,87 @@ def build_content_plan(
     )
 
 
-def _realize(spec: _SurfaceSpec) -> SurfaceCandidate:
-    time, topic_particle = _TIME[spec.target_time]
-    degree = _DEGREE[spec.degree]
-    comparison = _COMPARISON[spec.comparison]
-    predicate = _PREDICATE[spec.predicate]
-    evidential_noun, ending, attach = _EVIDENTIAL[spec.evidentiality]
+def _surface_projection(
+    *,
+    target_time: str,
+    predicate: str,
+    comparison: str,
+    degree_form: str,
+    evidential_form: str,
+) -> _SurfaceProjection:
+    time, topic_particle = _TIME[target_time]
+    degree_surface, degree_semantics = _DEGREE_FORMS[degree_form]
+    comparison_surface = _COMPARISON[comparison]
+    predicate_surface = _PREDICATE[predicate]
+    (
+        evidential_noun,
+        ending,
+        attach,
+        evidential_semantics,
+        surface_register,
+    ) = _EVIDENTIAL_FORMS[evidential_form]
     atoms = (
         time,
         topic_particle,
-        degree,
-        comparison,
-        predicate,
+        degree_surface,
+        comparison_surface,
+        predicate_surface,
         evidential_noun,
         ending,
         ".",
     )
+    atom_roles = (
+        "time",
+        "particle",
+        "degree",
+        "comparison",
+        "predicate",
+        "evidential",
+        "evidential",
+        "punctuation",
+    )
     evidential_surface = (
         f"{evidential_noun}{ending}" if attach else f"{evidential_noun} {ending}"
     )
-    text = f"{time}{topic_particle} {degree} {comparison} {predicate} {evidential_surface}."
+    text = (
+        f"{time}{topic_particle} {degree_surface} {comparison_surface} "
+        f"{predicate_surface} {evidential_surface}."
+    )
+    return _SurfaceProjection(
+        text=text,
+        atoms=atoms,
+        atom_roles=atom_roles,
+        degree=degree_semantics,
+        evidentiality=evidential_semantics,
+        register=surface_register,
+    )
+
+
+def _realize(spec: _SurfaceSpec) -> SurfaceCandidate:
+    projection = _surface_projection(
+        target_time=spec.target_time,
+        predicate=spec.predicate,
+        comparison=spec.comparison,
+        degree_form=spec.degree_form,
+        evidential_form=spec.evidential_form,
+    )
+    if projection.degree != spec.degree or projection.evidentiality != spec.evidentiality:
+        raise ValueError(f"surface form semantics disagree: {spec.candidate_id}")
+    if projection.register != spec.register:
+        raise ValueError(f"surface form register disagrees: {spec.candidate_id}")
     return SurfaceCandidate(
         candidate_id=spec.candidate_id,
-        text=text,
+        text=projection.text,
         target_time=spec.target_time,
         predicate=spec.predicate,
         comparison=spec.comparison,
         degree=spec.degree,
         evidentiality=spec.evidentiality,
         register=spec.register,
-        atoms=atoms,
+        degree_form=spec.degree_form,
+        evidential_form=spec.evidential_form,
+        atoms=projection.atoms,
+        atom_roles=projection.atom_roles,
         deterministic_naturalness_prior=spec.naturalness,
         deterministic_clarity_prior=spec.clarity,
     )
@@ -172,59 +251,95 @@ def compose_candidates() -> tuple[SurfaceCandidate, ...]:
 
     specs = (
         _SurfaceSpec(
-            "weather.less_cold.seem",
-            "tomorrow",
-            "cold",
-            "less",
-            "slight",
-            "seem",
-            "casual_banmal",
-            0.95,
-            0.98,
+            candidate_id="weather.less_cold.seem",
+            target_time="tomorrow",
+            predicate="cold",
+            comparison="less",
+            degree="slight",
+            evidentiality="seem",
+            register="casual_banmal",
+            degree_form="slight",
+            evidential_form="seem",
+            naturalness=0.95,
+            clarity=0.98,
         ),
         _SurfaceSpec(
-            "weather.less_cold.concise",
-            "tomorrow",
-            "cold",
-            "less",
-            "slight_casual",
-            "seem_concise",
-            "casual_banmal",
-            0.93,
-            0.91,
+            candidate_id="weather.less_cold.concise",
+            target_time="tomorrow",
+            predicate="cold",
+            comparison="less",
+            degree="slight",
+            evidentiality="seem",
+            register="casual_banmal",
+            degree_form="slight_casual",
+            evidential_form="seem_concise",
+            naturalness=0.93,
+            clarity=0.91,
         ),
         _SurfaceSpec(
-            "weather.wrong_time",
-            "yesterday",
-            "cold",
-            "less",
-            "slight",
-            "seem",
-            "casual_banmal",
-            0.96,
-            0.97,
+            candidate_id="weather.wrong_time",
+            target_time="yesterday",
+            predicate="cold",
+            comparison="less",
+            degree="slight",
+            evidentiality="seem",
+            register="casual_banmal",
+            degree_form="slight",
+            evidential_form="seem",
+            naturalness=0.96,
+            clarity=0.97,
         ),
         _SurfaceSpec(
-            "weather.wrong_comparison",
-            "tomorrow",
-            "cold",
-            "more",
-            "slight",
-            "seem",
-            "casual_banmal",
-            0.97,
-            0.97,
+            candidate_id="weather.wrong_comparison",
+            target_time="tomorrow",
+            predicate="cold",
+            comparison="more",
+            degree="slight",
+            evidentiality="seem",
+            register="casual_banmal",
+            degree_form="slight",
+            evidential_form="seem",
+            naturalness=0.97,
+            clarity=0.97,
         ),
         _SurfaceSpec(
-            "weather.wrong_register",
-            "tomorrow",
-            "cold",
-            "less",
-            "slight",
-            "seem_polite",
-            "polite_haeyo",
-            0.99,
-            0.99,
+            candidate_id="weather.wrong_register",
+            target_time="tomorrow",
+            predicate="cold",
+            comparison="less",
+            degree="slight",
+            evidentiality="seem",
+            register="polite_haeyo",
+            degree_form="slight",
+            evidential_form="seem_polite",
+            naturalness=0.99,
+            clarity=0.99,
+        ),
+        _SurfaceSpec(
+            candidate_id="weather.wrong_degree",
+            target_time="tomorrow",
+            predicate="cold",
+            comparison="less",
+            degree="strong",
+            evidentiality="seem",
+            register="casual_banmal",
+            degree_form="strong",
+            evidential_form="seem",
+            naturalness=0.99,
+            clarity=0.99,
+        ),
+        _SurfaceSpec(
+            candidate_id="weather.wrong_evidentiality",
+            target_time="tomorrow",
+            predicate="cold",
+            comparison="less",
+            degree="slight",
+            evidentiality="certain",
+            register="casual_banmal",
+            degree_form="slight",
+            evidential_form="certain_casual",
+            naturalness=0.99,
+            clarity=0.99,
         ),
     )
     return tuple(_realize(spec) for spec in specs)
@@ -241,10 +356,42 @@ def verify_candidate(
         reasons.append("gate:predicate_mismatch")
     if candidate.comparison != plan.comparison:
         reasons.append("gate:comparison_mismatch")
+    if candidate.degree != plan.degree:
+        reasons.append("gate:degree_mismatch")
+    if candidate.evidentiality != plan.evidentiality:
+        reasons.append("gate:evidentiality_mismatch")
     if candidate.register != plan.register:
         reasons.append("gate:register_mismatch")
+    missing_roles = sorted(set(plan.required_atoms) - set(candidate.atom_roles))
+    if missing_roles:
+        reasons.append("gate:required_atoms_missing")
+    if len(candidate.atoms) != len(candidate.atom_roles):
+        reasons.append("gate:atom_role_alignment_mismatch")
     if not candidate.atoms or candidate.atoms[-1] != ".":
         reasons.append("gate:morphology_incomplete")
+    try:
+        projection = _surface_projection(
+            target_time=candidate.target_time,
+            predicate=candidate.predicate,
+            comparison=candidate.comparison,
+            degree_form=candidate.degree_form,
+            evidential_form=candidate.evidential_form,
+        )
+    except (KeyError, TypeError):
+        reasons.append("gate:unknown_surface_form")
+    else:
+        if candidate.text != projection.text:
+            reasons.append("gate:surface_text_mismatch")
+        if candidate.atoms != projection.atoms:
+            reasons.append("gate:surface_atoms_mismatch")
+        if candidate.atom_roles != projection.atom_roles:
+            reasons.append("gate:surface_atom_roles_mismatch")
+        if (
+            candidate.degree != projection.degree
+            or candidate.evidentiality != projection.evidentiality
+            or candidate.register != projection.register
+        ):
+            reasons.append("gate:surface_metadata_mismatch")
     accepted = not reasons
     score = (
         round(

@@ -59,7 +59,10 @@ class SurfaceCandidate:
     degree: str
     evidentiality: str
     register: str
+    degree_form: str
+    evidential_form: str
     atoms: tuple[str, ...]
+    atom_roles: tuple[str, ...]
     deterministic_naturalness_prior: float
     deterministic_clarity_prior: float
 

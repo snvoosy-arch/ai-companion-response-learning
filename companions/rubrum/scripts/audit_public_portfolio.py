@@ -236,14 +236,19 @@ def _scan_evidence_claims(
 
 def _scan_markdown_links() -> list[str]:
     failures: list[str] = []
-    markdown_files = tuple(REPOSITORY_ROOT.glob("*.md")) + tuple(
-        (REPOSITORY_ROOT / "docs").glob("*.md")
-    ) + (RUBRUM_ROOT / "README.md",)
+    root_readme = REPOSITORY_ROOT / "README.md"
+    markdown_files = (
+        root_readme,
+        *tuple((REPOSITORY_ROOT / "docs").glob("rubrum-*.md")),
+        RUBRUM_ROOT / "README.md",
+    )
     for path in markdown_files:
         text = path.read_text(encoding="utf-8")
         for raw_target in _MARKDOWN_LINK.findall(text):
             target = raw_target.strip().split("#", 1)[0]
             if not target or target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if path == root_readme and "rubrum" not in target.casefold():
                 continue
             resolved = (path.parent / target).resolve()
             if not resolved.exists():

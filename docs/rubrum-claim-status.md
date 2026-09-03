@@ -1,6 +1,6 @@
 # Rubrum 공개 주장 상태표
 
-**기준일:** 2026-09-03
+**기준일:** 2026-09-04
 
 ## 상태 정의
 
@@ -18,7 +18,9 @@
 
 | 주장 | 운영 상태 | 공개 증거 | 공개 가능한 정확한 표현 | 하면 안 되는 표현 |
 |---|---|---|---|---|
-| MeaningBERT-A가 구조화된 의미 축을 예측 | `CORE` | `SANITIZED-REPORT` | 여러 head와 MeaningPacket 계약이 비공개 runtime에 구현됨 | 공개 예제가 MeaningBERT 추론을 재현함 |
+| MeaningPacket 계약 | `CORE` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 의미 신호의 label·confidence·source와 하위 계층 전달 경계를 분리 | 공개 fixture가 모델 추론 결과임 |
+| MeaningBERT-A 실행 기반 | `CORE` | `SANITIZED-REPORT` | 다중 head 실행·적재 기반이 비공개 runtime에 구현됨 | 모든 의미 head가 안정적으로 완성됨 |
+| MeaningBERT-A 개별 의미 head | head별 `CORE / SHADOW / RESEARCH` | `SANITIZED-REPORT` | 각 의미 축을 독립 heldout과 승격 조건으로 판정 | 기반이 CORE이므로 모든 head도 CORE임 |
 | 일상 상태 판정 | `CORE + 혼합` | `SANITIZED-REPORT` | 피로·배고픔 등 일부 경로는 모델·resolver·경계 판정 혼합 | 전부 MeaningBERT가 직접 판정함 |
 | 주체·대상 grounding | `CORE 전환 중` | `SANITIZED-REPORT` | 독립 계약과 다수 경계 평가가 존재 | 생략·제3자·다의어를 모두 해결함 |
 | ReactionDecision | `CORE 전환 중` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 후보와 최종 결정 책임을 분리 | 모든 legacy Composer를 제거함 |
@@ -26,7 +28,7 @@
 | 개념·속성 기반 비유 | `CANARY` | `PRIVATE-RUNTIME-AUDIT + SANITIZED-REPORT` | 검토된 관계 비유 family에서 제한 출력 | 임의 개념을 범용적으로 연결함 |
 | 단어·형태소 조립 | `CANARY` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 조립 표본과 제한 Discord 전달이 각각 확인됨 | 일상대화 전체가 원자 조립으로 전환됨 |
 | SurfaceBERT-B | `RESEARCH` | `SANITIZED-REPORT` | 후보 ranker를 실험했고 의미 선택 권한을 축소 | 실제 답변을 생성하거나 결정함 |
-| Verifier와 출력 권한 분리 | `CORE + CANARY` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 의미 gate와 비공개 delivery gate의 증거 범위를 구분 | 모든 과거 경로가 완전히 통합됨 |
+| Verifier와 출력 권한 분리 | `CORE + CANARY` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 표본은 confidence·계획 의미·필수 원자·표면 정합성을 검사하고 비공개 delivery gate와 증거 범위를 구분 | 모든 과거 경로가 완전히 통합됨 |
 | DecisionTrace / Outcome | `CORE` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 공개 축소 Trace와 비공개 전달 최종화를 구분 | 사람의 품질 판단을 완전히 자동화함 |
 | Transition model | `SHADOW` | `PUBLIC-RUNNABLE + PRIVATE-RUNTIME-AUDIT` | 결정론적 예측과 관찰 비교 | 학습된 세계모델을 완성함 |
 | Learned world model | `FUTURE` | 없음 | 장기 연구 계획 | 현재 구현됨 |

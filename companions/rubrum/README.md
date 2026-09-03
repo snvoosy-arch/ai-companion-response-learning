@@ -50,8 +50,9 @@ python scripts\audit_public_portfolio.py
 ## 예제에서 확인할 수 있는 계약
 
 - 완성 문장 은행이 아니라 시간·조사·정도·비교·서술·추측·종결 원자를 조립합니다.
-- 시간과 비교 방향이 다른 hard negative 후보도 함께 만듭니다.
-- 자연스러움 점수가 높아도 의미가 틀리면 hard gate에서 탈락합니다.
+- 시간·정도·비교 방향·추측성·말투가 다른 hard negative 후보도 함께 만듭니다.
+- 자연스러움 점수가 높아도 의미가 틀리거나 문장·원자·메타데이터가 서로 다르면 hard gate에서 탈락합니다.
+- MeaningPacket confidence가 공개 표본의 예시 기준 `0.8` 미만이거나 유효 범위 밖이면 ReactionDecision이 abstain합니다. 이 값은 비공개 모델의 보정 성능 주장이 아닙니다.
 - 후보 점수는 학습 모델 confidence가 아니라 공개 예제에 선언된 결정론적 preference prior입니다.
 - 의미가 맞고 자연스러워도 Rubrum의 register와 다르면 탈락합니다.
 - Transition Shadow는 예상과 관찰을 비교하지만 정책과 출력을 바꾸지 않습니다.

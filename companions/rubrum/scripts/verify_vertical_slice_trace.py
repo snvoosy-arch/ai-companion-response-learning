@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import argparse
 import json
+from math import isfinite
 from pathlib import Path
 from typing import Any
+
+REFERENCE_MIN_MEANING_CONFIDENCE = 0.8
 
 
 def validate_trace(payload: object) -> list[str]:
@@ -19,10 +22,20 @@ def validate_trace(payload: object) -> list[str]:
             failures.append("public fixture must not claim MeaningBERT inference")
         if meaning.get("provenance") != "fixture:human_reviewed_public":
             failures.append("public fixture provenance changed")
+        confidence = meaning.get("confidence")
+        if (
+            isinstance(confidence, bool)
+            or not isinstance(confidence, int | float)
+            or not isfinite(confidence)
+            or not REFERENCE_MIN_MEANING_CONFIDENCE <= confidence <= 1.0
+        ):
+            failures.append("reference meaning confidence is outside the decision gate")
 
     reaction = payload.get("reaction")
     if not isinstance(reaction, dict) or reaction.get("abstained") is not False:
         failures.append("reference reaction must be a non-abstained decision")
+    elif isinstance(meaning, dict) and reaction.get("confidence") != meaning.get("confidence"):
+        failures.append("reaction confidence must preserve accepted meaning confidence")
 
     candidates = payload.get("candidates")
     verdicts = payload.get("verdicts")
@@ -32,6 +45,11 @@ def validate_trace(payload: object) -> list[str]:
     if not isinstance(verdicts, list | tuple) or not verdicts:
         failures.append("trace must contain candidate verdicts")
         verdicts = []
+
+    content_plan = payload.get("content_plan")
+    if not isinstance(content_plan, dict):
+        failures.append("content plan must be an object")
+        content_plan = {}
 
     candidate_by_id: dict[str, dict[str, Any]] = {}
     for candidate in candidates:
@@ -65,8 +83,28 @@ def validate_trace(payload: object) -> list[str]:
         if selected.get("text") != payload.get("selected_text"):
             failures.append("selected candidate text does not match trace output")
         atoms = selected.get("atoms")
+        atom_roles = selected.get("atom_roles")
         if not isinstance(atoms, list | tuple) or len(atoms) < 2:
             failures.append("selected surface is not represented as multiple atoms")
+            atoms = []
+        if not isinstance(atom_roles, list | tuple) or len(atom_roles) != len(atoms):
+            failures.append("selected atom roles do not align with atoms")
+            atom_roles = []
+        required_atoms = content_plan.get("required_atoms")
+        if not isinstance(required_atoms, list | tuple) or not set(required_atoms).issubset(
+            atom_roles
+        ):
+            failures.append("selected candidate does not satisfy required atom roles")
+        for field in (
+            "target_time",
+            "predicate",
+            "comparison",
+            "degree",
+            "evidentiality",
+            "register",
+        ):
+            if selected.get(field) != content_plan.get(field):
+                failures.append(f"selected candidate changed content plan field: {field}")
         selected_verdict = verdict_by_id.get(selected_id)
         if selected_verdict is None or selected_verdict.get("accepted") is not True:
             failures.append("selected candidate did not pass the hard gate")
@@ -75,6 +113,8 @@ def validate_trace(payload: object) -> list[str]:
         "weather.wrong_time": "gate:target_time_mismatch",
         "weather.wrong_comparison": "gate:comparison_mismatch",
         "weather.wrong_register": "gate:register_mismatch",
+        "weather.wrong_degree": "gate:degree_mismatch",
+        "weather.wrong_evidentiality": "gate:evidentiality_mismatch",
     }
     for candidate_id, expected_reason in required_rejections.items():
         verdict = verdict_by_id.get(candidate_id)
