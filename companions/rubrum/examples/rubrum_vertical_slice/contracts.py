@@ -5,27 +5,31 @@ from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
+class SemanticFeature:
+    axis: str
+    value: str
+
+
+@dataclass(frozen=True, slots=True)
 class MeaningPacket:
     """A reviewed semantic input, not a claim of model inference."""
 
     speech_act: str
     topic: str
-    target_time: str
-    predicate: str
-    comparison: str
     experiencer: str
     grounding: str
     confidence: float
     provenance: str
+    semantic_features: tuple[SemanticFeature, ...]
+    grounding_axes: tuple[str, ...]
     meaning_inference_executed: bool = False
 
 
 @dataclass(frozen=True, slots=True)
 class WorldState:
     topic: str
-    target_time: str
-    observed_predicate: str
-    observed_comparison: str
+    experiencer: str
+    semantic_features: tuple[SemanticFeature, ...]
     source: str
 
 
@@ -40,11 +44,11 @@ class ReactionDecision:
 
 @dataclass(frozen=True, slots=True)
 class ContentPlan:
-    target_time: str
-    predicate: str
-    comparison: str
-    degree: str
-    evidentiality: str
+    family: str
+    response_act: str
+    topic: str
+    experiencer: str
+    semantic_features: tuple[SemanticFeature, ...]
     register: str
     required_atoms: tuple[str, ...]
 
@@ -52,15 +56,14 @@ class ContentPlan:
 @dataclass(frozen=True, slots=True)
 class SurfaceCandidate:
     candidate_id: str
+    family: str
     text: str
-    target_time: str
-    predicate: str
-    comparison: str
-    degree: str
-    evidentiality: str
+    response_act: str
+    topic: str
+    experiencer: str
+    semantic_features: tuple[SemanticFeature, ...]
     register: str
-    degree_form: str
-    evidential_form: str
+    form_id: str
     atoms: tuple[str, ...]
     atom_roles: tuple[str, ...]
     deterministic_naturalness_prior: float
@@ -87,7 +90,16 @@ class TransitionShadow:
 
 
 @dataclass(frozen=True, slots=True)
+class SceneFixture:
+    scene_id: str
+    input_text: str
+    meaning: MeaningPacket
+    world_state: WorldState
+
+
+@dataclass(frozen=True, slots=True)
 class PipelineTrace:
+    scene_id: str
     scope_notice: str
     input_text: str
     meaning: MeaningPacket

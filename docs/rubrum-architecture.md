@@ -49,7 +49,7 @@ Rubrum은 생성형 모델의 존재 여부만으로 companion을 구분하지 �
 
 ### WorldState / Memory
 
-비공개 runtime은 대화와 외부 사건을 구조화된 사실·상태로 보관하며 source, confidence, lifecycle, owner를 구분합니다. 공개 CPU 표본의 축소 WorldState는 topic, target time, predicate, comparison, source만 재현하므로 전체 기억 계약을 공개 코드가 증명한다고 해석하면 안 됩니다.
+비공개 runtime은 대화와 외부 사건을 구조화된 사실·상태로 보관하며 source, confidence, lifecycle, owner를 구분합니다. 공개 CPU 표본의 축소 WorldState는 topic, experiencer, semantic feature, source만 재현하므로 전체 기억 계약을 공개 코드가 증명한다고 해석하면 안 됩니다.
 
 ### ReactionCandidate / ReactionDecision
 
@@ -68,7 +68,7 @@ XAI / DecisionTrace
 
 ### ContentPlan
 
-무엇을 말할지와 어떻게 말할지를 분리합니다. ContentPlan은 핵심 주장, 인정할 대상, 제안할 행동, 금지된 함의, 말투 범위를 고정하지만 완성 문장을 저장하지 않습니다.
+무엇을 말할지와 어떻게 말할지를 분리합니다. 공개 계약의 ContentPlan은 family, response act, topic, experiencer, semantic feature, register, 필수 원자 역할을 고정하지만 완성 문장을 저장하지 않습니다.
 
 ### Concept / Lexical Planning
 
@@ -97,7 +97,9 @@ frame, lexical sense, 생략, 조사, 연결어, 어미, register를 하나의 �
 - 조사·활용·종결의 구조적 완결
 - 캐릭터 register 경계
 
-공개 CPU 표본은 이 중 MeaningPacket confidence, 시간, 서술어, 정도, 비교 방향, 추측성, register, 필수 원자 역할을 직접 검사합니다. 공개 confidence 기준 `0.8`은 실패 폐쇄를 재현하기 위한 예시값이며 비공개 모델의 calibration 결과로 주장하지 않습니다. 또한 결정론적 실현 결과와 후보의 문장·원자·역할·메타데이터가 일치하지 않으면 실패 폐쇄합니다. 실제 경험·기억·신체 주장 차단처럼 공개 표본에 포함되지 않은 검사는 비공개 runtime 범위이며 공개 코드가 재현한다고 주장하지 않습니다.
+공개 CPU 표본은 이 중 MeaningPacket confidence·grounding 축, 장면별 의미 속성, experiencer, register, 필수 원자 역할을 직접 검사합니다. 공개 confidence 기준 `0.8`은 실패 폐쇄를 재현하기 위한 예시값이며 비공개 모델의 calibration 결과로 주장하지 않습니다. 또한 결정론적 실현 결과와 후보의 문장·원자·역할·메타데이터가 일치하지 않으면 실패 폐쇄합니다. 실제 경험·기억·신체 주장 차단처럼 공개 표본에 포함되지 않은 검사는 비공개 runtime 범위이며 공개 코드가 재현한다고 주장하지 않습니다.
+
+공개 suite의 장면별 producer는 날씨, 피로, 음식, 관계 비유 표현을 각각 조립하지만 gate와 selector는 공유합니다. 한 장면에서 선택된 후보를 다른 장면의 ContentPlan에 넣으면 family·response act·topic·experiencer·semantic feature 경계에서 차단됩니다.
 
 ### SurfaceBERT-B
 

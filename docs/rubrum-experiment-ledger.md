@@ -109,6 +109,21 @@ SurfacePlan
 
 **증거:** `PRIVATE-RUNTIME-AUDIT`
 
+## 8. 공개 다중 장면 CPU 수직 표본
+
+<!-- evidence:public_multi_scene_vertical_slice_v1 metrics=scene_count,candidate_count,accepted_candidate_count,hard_negative_count,cross_scene_rejection -->
+날씨 전망, 피로 인정, 음식 추천, 관계 비유의 `4`개 장면을 공통 계약으로 실행했습니다.
+
+- 전체 표면 후보: `23`
+- 계획 적격 후보: `8`
+- hard negative: `15`
+- 다른 장면의 선택 후보를 ContentPlan에 투입한 교차 차단: `12/12`
+<!-- /evidence -->
+
+**판정:** 단일 날씨 fixture 전용 gate라는 공개 코드의 한계를 줄였습니다. 장면별 producer는 분리하되 MeaningPacket grounding, ReactionDecision, ContentPlan, 공통 hard gate, selector, Transition Shadow를 재사용합니다. 이 결과는 공개 계약 회귀 증거이며 open-domain 대화 품질이나 MeaningBERT 추론 성능의 증거가 아닙니다.
+
+**증거:** `PUBLIC-RUNNABLE`
+
 ## 승격 규칙
 
 각 실험은 다음을 모두 만족해야 실제 권한 확대를 검토합니다.

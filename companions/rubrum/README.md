@@ -28,13 +28,15 @@ Python 3.11 이상만 필요합니다.
 ```powershell
 cd companions\rubrum
 python -m examples.rubrum_vertical_slice.demo
+python -m examples.rubrum_vertical_slice.demo --scene relation_hyperbole
+python -m examples.rubrum_vertical_slice.demo --all
 ```
 
 전체 구조화 Trace:
 
 ```powershell
 python -m examples.rubrum_vertical_slice.demo --json
-python -m examples.rubrum_vertical_slice.demo --json --output rubrum-trace.json
+python -m examples.rubrum_vertical_slice.demo --all --json --output rubrum-trace.json
 python scripts\verify_vertical_slice_trace.py rubrum-trace.json
 ```
 
@@ -47,10 +49,25 @@ python scripts\audit_public_portfolio.py
 
 감사 스크립트는 비밀정보·금지 파일·링크뿐 아니라 evidence JSON의 실험 ID와 README·케이스스터디·실험 원장에 표시된 수치도 대조합니다.
 
+## 공개 다중 장면 표본
+
+<!-- evidence:public_multi_scene_vertical_slice_v1 metrics=scene_count,candidate_count,accepted_candidate_count,hard_negative_count,cross_scene_rejection -->
+동일한 공통 계약으로 `4`개 장면과 `23`개 표면 후보를 실행합니다. 이 중 계획과 일치하는 후보 `8`개가 통과하고 의미·대상·말투가 다른 hard negative `15`개는 탈락합니다. 한 장면의 선택 후보를 다른 세 장면의 ContentPlan에 넣는 교차 검사도 `12/12` 차단됩니다.
+
+| 장면 | 입력 요약 | 선택 출력 |
+|---|---|---|
+| 날씨 전망 | 내일 덜 추운지 질문 | 내일은 조금 덜 추울 것 같아. |
+| 피로 인정 | 하루 종일 일한 피로 공유 | 오늘 하루 종일 일했으면 많이 지쳤겠네. |
+| 음식 추천 | 담백하고 따뜻한 국물 희망 | 담백하고 따뜻한 국물이면 닭곰탕이 잘 맞겠네. |
+| 관계 비유 | 모두의 할아버지라는 농담 | 족보가 팔만대장경인가? |
+<!-- /evidence -->
+
+이 표본은 네 반응군의 계약 재사용성을 보여주는 회귀 suite이며 open-domain 대화 품질의 증거는 아닙니다.
+
 ## 예제에서 확인할 수 있는 계약
 
 - 완성 문장 은행이 아니라 시간·조사·정도·비교·서술·추측·종결 원자를 조립합니다.
-- 시간·정도·비교 방향·추측성·말투가 다른 hard negative 후보도 함께 만듭니다.
+- 시간·정도·비교 방향·상태·대상·음식 속성·비유·말투가 다른 hard negative 후보도 함께 만듭니다.
 - 자연스러움 점수가 높아도 의미가 틀리거나 문장·원자·메타데이터가 서로 다르면 hard gate에서 탈락합니다.
 - MeaningPacket confidence가 공개 표본의 예시 기준 `0.8` 미만이거나 유효 범위 밖이면 ReactionDecision이 abstain합니다. 이 값은 비공개 모델의 보정 성능 주장이 아닙니다.
 - 후보 점수는 학습 모델 confidence가 아니라 공개 예제에 선언된 결정론적 preference prior입니다.
@@ -73,7 +90,10 @@ python scripts\audit_public_portfolio.py
 ```text
 examples/rubrum_vertical_slice/
   contracts.py       공개 책임 계약
-  pipeline.py        후보 생성·검증·선택·전이 비교
+  semantic_features.py 의미 속성 검증·변환
+  scenes.py          장면 fixture·판단·ContentPlan
+  surface.py         표면 후보 생성·검증·선택
+  pipeline.py        공통 실행·전이 비교 오케스트레이터
   demo.py            사람용/JSON 실행 진입점
 
 tests/

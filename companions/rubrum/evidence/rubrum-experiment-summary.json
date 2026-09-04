@@ -1,5 +1,5 @@
 {
-  "version": "rubrum_public_experiment_summary_v2_20260904",
+  "version": "rubrum_public_experiment_summary_v3_20260904",
   "as_of": "2026-09-04",
   "scope": "sanitized_metrics_without_private_prompts_outputs_or_model_weights",
   "experiments": [
@@ -89,6 +89,18 @@
         "private_identifiers_published": false
       },
       "decision": "keep_scope_limited_and_fail_closed"
+    },
+    {
+      "id": "public_multi_scene_vertical_slice_v1",
+      "evidence_level": "PUBLIC-RUNNABLE",
+      "metrics": {
+        "scene_count": 4,
+        "candidate_count": 23,
+        "accepted_candidate_count": 8,
+        "hard_negative_count": 15,
+        "cross_scene_rejection": "12/12"
+      },
+      "decision": "retain_as_public_contract_regression_suite_not_open_domain_quality_evidence"
     }
   ]
 }

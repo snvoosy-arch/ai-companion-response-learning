@@ -28,6 +28,14 @@ Rubrum은 한국어 AI companion의 의미 판단, 상태, 반응 정책, 내용
 
 따라서 공개 수직 표본은 전체 비공개 런타임의 복제품이 아니며 MeaningBERT-A 추론이나 open-domain Discord 대화를 증명하지 않습니다.
 
+### 공개 계약의 다중 장면 재사용
+
+<!-- evidence:public_multi_scene_vertical_slice_v1 metrics=scene_count,candidate_count,accepted_candidate_count,hard_negative_count,cross_scene_rejection -->
+공개 CPU suite는 날씨 전망, 피로 인정, 음식 추천, 관계 비유의 `4`개 장면을 같은 계약으로 실행합니다. 총 `23`개 후보 중 계획과 일치하는 `8`개를 허용하고 hard negative `15`개를 차단합니다. 서로 다른 장면의 선택 후보를 다른 ContentPlan에 넣은 검사도 `12/12` 차단됩니다.
+<!-- /evidence -->
+
+장면별 표현 producer는 다르지만 MeaningPacket grounding, ReactionDecision, ContentPlan 의미 특징, 필수 원자 역할, 표면 재투영, 결정론적 선택과 Transition Shadow는 같은 경로를 사용합니다. 이는 단일 날씨 문장에만 맞춘 gate였던 이전 공개 표본의 한계를 줄인 것이며, 네 장면 밖의 범용성을 주장하지는 않습니다.
+
 ## 문제
 
 초기 companion 구조에서는 규칙, 분류기, Composer, 설명 Trace가 모두 후보 선택이나 완성 답변 생성에 관여했습니다. 답변이 틀렸을 때 원인이 의미 오판인지, 정책 경쟁인지, 표현 실패인지 구분하기 어려웠습니다.

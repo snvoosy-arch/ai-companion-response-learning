@@ -35,6 +35,7 @@ _EVIDENCE_BLOCK = re.compile(
 _EVIDENCE_PATH = RUBRUM_ROOT / "evidence" / "rubrum-experiment-summary.json"
 _EVIDENCE_CLAIM_PATHS = (
     REPOSITORY_ROOT / "README.md",
+    RUBRUM_ROOT / "README.md",
     REPOSITORY_ROOT / "docs" / "rubrum-case-study.md",
     REPOSITORY_ROOT / "docs" / "rubrum-experiment-ledger.md",
 )
@@ -99,20 +100,15 @@ def _scan_current_rubrum_terms() -> list[str]:
         for stale in ("KcBERT", "KC-BERT"):
             if stale in text:
                 failures.append(
-                    "stale current-stack term "
-                    f"{stale}: {path.relative_to(REPOSITORY_ROOT)}"
+                    f"stale current-stack term {stale}: {path.relative_to(REPOSITORY_ROOT)}"
                 )
         for legacy_path in ("companions/black", r"companions\black"):
             if legacy_path in text:
                 failures.append(
-                    "legacy public path "
-                    f"{legacy_path}: {path.relative_to(REPOSITORY_ROOT)}"
+                    f"legacy public path {legacy_path}: {path.relative_to(REPOSITORY_ROOT)}"
                 )
         if re.search(r"\bBlack\b", text):
-            failures.append(
-                "legacy public name Black: "
-                f"{path.relative_to(REPOSITORY_ROOT)}"
-            )
+            failures.append(f"legacy public name Black: {path.relative_to(REPOSITORY_ROOT)}")
     return failures
 
 
@@ -147,9 +143,7 @@ def _load_evidence() -> tuple[dict[str, dict[str, object]], list[str]]:
             continue
         evidence_level = raw.get("evidence_level")
         if evidence_level not in _ALLOWED_EVIDENCE_LEVELS:
-            failures.append(
-                f"invalid evidence level for {experiment_id}: {evidence_level}"
-            )
+            failures.append(f"invalid evidence level for {experiment_id}: {evidence_level}")
         metrics = raw.get("metrics")
         if not isinstance(metrics, dict) or not metrics:
             failures.append(f"missing evidence metrics: {experiment_id}")
@@ -158,9 +152,7 @@ def _load_evidence() -> tuple[dict[str, dict[str, object]], list[str]]:
                 if not isinstance(metric, str) or not metric:
                     failures.append(f"invalid metric key: {experiment_id}")
                 if value is None or isinstance(value, dict | list):
-                    failures.append(
-                        f"metric must be a scalar: {experiment_id}.{metric}"
-                    )
+                    failures.append(f"metric must be a scalar: {experiment_id}.{metric}")
         if not isinstance(raw.get("decision"), str) or not raw["decision"]:
             failures.append(f"missing evidence decision: {experiment_id}")
         experiments[experiment_id] = raw
@@ -188,9 +180,7 @@ def _scan_evidence_claims(
         text = path.read_text(encoding="utf-8")
         matches = tuple(_EVIDENCE_BLOCK.finditer(text))
         if text.count("<!-- evidence:") != len(matches):
-            failures.append(
-                f"malformed evidence marker: {path.relative_to(REPOSITORY_ROOT)}"
-            )
+            failures.append(f"malformed evidence marker: {path.relative_to(REPOSITORY_ROOT)}")
         for match in matches:
             experiment_id = match.group("experiment")
             requested_metrics = tuple(match.group("metrics").split(","))

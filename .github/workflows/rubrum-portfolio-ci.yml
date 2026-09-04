@@ -32,7 +32,7 @@ jobs:
         run: python -m pip install ruff==0.12.11
 
       - name: Run public CPU vertical slice
-        run: python -m examples.rubrum_vertical_slice.demo --json --output "$RUNNER_TEMP/rubrum-vertical-slice.json"
+        run: python -m examples.rubrum_vertical_slice.demo --all --json --output "$RUNNER_TEMP/rubrum-vertical-slice.json"
 
       - name: Verify vertical slice trace and authority boundaries
         run: python scripts/verify_vertical_slice_trace.py "$RUNNER_TEMP/rubrum-vertical-slice.json"
