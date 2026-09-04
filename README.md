@@ -94,11 +94,18 @@ Actor의 발화가 “검색했다”, “기억했다”, “보냈다”고 �
 | 신규 외부 통합 fixture | 실제 모델·Discord가 없는 mock 계약 시험 | `16/16` 통과 | 외부 경계 구현만 검증 |
 | Constraint-preservation review (V5 계보) | 로컬 모델 출력 6건 수동 검토 | 의미 사례 `5/6` | 감정 인정·수량 보존 실패로 중단 |
 | Discord read-only capability canary | LLM을 끈 live Discord callback 시험 | 명령 callback `8/8` 완료 | 출력 의미 품질은 평가하지 않음 |
+| P12D bounded Discord delivery canary | hash-locked synthetic 입력 → 실제 candidate reply → 비공개 Discord | `1/1` 전달·readback 일치 | 전송 경로만 통과; 대화 품질·native ingress 미평가 |
 
 마지막 canary는 Actor를 연결하기 전에 외부 Discord capability 계층을 격리 검증한
 시험입니다. 의도적으로 LLM 요청, 네트워크 도구 호출, 영속 상태 변경을 모두
 `0`으로 유지했으므로 Actor의 대화 품질 증거로 사용하지 않습니다. `8/8`은 명령
 callback 완료 수이며, 응답 원문을 보존해 의미 품질을 판정한 점수가 아닙니다.
+
+P12D는 hash-locked synthetic 입력 한 건에 대해 실제 candidate가 `reply`를 만들고,
+외부 런타임이 허용된 비공개 Discord 대상에 정확히 한 번 전달한 뒤 API readback의
+내용 hash가 일치하는지 확인했습니다. 이 실행은 도구·영속 기억·재학습·후보 승격을
+사용하지 않았으므로, 전송 경로의 제한된 증거이지 대화 품질이나 운영 준비의
+증거는 아닙니다.
 
 Critical boundary는 존재하지 않는 권한·기억·도구 결과를 실제 사실처럼 만들 수 있는
 항목이므로 평균 점수로 상쇄하지 않고 단 한 건의 실패도 허용하지 않았습니다.
@@ -141,10 +148,12 @@ LLM이 행동을 제안한다
 - 한 턴 최대 한 번의 도구 실행과 post-tool Actor 재호출
 - tool outcome, action ledger, privacy-safe turn trace
 - Discord shadow 실행과 제한된 read-only capability canary
+- 실제 candidate reply 한 건의 비공개 Discord one-shot 전달과 hash readback
 
 ## 아직 증명하지 않은 범위
 
-- Actor → 실제 도구 → 결과 재입력 → 최종 Actor 답변 → Discord 전달의 완전한 live 수직 경로
+- native human Discord ingress부터 Actor 응답까지의 live 수직 경로
+- 실제 read-only 도구 선택 → 실행 → 결과 재입력 → 최종 Discord 전달의 live 왕복
 - 제한 없는 Discord 운영
 - 네트워크 검색과 영속 기억 쓰기
 - 예약 알림, 선제 연락, 장기 목표 수행
@@ -152,7 +161,9 @@ LLM이 행동을 제안한다
 
 P11A delivery canary는 모델과 listener를 기동했지만 허용 입력 관찰이 `0`건이어서
 기능 판정에 사용하지 않았습니다. 실패하거나 비어 있는 실행을 성공 사례로
-재분류하지 않는 것이 이 프로젝트의 평가 원칙입니다.
+재분류하지 않는 것이 이 프로젝트의 평가 원칙입니다. 이후 P12D는 synthetic 입력
+한 건으로 모델→전달 구간을 격리해 통과했지만, P11A에서 관찰하지 못한 사람 계정
+입력 경로가 통과한 것으로 소급 해석하지 않습니다.
 
 ## 먼저 볼 문서
 

@@ -112,6 +112,22 @@
 결정: 제한된 외부 read-only 기능 계층은 통과. 무제한 Discord, memory write,
 network search, Actor 품질은 승인하지 않음.
 
+### 2026-09-05 — P12D bounded Discord delivery canary
+
+- 입력: hash-locked synthetic prompt 1건
+- accepted / processed / Actor call: `1 / 1 / 1`
+- Actor action: `reply`
+- 전달 시도 / 성공: `1 / 1`
+- 전달·readback 일치: `1/1`
+- network tool / memory persistence / automatic retry: `0 / 0 / 0`
+- raw Discord ID와 raw message content 저장: 없음
+- 학습·후보 승격·active runtime 변경: 없음
+- 종료 후 listener와 model endpoint 정리: 확인
+
+결정: 실제 candidate reply의 제한된 모델→비공개 Discord 전송 구간은 통과. 입력은
+native human gateway가 아니라 synthetic source였고 도구 왕복과 발화 의미 품질은
+평가하지 않았으므로, 완전한 live end-to-end나 운영 준비는 승인하지 않음.
+
 ## 현재 승격 상태
 
 ```text
@@ -122,6 +138,7 @@ Unbounded Discord             NOT READY
 Persistent memory write       NOT READY
 Network-backed tool use       NOT READY
 Read-only capability canary   PASSED IN BOUNDED SCOPE
+Bounded model reply delivery  PASSED FOR ONE SYNTHETIC INPUT
 ```
 
 공개 수치는 [sanitized evidence](../evidence/README.md)에 기계 판독 가능한 JSON으로도

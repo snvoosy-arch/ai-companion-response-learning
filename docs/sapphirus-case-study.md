@@ -243,6 +243,26 @@ LLM 호출 0건은 결함이 아니라 격리 조건입니다. `8/8`은 callback
 응답 문구는 저장하지 않았으므로 출력의 의미 정확도 점수가 아닙니다. 이 실험은
 Actor가 아니라 외부 capability와 개인정보 경계를 검증했습니다.
 
+## 7. P12D bounded Discord delivery canary
+
+P11A의 zero-observation 결과를 성공으로 바꾸지 않고, 사람 입력을 기다리지 않는
+hash-locked synthetic 입력 한 건으로 모델→전달 구간만 따로 검증했습니다.
+
+- accepted / processed / Actor call: `1 / 1 / 1`
+- Actor action: `reply`
+- 전달 시도 / 성공: `1 / 1`
+- Discord API 내용 hash가 일치한 bot message: 1건
+- `1/1` 전달·readback 일치
+- network tool / memory persistence / automatic retry: `0 / 0 / 0`
+- 학습·후보 승격·active runtime 변경: 없음
+- 실행 종료 후 관련 listener와 model endpoint 정리: 확인
+
+이 결과는 실제 candidate가 만든 한 발화를 승인된 비공개 Discord 대상으로 전달하고
+같은 내용을 다시 읽을 수 있었다는 제한된 전송 증거입니다. 입력은 Discord 사람
+계정에서 들어온 것이 아니고 도구 왕복도 없었으며, 발화 의미의 품질을 평가한
+실험도 아닙니다. 따라서 native ingress, 대화 품질, 무제한 Discord 준비 상태는
+여전히 승인하지 않습니다.
+
 ## 현재 결론
 
 Sapphirus는 “학습된 모델이 모든 것을 올바르게 판단한다”는 가정에서 출발하지
@@ -251,14 +271,15 @@ Sapphirus는 “학습된 모델이 모든 것을 올바르게 판단한다”�
 
 현재 다음은 아직 완료되지 않았습니다.
 
-- 실제 Actor의 tool 선택부터 Discord 최종 전달까지 이어지는 live end-to-end 증명
+- native human Discord ingress부터 실제 Actor 응답까지의 live 수직 경로
+- 실제 Actor의 read-only tool 선택·결과 재입력·Discord 전달 live 왕복
 - 네트워크 검색과 영속 기억 write canary
 - 선제 알림과 장기 목표 계약
 - 대화 품질 acceptance와 모델 승격
 
-다음 기술 관문은 새로운 SFT가 아니라, 공개 예제와 같은 전체 수직 경로를 제한된
-환경에서 실제 Actor로 관찰하고 각 단계의 evidence를 같은 turn trace에 연결하는
-것입니다.
+다음 기술 관문은 새로운 SFT가 아니라, native human ingress를 제한된 환경에서
+관찰하고 실제 read-only tool outcome과 최종 delivery evidence를 같은 turn trace에
+연결하는 것입니다.
 
 초기 Discord runtime 전체 snapshot은 private dependency가 빠진 상태에서 main의
 현재 코드보다 훨씬 큰 비중을 차지해 구조를 흐렸습니다. 해당 상태는

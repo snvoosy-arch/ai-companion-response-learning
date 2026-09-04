@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import unittest
 
 from examples.sapphirus_external_first.external_first import (
@@ -59,6 +60,46 @@ class PublicEvidenceContractTests(unittest.TestCase):
         self.assertEqual(public_contract["executor"], "fixture_read_only")
         self.assertFalse(public_contract["external_side_effects"])
         self.assertFalse(public_contract["private_runtime_reproduction"])
+
+    def test_p12d_evidence_proves_only_one_bounded_delivery(self) -> None:
+        p12d = self.load("p12d-discord-delivery-summary.json")
+        execution = p12d["execution"]
+        readback = p12d["discord_readback"]
+        isolation = p12d["isolation"]
+        decision = p12d["decision"]
+
+        self.assertEqual(
+            p12d["schema_version"],
+            "sapphirus.portfolio.p12d_discord_delivery_summary.v1",
+        )
+        self.assertRegex(p12d["private_result_sha256"], re.compile(r"^[0-9a-f]{64}$"))
+        self.assertEqual(execution["input_source"], "hash_locked_synthetic_prompt")
+        self.assertEqual(execution["actor_actions"], ["reply"])
+        for counter in (
+            "accepted",
+            "processed",
+            "actor_calls",
+            "delivery_attempts",
+            "successful_deliveries",
+        ):
+            self.assertEqual(execution[counter], 1)
+        self.assertTrue(readback["target_channel_matched"])
+        self.assertTrue(readback["target_guild_matched"])
+        self.assertEqual(readback["matching_bot_messages"], 1)
+        self.assertTrue(readback["content_hash_matched"])
+        self.assertFalse(readback["raw_discord_ids_stored"])
+        self.assertFalse(readback["raw_message_content_stored"])
+        self.assertEqual(isolation["network_tool_calls"], 0)
+        self.assertEqual(isolation["memory_persistence_calls"], 0)
+        self.assertFalse(isolation["training_performed"])
+        self.assertFalse(isolation["candidate_promoted"])
+        self.assertFalse(isolation["active_runtime_changed"])
+        self.assertTrue(isolation["post_run_cleanup_verified"])
+        self.assertTrue(decision["bounded_delivery_canary_pass"])
+        self.assertFalse(decision["conversation_quality_evaluated"])
+        self.assertFalse(decision["native_human_ingress_evaluated"])
+        self.assertFalse(decision["read_only_tool_round_trip_evaluated"])
+        self.assertFalse(decision["unbounded_discord_ready"])
 
 
 if __name__ == "__main__":

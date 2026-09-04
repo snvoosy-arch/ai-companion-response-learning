@@ -1,0 +1,47 @@
+{
+  "schema_version": "sapphirus.portfolio.p12d_discord_delivery_summary.v1",
+  "date": "2026-09-05",
+  "evidence_scope": "bounded_live_model_reply_to_private_discord_delivery",
+  "private_result_sha256": "a58d6d4351ea0a37033941c86fe84354d32739c4c353bad00b9e88a809b9609a",
+  "execution": {
+    "input_source": "hash_locked_synthetic_prompt",
+    "accepted": 1,
+    "processed": 1,
+    "actor_calls": 1,
+    "actor_actions": [
+      "reply"
+    ],
+    "delivery_attempts": 1,
+    "successful_deliveries": 1
+  },
+  "discord_readback": {
+    "target_channel_matched": true,
+    "target_guild_matched": true,
+    "matching_bot_messages": 1,
+    "content_hash_matched": true,
+    "raw_discord_ids_stored": false,
+    "raw_message_content_stored": false
+  },
+  "isolation": {
+    "network_tool_calls": 0,
+    "memory_persistence_calls": 0,
+    "automatic_retries": 0,
+    "training_performed": false,
+    "candidate_promoted": false,
+    "active_runtime_changed": false,
+    "post_run_cleanup_verified": true
+  },
+  "decision": {
+    "bounded_delivery_canary_pass": true,
+    "conversation_quality_evaluated": false,
+    "native_human_ingress_evaluated": false,
+    "read_only_tool_round_trip_evaluated": false,
+    "unbounded_discord_ready": false
+  },
+  "limitations": [
+    "The input was one hash-locked synthetic prompt, not native human Discord ingress.",
+    "The run exercised reply delivery only; no read-only tool round trip or persistent memory path was used.",
+    "A matching Discord API readback proves transport completion, not broad conversation quality.",
+    "The operational trace stores delivery booleans; the exact readback was verified by a separate private pseudonymized receipt."
+  ]
+}

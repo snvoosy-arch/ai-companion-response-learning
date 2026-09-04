@@ -9,6 +9,7 @@
 | `contract-sft-v0.1-summary.json` | clean base와 SFT candidate 비교 및 승격 결정 |
 | `external-first-summary.json` | known-failure replay, 신규 fixture, constraint-preservation shadow 결과 |
 | `p11b-readonly-canary-summary.json` | 격리된 Discord read-only 기능 시험 |
+| `p12d-discord-delivery-summary.json` | 실제 candidate reply 한 건의 제한된 비공개 Discord 전달 시험 |
 
 이 요약은 원본 private artifact를 대신해 실험을 재실행할 수 있는 자료가 아닙니다.
 어떤 숫자가 모델 평가인지, mock integration인지, live capability canary인지 혼동하지

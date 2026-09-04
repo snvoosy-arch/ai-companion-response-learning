@@ -12,6 +12,7 @@
 | Synthetic fixture `16/16` | `external-first-summary.json` | scripted Actor와 fixture executor의 외부 계약 시험 | 실제 모델 품질, 실제 Discord 전달 | mock 통합 통과 |
 | Constraint-preservation 의미 사례 `5/6` | `external-first-summary.json` | V5 계보 로컬 모델 출력 6건의 수동 검토 | broad dialogue 품질 | gate 실패 |
 | P11B callback `8/8` | `p11b-readonly-canary-summary.json` | LLM을 끈 제한된 live Discord command callback | Actor 품질, 응답 의미 정확도, 무제한 운영 | bounded scope만 통과 |
+| P12D bounded delivery `1/1` | `p12d-discord-delivery-summary.json` | hash-locked synthetic 입력 한 건의 실제 candidate reply와 비공개 Discord hash readback | native human ingress, 도구 왕복, 대화 품질, 운영 준비 | one-shot 전송만 통과 |
 | CPU reference slice 실행 | `examples/sapphirus_external_first` | dependency-free contract 동작 | private runtime 재현, 모델 추론 | CI 지속 검증 |
 
 ## 해석 규칙
@@ -23,13 +24,16 @@
 - 이미 확인한 실패 replay는 회귀 검증에는 쓸 수 있지만 unseen 일반화 근거로 쓰지
   않습니다.
 - command callback 완료는 응답 원문의 의미 정확도와 다릅니다.
+- 한 건의 synthetic 모델 발화 전달은 native human ingress나 broad dialogue 품질과
+  다릅니다.
 - 원본 prompt와 모델 출력이 비공개이므로 공개 수치는 독립 재평가 자료가 아니라
   비식별 결과 요약입니다.
 
 ## 현재 승인하지 않은 주장
 
 - SFT candidate가 runtime-ready라는 주장
-- Actor부터 실제 도구와 Discord 전달까지의 live end-to-end 완성
+- native human Discord ingress부터 Actor 응답까지의 live end-to-end 완성
+- 실제 Actor의 read-only tool 선택·결과 재입력·Discord 전달 live 왕복
 - 네트워크 검색과 영속 기억 쓰기의 운영 준비
 - 예약 알림, 선제 연락, 장기 목표 수행
 - 공개 CPU slice가 private runtime 전체와 동일하다는 주장

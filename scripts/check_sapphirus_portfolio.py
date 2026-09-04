@@ -142,8 +142,8 @@ def _check_markdown_links() -> list[str]:
 
 def _check_evidence_json() -> list[str]:
     errors: list[str] = []
-    if len(EVIDENCE_FILES) != 3:
-        errors.append(f"expected 3 evidence JSON files, found {len(EVIDENCE_FILES)}")
+    if len(EVIDENCE_FILES) != 4:
+        errors.append(f"expected 4 evidence JSON files, found {len(EVIDENCE_FILES)}")
     for path in EVIDENCE_FILES:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
@@ -190,12 +190,24 @@ def _nested_int(payload: dict[str, object], *path: str) -> int:
     return value
 
 
+def _nested_bool(payload: dict[str, object], *path: str) -> bool:
+    value: object = payload
+    for key in path:
+        if not isinstance(value, dict) or key not in value:
+            raise KeyError(".".join(path))
+        value = value[key]
+    if not isinstance(value, bool):
+        raise TypeError(".".join(path))
+    return value
+
+
 def _check_evidence_invariants_and_document_claims() -> list[str]:
     payloads, errors = _load_evidence_by_schema()
     schemas = {
         "contract": "sapphirus.portfolio.contract_sft_summary.v1",
         "external": "sapphirus.portfolio.external_first_summary.v1",
         "p11b": "sapphirus.portfolio.p11b_readonly_canary_summary.v1",
+        "p12d": "sapphirus.portfolio.p12d_discord_delivery_summary.v1",
     }
     missing = [name for name, schema in schemas.items() if schema not in payloads]
     if missing:
@@ -204,6 +216,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
     contract = payloads[schemas["contract"]]
     external = payloads[schemas["external"]]
     p11b = payloads[schemas["p11b"]]
+    p12d = payloads[schemas["p12d"]]
 
     try:
         total = _nested_int(contract, "evaluation_total")
@@ -278,6 +291,18 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
         clean_severity_total = _nested_int(
             contract, "clean_base", "critical_severity_total"
         )
+        p12d_accepted = _nested_int(p12d, "execution", "accepted")
+        p12d_processed = _nested_int(p12d, "execution", "processed")
+        p12d_actor_calls = _nested_int(p12d, "execution", "actor_calls")
+        p12d_delivery_attempts = _nested_int(
+            p12d, "execution", "delivery_attempts"
+        )
+        p12d_successful_deliveries = _nested_int(
+            p12d, "execution", "successful_deliveries"
+        )
+        p12d_matching_messages = _nested_int(
+            p12d, "discord_readback", "matching_bot_messages"
+        )
     except (KeyError, TypeError) as exc:
         errors.append(f"claim evidence field is missing or not an integer: {exc}")
         return errors
@@ -306,6 +331,16 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             p11b_accepted == p11b_completed == len(p11b.get("commands", []))
         ),
         "P11B denied count is zero": p11b_denied == 0,
+        "P12D processed one accepted actor reply": (
+            p12d_accepted == p12d_processed == p12d_actor_calls == 1
+            and p12d.get("execution", {}).get("actor_actions") == ["reply"]
+        ),
+        "P12D attempted and verified exactly one delivery": (
+            p12d_delivery_attempts
+            == p12d_successful_deliveries
+            == p12d_matching_messages
+            == 1
+        ),
     }
     for label, passed in invariants.items():
         if not passed:
@@ -352,6 +387,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             f"`{fixture_passed}/{fixture_cases}`",
             f"`{v5_passed}/{v5_observations}`",
             f"`{p11b_completed}/{p11b_accepted}`",
+            f"`{p12d_successful_deliveries}/{p12d_delivery_attempts}` 전달·readback 일치",
             f"{rows}행, {pairs}개 최소대조쌍, {domains}개 분야",
         ),
         ROOT / "docs" / "sapphirus-case-study.md": (
@@ -361,6 +397,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             f"격리: `{contained}/{blockable}`",
             f"결과는 `{fixture_passed}/{fixture_cases}`",
             f"`{p11b_completed}/{p11b_accepted}`은 callback 완료 수",
+            f"`{p12d_successful_deliveries}/{p12d_delivery_attempts}` 전달·readback 일치",
         ),
         ROOT / "docs" / "sapphirus-evaluation-ledger.md": (
             f"clean Qwen3-8B: `{historical_clean}/{historical_total}`",
@@ -370,6 +407,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             f"격리 성공: `{contained}/{blockable}`",
             f"결과: `{fixture_passed}/{fixture_cases}`",
             f"완료: `{p11b_completed}/{p11b_accepted}`",
+            f"전달·readback 일치: `{p12d_successful_deliveries}/{p12d_delivery_attempts}`",
         ),
         ROOT / "docs" / "sapphirus-claim-status.md": (
             f"Contract SFT `{clean}/{total} → {candidate}/{total}`",
@@ -378,6 +416,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             f"Synthetic fixture `{fixture_passed}/{fixture_cases}`",
             f"Constraint-preservation 의미 사례 `{v5_passed}/{v5_observations}`",
             f"P11B callback `{p11b_completed}/{p11b_accepted}`",
+            f"P12D bounded delivery `{p12d_successful_deliveries}/{p12d_delivery_attempts}`",
         ),
     }
     for path, expected_strings in claim_strings.items():
@@ -398,6 +437,72 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             expected = False if name == "raw_discord_ids_stored" else 0
             if value != expected:
                 errors.append(f"P11B isolation is not zero/false: {name}")
+
+    source_digest = p12d.get("private_result_sha256")
+    if not isinstance(source_digest, str) or not re.fullmatch(
+        r"[0-9a-f]{64}", source_digest
+    ):
+        errors.append("P12D private result digest is invalid")
+
+    try:
+        p12d_boolean_contract = {
+            "target channel matched": _nested_bool(
+                p12d, "discord_readback", "target_channel_matched"
+            ),
+            "target guild matched": _nested_bool(
+                p12d, "discord_readback", "target_guild_matched"
+            ),
+            "content hash matched": _nested_bool(
+                p12d, "discord_readback", "content_hash_matched"
+            ),
+            "raw Discord ids were not stored": not _nested_bool(
+                p12d, "discord_readback", "raw_discord_ids_stored"
+            ),
+            "raw message content was not stored": not _nested_bool(
+                p12d, "discord_readback", "raw_message_content_stored"
+            ),
+            "bounded delivery passed": _nested_bool(
+                p12d, "decision", "bounded_delivery_canary_pass"
+            ),
+            "conversation quality was not evaluated": not _nested_bool(
+                p12d, "decision", "conversation_quality_evaluated"
+            ),
+            "native ingress was not evaluated": not _nested_bool(
+                p12d, "decision", "native_human_ingress_evaluated"
+            ),
+            "tool round trip was not evaluated": not _nested_bool(
+                p12d, "decision", "read_only_tool_round_trip_evaluated"
+            ),
+            "unbounded Discord remains unready": not _nested_bool(
+                p12d, "decision", "unbounded_discord_ready"
+            ),
+            "post-run cleanup was verified": _nested_bool(
+                p12d, "isolation", "post_run_cleanup_verified"
+            ),
+        }
+    except (KeyError, TypeError) as exc:
+        errors.append(f"P12D boolean evidence is missing or invalid: {exc}")
+    else:
+        for label, passed in p12d_boolean_contract.items():
+            if not passed:
+                errors.append(f"P12D evidence invariant failed: {label}")
+
+    p12d_isolation = p12d.get("isolation")
+    if not isinstance(p12d_isolation, dict):
+        errors.append("P12D isolation evidence is missing")
+    else:
+        expected_isolation = {
+            "network_tool_calls": 0,
+            "memory_persistence_calls": 0,
+            "automatic_retries": 0,
+            "training_performed": False,
+            "candidate_promoted": False,
+            "active_runtime_changed": False,
+            "post_run_cleanup_verified": True,
+        }
+        for name, expected in expected_isolation.items():
+            if p12d_isolation.get(name) != expected:
+                errors.append(f"P12D isolation drifted at {name}")
 
     return errors
 
