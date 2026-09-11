@@ -2,7 +2,8 @@
 
 Canonical companion entry points:
 
-- `../examples/sapphirus_external_first`: Sapphirus current CPU reference slice
+- [sapphirus](sapphirus/README.md): Sapphirus RAG·초안 작성·Minecraft 공개 구현과 테스트
+- [CPU reference slice](../examples/sapphirus_external_first/README.md): External-First 계약 설명 예제
 - `rubrum`: Rubrum 판단·상태 중심 공개 포트폴리오
 
 Historical implementation note:

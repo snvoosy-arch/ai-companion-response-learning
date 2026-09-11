@@ -23,6 +23,9 @@ from examples.sapphirus_external_first.external_first import (  # noqa: E402
 SCOPED_MARKDOWN = (
     ROOT / "README.md",
     ROOT / "companions" / "README.md",
+    ROOT / "companions" / "sapphirus" / "README.md",
+    ROOT / "companions" / "sapphirus" / "rag" / "README.md",
+    ROOT / "companions" / "sapphirus" / "minecraft" / "README.md",
     ROOT / "docs" / "sapphirus-case-study.md",
     ROOT / "docs" / "sapphirus-claim-status.md",
     ROOT / "docs" / "sapphirus-development-lineage.md",
@@ -39,6 +42,7 @@ PUBLIC_CODE = tuple(
 PUBLIC_TEXT_SUFFIXES = {
     ".example",
     ".json",
+    ".js",
     ".md",
     ".py",
     ".svg",
@@ -59,12 +63,14 @@ def _collect_public_boundary_files() -> tuple[Path, ...]:
     roots = (
         ROOT / "examples" / "sapphirus_external_first",
         ROOT / "evidence",
+        ROOT / "companions" / "sapphirus",
     )
     for directory in roots:
         files.update(
             path
             for path in directory.rglob("*")
             if path.is_file() and path.suffix.lower() in PUBLIC_TEXT_SUFFIXES
+            and not {"node_modules", "drafts", "__pycache__"}.intersection(path.parts)
         )
     files.update((ROOT / "docs").glob("sapphirus-*"))
     files.update((ROOT / "docs" / "assets").glob("sapphirus-*"))
@@ -595,6 +601,10 @@ def _check_public_boundaries() -> list[str]:
     errors: list[str] = []
     for path in PUBLIC_BOUNDARY_FILES:
         text = path.read_text(encoding="utf-8")
+        if path == ROOT / "companions/sapphirus/rag/tests/test_drafts.py":
+            # Reviewed synthetic path-rejection fixture, not a private local path.
+            fixture = '"C:' + chr(92) * 2 + 'escape"'
+            text = text.replace(fixture, '"WINDOWS_PATH_REJECTION_FIXTURE"')
         for name, pattern in FORBIDDEN_PATTERNS.items():
             if pattern.search(text):
                 errors.append(f"{name} found in {path.relative_to(ROOT)}")

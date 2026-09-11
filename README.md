@@ -67,7 +67,7 @@ Sapphirus는 생성형 LLM에게 대화와 `reply · silence · use_tool` 제안
 | 보고 싶은 내용 | 시작점 |
 | --- | --- |
 | 어떤 문제를 해결했고 왜 설계를 바꿨는가 | [케이스스터디](docs/sapphirus-case-study.md) |
-| 실제로 실행해 볼 수 있는 코드는 무엇인가 | [CPU 예제와 테스트](examples/sapphirus_external_first/README.md) |
+| 실제로 실행해 볼 수 있는 코드는 무엇인가 | [RAG·Minecraft 구현](companions/sapphirus/README.md) · [CPU 계약 예제](examples/sapphirus_external_first/README.md) |
 | 최근 RAG·Minecraft 실험에서 무엇을 확인했는가 | [최근 실험과 다음 관문](docs/sapphirus-latest-experiments.md) |
 | 수치는 어디까지 믿을 수 있는가 | [공개 주장 상태표](docs/sapphirus-claim-status.md) · [근거 JSON](evidence/README.md) |
 
@@ -166,6 +166,10 @@ LLM이 행동을 제안한다
 
 ## 비공개 개발 저장소에서 구현한 범위
 
+이 중 독립 실행 가능한 RAG·초안 작성·Minecraft 기능 모듈과 테스트는
+[`companions/sapphirus`](companions/sapphirus/README.md)에 공개했습니다. 모델 가중치와
+private runtime 전체, 원본 평가 runner·자료는 포함하지 않습니다.
+
 - Qwen 계열 생성형 Actor와 3-action JSON 계약
 - 640행, 320개 최소대조쌍, 8개 분야의 개별 작성 Contract SFT 자료
 - clean base와 SFT candidate의 동일 조건 평가
@@ -201,6 +205,7 @@ P11A delivery canary는 모델과 listener를 기동했지만 허용 입력 관�
 - [평가·승격 원장](docs/sapphirus-evaluation-ledger.md)
 - [공개 주장 상태표](docs/sapphirus-claim-status.md)
 - [CPU 재현 예제](examples/sapphirus_external_first/README.md)
+- [RAG·Minecraft 공개 구현](companions/sapphirus/README.md)
 - [초기 runtime snapshot 태그](https://github.com/snvoosy-arch/ai-companion-response-learning/tree/sapphirus-legacy-snapshot-v1/companions/sapphirus_legacy)
 - [개발 계보 메모](docs/sapphirus-development-lineage.md)
 
@@ -220,8 +225,8 @@ ledger를 기록하는 과정을 보여줍니다.
 
 ## 공개 범위와 재현성
 
-공개 저장소에는 설계 문서, 비밀정보를 제거한 결과 요약, CPU reference slice와
-테스트를 포함합니다. 실제 Qwen inference 결과와 수동 판정 원장은 hash-frozen
+공개 저장소에는 설계 문서, 비밀정보를 제거한 결과 요약, CPU reference slice,
+RAG·Minecraft 기능 모듈과 테스트를 포함합니다. 실제 Qwen inference 결과와 수동 판정 원장은 hash-frozen
 private artifact로 보관하지만, 사용자 문장과 모델 원문 출력은 공개하지 않습니다.
 
 모델 학습과 실제 Discord 실행은 별도의 승인·실행 계약을 사용하며 이 저장소의

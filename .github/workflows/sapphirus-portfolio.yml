@@ -5,6 +5,7 @@ on:
     paths:
       - "README.md"
       - "companions/README.md"
+      - "companions/sapphirus/**"
       - "docs/sapphirus-*"
       - "docs/assets/sapphirus-*"
       - "evidence/**"
@@ -15,6 +16,7 @@ on:
     paths:
       - "README.md"
       - "companions/README.md"
+      - "companions/sapphirus/**"
       - "docs/sapphirus-*"
       - "docs/assets/sapphirus-*"
       - "evidence/**"
@@ -53,3 +55,30 @@ jobs:
         run: python scripts/check_sapphirus_portfolio.py
       - name: Run the CPU demonstration
         run: python -m examples.sapphirus_external_first.demo
+
+  verify-functional-modules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Compile and test RAG without model requests
+        working-directory: companions/sapphirus/rag
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m compileall -q src tests run_lab.py
+          python -m unittest discover -s tests -v
+          python run_lab.py demo
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install pinned Minecraft dependencies
+        working-directory: companions/sapphirus/minecraft
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check and test Minecraft without connecting
+        working-directory: companions/sapphirus/minecraft
+        run: |
+          npm run check
+          npm test

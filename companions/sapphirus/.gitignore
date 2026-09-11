@@ -1,0 +1,10 @@
+node_modules/
+drafts/
+*.log
+logs/
+.env
+.env.*
+__pycache__/
+*.pyc
+.venv/
+coverage/

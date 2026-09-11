@@ -1,0 +1,16 @@
+{
+  "name": "sapphirus-minecraft-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Isolated Minecraft observation and log collection tools",
+  "main": "src/actions.js",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/actions.js && node --check src/primitives.js && node --check src/observations.js && node --check src/actorBridge.js && node --check src/localActor.js && node --check src/actorHost.js"
+  },
+  "dependencies": {
+    "mineflayer": "4.39.0",
+    "mineflayer-pathfinder": "2.4.5",
+    "vec3": "0.1.10"
+  }
+}
