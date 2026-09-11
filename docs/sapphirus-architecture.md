@@ -114,6 +114,20 @@ Constraint-preservation review의 수량 보존 실패가 안전 gate를 통과�
 대화 의미 품질은 Actor 또는 별도의 증거 기반 품질 연구로 해결하되, capability
 gate에 사회적 판단 전체를 흡수하지 않습니다.
 
+## RAG와 Minecraft에 적용한 경계
+
+RAG에서는 조회 경로, 답변의 구조적 evidence binding, 근거와의 의미적 일치,
+사용자 질문에 대한 품질을 별도 검사로 둡니다. P13D의 구조 binding 통과가
+grounding·quality 통과를 보장하지 않았으므로 단일 gate 점수로 합치지 않습니다.
+
+Minecraft 실험에서는 Actor가 제안한 이동도 action별 계약과 대상·예산 검사를
+통과해야 실행기로 전달합니다. `reply`와 도구 호출이 혼합된 제안 두 건은 이동 전에
+거부됐습니다. 실행기 단독 goto와 모델이 선택한 goto는 서로 다른 증거입니다.
+
+이 확장은 비공개 실험 계층의 관찰이며 아래 CPU reference slice가 전체 RAG나
+Minecraft를 구현한다는 뜻은 아닙니다. [최근 실험](sapphirus-latest-experiments.md)에
+현재 결과와 미검증 범위를 기록했습니다.
+
 ## 공개 reference slice
 
 [CPU 예제](../examples/sapphirus_external_first/README.md)는 위 구조에서 다음 부분을

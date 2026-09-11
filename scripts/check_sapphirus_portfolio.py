@@ -28,6 +28,7 @@ SCOPED_MARKDOWN = (
     ROOT / "docs" / "sapphirus-development-lineage.md",
     ROOT / "docs" / "sapphirus-architecture.md",
     ROOT / "docs" / "sapphirus-evaluation-ledger.md",
+    ROOT / "docs" / "sapphirus-latest-experiments.md",
     ROOT / "evidence" / "README.md",
     ROOT / "examples" / "sapphirus_external_first" / "README.md",
 )
@@ -142,8 +143,8 @@ def _check_markdown_links() -> list[str]:
 
 def _check_evidence_json() -> list[str]:
     errors: list[str] = []
-    if len(EVIDENCE_FILES) != 4:
-        errors.append(f"expected 4 evidence JSON files, found {len(EVIDENCE_FILES)}")
+    if len(EVIDENCE_FILES) != 5:
+        errors.append(f"expected 5 evidence JSON files, found {len(EVIDENCE_FILES)}")
     for path in EVIDENCE_FILES:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
@@ -208,6 +209,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
         "external": "sapphirus.portfolio.external_first_summary.v1",
         "p11b": "sapphirus.portfolio.p11b_readonly_canary_summary.v1",
         "p12d": "sapphirus.portfolio.p12d_discord_delivery_summary.v1",
+        "recent": "sapphirus.portfolio.recent_experiments_summary.v1",
     }
     missing = [name for name, schema in schemas.items() if schema not in payloads]
     if missing:
@@ -217,6 +219,7 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
     external = payloads[schemas["external"]]
     p11b = payloads[schemas["p11b"]]
     p12d = payloads[schemas["p12d"]]
+    errors.extend(_check_recent_evidence(payloads[schemas["recent"]]))
 
     try:
         total = _nested_int(contract, "evaluation_total")
@@ -504,6 +507,87 @@ def _check_evidence_invariants_and_document_claims() -> list[str]:
             if p12d_isolation.get(name) != expected:
                 errors.append(f"P12D isolation drifted at {name}")
 
+    return errors
+
+
+def _check_recent_evidence(payload: dict[str, object]) -> list[str]:
+    """Pin historical results; do not silently relabel an exploratory run as success."""
+    errors: list[str] = []
+    expected_sections = {
+        "temporal": {
+            "cases": 12, "accepted": 7, "rejected": 5,
+            "candidate_loads": 1, "identity_requests": 1,
+            "actor_requests": 19, "candidate_requests": 20, "tool_calls": 5,
+            "automatic_process_retries": 0,
+            "acceptance": False, "holdout_spent": True, "phase_closed": True,
+            "private_result_sha256": (
+                "b167828fa09ed2355a150a466639aa666b8fbf442a980b56ccc36d1ee413a9ff"
+            ),
+        },
+        "rag": {
+            "cases": 16, "actor_cases": 15, "external_nonresponse_cases": 1,
+            "route_pass": 6, "joint_pass": 1,
+            "retrieval_required_cases": 11, "initial_retrieval_pass": 3,
+            "retrieval_route_pass": 2, "direct_cases": 4, "direct_route_pass": 4,
+            "local_retrieval_cases": 7, "local_retrieval_pass": 0,
+            "injected_provider_cases": 4, "injected_provider_pass": 3,
+            "speech_reviewed": 14, "structural_binding_pass": 14,
+            "grounding_pass": 5, "quality_pass": 1, "external_nonresponse_pass": 1,
+            "candidate_loads": 1, "identity_requests": 1,
+            "actor_requests": 18, "candidate_requests": 19, "local_retrieval_calls": 3,
+            "automatic_retries": 0, "automatic_corrections": 0, "fallbacks": 0,
+            "external_network_searches": 0, "discord_connections": 0,
+            "memory_persistence_calls": 0, "training_performed": False,
+            "candidate_promoted": False, "active_runtime_changed": False,
+            "acceptance": False, "holdout_spent": True,
+            "private_result_sha256": (
+                "afd8861cfbcf99628d654907744539263a025336cc9507633959a2f5fa7b8017"
+            ),
+        },
+        "minecraft": {
+            "actor_requests": 2, "mixed_reply_tool_contract_rejections": 2,
+            "model_triggered_movements": 0, "inventory_gain_verified": False,
+            "executor_connection_observed": True, "executor_only_goto_observed": True,
+            "model_and_bot_stopped_at_session_end": True,
+        },
+    }
+    for section, expected_fields in expected_sections.items():
+        observed = payload.get(section)
+        if not isinstance(observed, dict):
+            errors.append(f"recent evidence missing section: {section}")
+            continue
+        for field, expected in expected_fields.items():
+            actual = observed.get(field)
+            if type(actual) is not type(expected) or actual != expected:
+                errors.append(f"recent evidence drift: {section}.{field}")
+
+    temporal = payload.get("temporal", {})
+    if not isinstance(temporal, dict) or temporal.get("manual") != {
+        "satisfactory": 4, "quality_warning": 1,
+        "suspected_false_rejection": 1, "clear_failure": 6,
+    }:
+        errors.append("recent evidence drift: temporal.manual")
+
+    # Ratios are intentionally distinct: captures, actor cases and voiced answers.
+    claims = {
+        "README.md": ("`7/12`", "`4/12`", "`6/15`", "`1/15`", "`14/14`",
+                      "`5/14`", "`1/14`", "`2/2`", "`0/2`"),
+        "docs/sapphirus-case-study.md": ("`7/12`", "`4/12`", "`6/15`", "`1/15`",
+                                        "`14/14`", "`5/14`", "`1/14`"),
+        "docs/sapphirus-evaluation-ledger.md": ("`6/15`", "`1/15`", "`14/14`",
+                                               "`5/14`", "`1/14`", "`0/2`"),
+        "docs/sapphirus-claim-status.md": ("`6/15`", "`1/15`", "`14/14`",
+                                          "`5/14`", "`1/14`", "`0/2`"),
+        "docs/sapphirus-latest-experiments.md": ("`6/15`", "`1/15`", "`14/14`",
+                                                "`5/14`", "`1/14`", "`0/7`", "`0/2`"),
+    }
+    for relative, expected_claims in claims.items():
+        path = ROOT / relative
+        if path.is_file():
+            text = path.read_text(encoding="utf-8")
+            for claim in expected_claims:
+                if claim not in text:
+                    errors.append(f"recent evidence document claim drift: {relative}: {claim}")
     return errors
 
 

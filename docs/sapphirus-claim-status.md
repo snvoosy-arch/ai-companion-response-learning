@@ -14,6 +14,10 @@
 | P11B callback `8/8` | `p11b-readonly-canary-summary.json` | LLM을 끈 제한된 live Discord command callback | Actor 품질, 응답 의미 정확도, 무제한 운영 | bounded scope만 통과 |
 | P12D bounded delivery `1/1` | `p12d-discord-delivery-summary.json` | hash-locked synthetic 입력 한 건의 실제 candidate reply와 비공개 Discord hash readback | native human ingress, 도구 왕복, 대화 품질, 운영 준비 | one-shot 전송만 통과 |
 | CPU reference slice 실행 | `examples/sapphirus_external_first` | dependency-free contract 동작 | private runtime 재현, 모델 추론 | CI 지속 검증 |
+| P12M canonical `7/12`, 수동 만족 `4/12` | `recent-experiments-summary.json` | temporal r3의 자동 계약 판정과 Codex 건별 검토 | 답변 품질의 전면 통과 | acceptance 거절, 분야 종료 |
+| P13D route `6/15`, joint `1/15` | `recent-experiments-summary.json` | 실제 frozen 후보의 로컬 RAG·주입 provider 평가 | 인터넷 검색, RAG 목표 달성 | acceptance 거절, holdout spent |
+| P13D binding `14/14`, grounding `5/14`, quality `1/14` | `recent-experiments-summary.json` | 발화 14건의 구조 검사와 Codex 수동 검토 | 구조 binding이 의미적 entailment를 보장한다는 주장 | 품질 미달 |
+| Minecraft 계약 거부 `2/2`, 이동 실행 `0/2` | `recent-experiments-summary.json` | 탐색적 live 모델 요청 두 건 | 모델의 이동 성공, 채집 성공, 일반화 성능 | 실행기 goto 성공과 별도 |
 
 ## 해석 규칙
 
@@ -37,3 +41,4 @@
 - 네트워크 검색과 영속 기억 쓰기의 운영 준비
 - 예약 알림, 선제 연락, 장기 목표 수행
 - 공개 CPU slice가 private runtime 전체와 동일하다는 주장
+- 실제 모델이 Minecraft 이동·채집 도구를 안정적으로 사용한다는 주장

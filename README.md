@@ -58,6 +58,23 @@ Sapphirus는 생성형 LLM에게 대화와 `reply · silence · use_tool` 제안
 유지하면서, 권한·실행·증거·전달의 사실성은 외부 런타임이 보장하도록 책임을
 분리한 한국어 AI 컴패니언 프로젝트입니다.
 
+**2026-09-11 기준:** frozen Qwen3-8B 후보를 유지하고 있습니다. RAG 후보 평가는
+거절됐으며, Minecraft에서는 실행기 이동과 모델의 도구 선택을 분리해 시험 중입니다.
+학습·후보 승격·active runtime 교체는 동결 상태입니다.
+
+### 빠르게 살펴보기
+
+| 보고 싶은 내용 | 시작점 |
+| --- | --- |
+| 어떤 문제를 해결했고 왜 설계를 바꿨는가 | [케이스스터디](docs/sapphirus-case-study.md) |
+| 실제로 실행해 볼 수 있는 코드는 무엇인가 | [CPU 예제와 테스트](examples/sapphirus_external_first/README.md) |
+| 최근 RAG·Minecraft 실험에서 무엇을 확인했는가 | [최근 실험과 다음 관문](docs/sapphirus-latest-experiments.md) |
+| 수치는 어디까지 믿을 수 있는가 | [공개 주장 상태표](docs/sapphirus-claim-status.md) · [근거 JSON](evidence/README.md) |
+
+핵심 구현은 **3-action 계약, 외부 권한 검사, 실행 결과 원장, 전달 검증**입니다.
+핵심 평가 판단은 **형식 준수·경로 선택·근거 정합성·답변 품질을 별도로 측정하고,
+평균 점수가 올라가도 사전 기준을 넘지 못한 후보는 승격하지 않는 것**입니다.
+
 이 저장소는 공개용 포트폴리오입니다. 모델 가중치, 원본 학습 데이터, Discord
 식별자, 개인 대화 로그, 토큰, 로컬 DB는 포함하지 않습니다. 불완전한 초기 runtime
 snapshot은 현재 구조와 혼동되지 않도록 main에서 제거하고
@@ -95,8 +112,11 @@ Actor의 발화가 “검색했다”, “기억했다”, “보냈다”고 �
 | Constraint-preservation review (V5 계보) | 로컬 모델 출력 6건 수동 검토 | 의미 사례 `5/6` | 감정 인정·수량 보존 실패로 중단 |
 | Discord read-only capability canary | LLM을 끈 live Discord callback 시험 | 명령 callback `8/8` 완료 | 출력 의미 품질은 평가하지 않음 |
 | P12D bounded Discord delivery canary | hash-locked synthetic 입력 → 실제 candidate reply → 비공개 Discord | `1/1` 전달·readback 일치 | 전송 경로만 통과; 대화 품질·native ingress 미평가 |
+| P12M temporal r3 | frozen 후보, 독립 실행 12문항 | canonical `7/12`, 수동 만족 `4/12` | acceptance 거절, temporal 종료 |
+| P13D read-only RAG | 로컬 문서·주입 provider, Actor 대상 15문항 | route `6/15`, joint `1/15` | acceptance 거절, 평가 자료 spent |
+| Minecraft 모델 도구 선택 | 실제 채팅에 대한 탐색적 모델 요청 2회 | 계약 거부 `2/2`, 이동 실행 `0/2` | 실행기의 goto 성공과 모델 성공을 구별 |
 
-마지막 canary는 Actor를 연결하기 전에 외부 Discord capability 계층을 격리 검증한
+P11B canary는 Actor를 연결하기 전에 외부 Discord capability 계층을 격리 검증한
 시험입니다. 의도적으로 LLM 요청, 네트워크 도구 호출, 영속 상태 변경을 모두
 `0`으로 유지했으므로 Actor의 대화 품질 증거로 사용하지 않습니다. `8/8`은 명령
 callback 완료 수이며, 응답 원문을 보존해 의미 품질을 판정한 점수가 아닙니다.
@@ -106,6 +126,12 @@ P12D는 hash-locked synthetic 입력 한 건에 대해 실제 candidate가 `repl
 내용 hash가 일치하는지 확인했습니다. 이 실행은 도구·영속 기억·재학습·후보 승격을
 사용하지 않았으므로, 전송 경로의 제한된 증거이지 대화 품질이나 운영 준비의
 증거는 아닙니다.
+
+RAG의 발화 14건은 sidecar 구조 binding `14/14`였지만, 수동 grounding `5/14`,
+답변 quality `1/14`였습니다. 문서와 답변을 연결하는 기록이 존재한다는 사실만으로
+답변 내용이 근거에 충실해지지는 않았습니다. 이 판정은 Codex의 건별 검토이며
+독립 사람 맹검 평가가 아닙니다. [최근 실험](docs/sapphirus-latest-experiments.md)에
+분모와 실패 원인, 다음 검증 범위를 정리했습니다.
 
 Critical boundary는 존재하지 않는 권한·기억·도구 결과를 실제 사실처럼 만들 수 있는
 항목이므로 평균 점수로 상쇄하지 않고 단 한 건의 실패도 허용하지 않았습니다.
@@ -149,6 +175,8 @@ LLM이 행동을 제안한다
 - tool outcome, action ledger, privacy-safe turn trace
 - Discord shadow 실행과 제한된 read-only capability canary
 - 실제 candidate reply 한 건의 비공개 Discord one-shot 전달과 hash readback
+- Discord-free 로컬 RAG 실행·route·구조 binding·grounding·quality의 분리 평가
+- Minecraft 채팅→Actor 계약 검증→제한된 goto→결과 재입력 실험용 연결 계층
 
 ## 아직 증명하지 않은 범위
 
@@ -158,6 +186,7 @@ LLM이 행동을 제안한다
 - 네트워크 검색과 영속 기억 쓰기
 - 예약 알림, 선제 연락, 장기 목표 수행
 - SFT candidate의 runtime 승격
+- 실제 모델 판단에 따른 Minecraft 이동 성공과 채집 후 인벤토리 증가
 
 P11A delivery canary는 모델과 listener를 기동했지만 허용 입력 관찰이 `0`건이어서
 기능 판정에 사용하지 않았습니다. 실패하거나 비어 있는 실행을 성공 사례로
@@ -182,6 +211,7 @@ P11A delivery canary는 모델과 listener를 기동했지만 허용 입력 관�
 ```powershell
 python -m unittest discover -s examples/sapphirus_external_first/tests -v
 python -m examples.sapphirus_external_first.demo
+python scripts/check_sapphirus_portfolio.py
 ```
 
 예제는 Mock Actor가 read-only 도구를 제안하고, 외부 gate가 권한을 검사하고,

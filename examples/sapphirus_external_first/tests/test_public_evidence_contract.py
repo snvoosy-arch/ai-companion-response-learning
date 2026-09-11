@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 import re
 import unittest
+from unittest.mock import patch
+
+from scripts import check_sapphirus_portfolio as audit
 
 from examples.sapphirus_external_first.external_first import (
     ACTOR_ACTIONS,
@@ -17,6 +20,29 @@ EVIDENCE = ROOT / "evidence"
 
 
 class PublicEvidenceContractTests(unittest.TestCase):
+    def test_recent_evidence_rejects_changed_denominators_and_success_claims(self) -> None:
+        for section, field, value in (
+            ("rag", "speech_reviewed", 15),
+            ("rag", "joint_pass", 6),
+            ("rag", "acceptance", True),
+            ("rag", "holdout_spent", False),
+            ("rag", "candidate_promoted", True),
+            ("minecraft", "model_triggered_movements", 2),
+            ("minecraft", "inventory_gain_verified", True),
+            ("temporal", "accepted", 12),
+        ):
+            with self.subTest(section=section, field=field):
+                payloads, errors = audit._load_evidence_by_schema()
+                self.assertEqual(errors, [])
+                recent = payloads["sapphirus.portfolio.recent_experiments_summary.v1"]
+                recent[section][field] = value
+                with patch.object(audit, "_load_evidence_by_schema", return_value=(payloads, [])):
+                    failures = audit._check_evidence_invariants_and_document_claims()
+                self.assertTrue(
+                    any("recent evidence" in failure for failure in failures),
+                    f"Inflated or relabelled evidence was accepted: {section}.{field}",
+                )
+
     @staticmethod
     def load(name: str) -> dict[str, object]:
         return json.loads((EVIDENCE / name).read_text(encoding="utf-8"))

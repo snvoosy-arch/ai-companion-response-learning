@@ -128,6 +128,37 @@ network search, Actor 품질은 승인하지 않음.
 native human gateway가 아니라 synthetic source였고 도구 왕복과 발화 의미 품질은
 평가하지 않았으므로, 완전한 live end-to-end나 운영 준비는 승인하지 않음.
 
+### 2026-09-06 — P12M temporal route recovery r3
+
+- canonical: `7/12` accepted, 5 rejected → 전체 acceptance 거절
+- 수동 만족 `4/12`; 품질 경고 1, 과잉 차단 추정 1, 명확한 실패 6
+- load / identity / Actor / candidate requests / tool: `1 / 1 / 19 / 20 / 5`
+- temporal 종료, holdout spent; 재실행·학습 재사용 없음
+
+### 2026-09-09 — P13D read-only RAG candidate
+
+- 16 captures = Actor 대상 15 + 외부 무응답 경계 1
+- route `6/15`, joint `1/15`; 외부 무응답 `1/1` 별도
+- 검색 필요 문항 첫 검색 `3/11`, 전체 route `2/11`; 직접 응답 route `4/4`
+- 정상 로컬 조회·source coverage `0/7`; 주입 provider 실행 `3/4`
+- 발화 14건: 구조 binding `14/14`, 수동 grounding `5/14`, quality `1/14`
+- load / identity / Actor / candidate requests / local retrieval: `1 / 1 / 18 / 19 / 3`
+- 자동 retry·correction·fallback, 외부 network·Discord·영속 기억: 모두 0
+- acceptance 거절, 평가 자료 P13C spent, 학습·승격·active runtime 변경 없음
+
+제한: 빈 발화에는 품질 점수를 합성하지 않았으며 Actor 성공률 분모는 15입니다.
+수동 검토는 Codex가 건별 수행했고 독립 사람 맹검이나 자동 entailment가 아닙니다.
+
+### 2026-09-11 — Minecraft exploratory live observation
+
+- 실행기 접속과 별도 goto 접근 관찰
+- 실제 Actor 요청 2건은 모두 reply/tool 혼합으로 계약 거부 `2/2`
+- 해당 모델 요청에 의한 이동 실행 `0/2`; 채집 인벤토리 증가 미검증
+- 해당 모델·봇 세션 종료
+
+제한: 두 건의 탐색 관찰이며 정식 holdout 성능이 아닙니다. 실행기 이동 성공을
+모델 성공으로 합산하지 않습니다. 상세 해석은 [최근 실험](sapphirus-latest-experiments.md)에 있습니다.
+
 ## 현재 승격 상태
 
 ```text
@@ -139,6 +170,10 @@ Persistent memory write       NOT READY
 Network-backed tool use       NOT READY
 Read-only capability canary   PASSED IN BOUNDED SCOPE
 Bounded model reply delivery  PASSED FOR ONE SYNTHETIC INPUT
+Temporal phase                CLOSED; ACCEPTANCE REJECTED
+Local RAG candidate           ACCEPTANCE REJECTED
+Model-selected Minecraft move NOT DEMONSTRATED
+Minecraft inventory gain      NOT VERIFIED
 ```
 
 공개 수치는 [sanitized evidence](../evidence/README.md)에 기계 판독 가능한 JSON으로도

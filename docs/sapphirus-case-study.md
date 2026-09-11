@@ -263,6 +263,22 @@ hash-locked synthetic 입력 한 건으로 모델→전달 구간만 따로 검�
 실험도 아닙니다. 따라서 native ingress, 대화 품질, 무제한 Discord 준비 상태는
 여전히 승인하지 않습니다.
 
+## 8. RAG 평가와 Minecraft로 좁힌 다음 과제
+
+2026-09-06 P12M r3는 canonical `7/12`, 수동 만족 `4/12`로 전체 acceptance를
+거절하고 temporal 분야를 종료했습니다. 이후 새 자료를 사용한 2026-09-09 P13D
+RAG 평가는 route `6/15`, joint `1/15`였습니다. 발화 14건의 구조 binding `14/14`와
+수동 grounding `5/14`, quality `1/14` 사이의 차이는 근거 연결 기록만으로 의미적
+정확성을 보장할 수 없다는 한계를 드러냈습니다. 두 평가 자료는 spent입니다.
+
+다음 실험은 Minecraft의 관측 가능한 이동·채집으로 범위를 좁혔습니다. 별도 goto
+실행기는 접근을 수행했지만, 실제 모델 요청 2회는 `reply`와 도구 호출을 섞어
+모두 거절됐고 이동 실행은 0회였습니다. 실행기 성공과 모델의 계약 준수 성공을
+분리하는 사례입니다. 모델·봇 세션은 종료했으며 채집 성공은 아직 확인하지 않았습니다.
+
+[최근 실험 문서](sapphirus-latest-experiments.md)에 분모, 판정 방식과 다음 관문을
+정리했습니다. 이 관찰은 새로운 학습이나 승격의 성공을 뜻하지 않습니다.
+
 ## 현재 결론
 
 Sapphirus는 “학습된 모델이 모든 것을 올바르게 판단한다”는 가정에서 출발하지
@@ -277,9 +293,9 @@ Sapphirus는 “학습된 모델이 모든 것을 올바르게 판단한다”�
 - 선제 알림과 장기 목표 계약
 - 대화 품질 acceptance와 모델 승격
 
-다음 기술 관문은 새로운 SFT가 아니라, native human ingress를 제한된 환경에서
-관찰하고 실제 read-only tool outcome과 최종 delivery evidence를 같은 turn trace에
-연결하는 것입니다.
+현재 다음 기술 관문은 Minecraft 실행기의 이동·채굴·인벤토리 증가를 따로 검증하고,
+새 수동 문항으로 frozen Actor의 도구 계약 준수를 확인한 뒤 두 경로를 연결하는
+것입니다. Discord 수직 경로 등 위의 미완료 항목은 미완료 상태로 유지합니다.
 
 초기 Discord runtime 전체 snapshot은 private dependency가 빠진 상태에서 main의
 현재 코드보다 훨씬 큰 비중을 차지해 구조를 흐렸습니다. 해당 상태는
