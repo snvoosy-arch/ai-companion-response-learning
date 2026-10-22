@@ -1,5 +1,8 @@
 # Sapphirus 공개 주장 상태표
 
+> **이전 모델 계보 기록:** 이 문서는 BERT 기반 Rubrum 또는 Qwen3-8B 기반 Sapphirus의 당시 구조·실험을 보존합니다. 현재 SDAR·Qwen3.5 연구와 학습 결과는 [최신 모델 문서](current-model-training.md)를 참고하세요. 아래의 현재 상태·수치는 원래 실험 시점에 한정됩니다.
+
+
 이 문서는 포트폴리오의 수치를 무엇의 증거로 사용할 수 있는지 고정합니다. 주요
 수치는 CI가 `evidence/*.json`과 README·케이스스터디·평가 원장 사이에서 자동
 대조합니다.

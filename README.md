@@ -1,4 +1,48 @@
-# AI Companion Architecture Portfolio
+# Rubrum & Sapphirus — Personal AI Model Training
+
+나와 대화하고 함께 게임하는 개인용 한국어 AI 컴패니언을 목표로, 공개 사전학습 모델 위에 서로 다른 생성 방식의 적응 학습을 진행하는 포트폴리오입니다.
+
+**2026-10-22 문서 갱신:** 현재 연구의 중심은 **Rubrum의 SDAR-4B-Chat 디퓨전**과 **Sapphirus의 Qwen3.5-4B 자기회귀(AR)**입니다. 이전 BERT·Qwen3-8B 구조와 당시 실험은 아래 연구 이력에 보존했습니다.
+
+| 프로젝트 | 현재 기반 모델·방식 | 현재 학습 주제 |
+| --- | --- | --- |
+| **Rubrum** | JetLM/SDAR-4B-Chat · 디퓨전 계열 | 균일 토큰 노이즈 복원, LoRA와 self-conditioning을 통한 생성 적응 |
+| **Sapphirus** | Qwen3.5-4B · AR | 한국어 일상 대화 LoRA SFT, 문맥·정정 반영과 대화 자연스러움 |
+
+## 먼저 볼 자료
+
+- [현재 모델·학습·평가 상세](docs/current-model-training.md)
+- [공개 가능한 최신 근거 집계](evidence/model-training/current-summary.json)
+- [이전 Rubrum 케이스스터디](docs/rubrum-case-study.md)
+- [이전 Sapphirus 케이스스터디](docs/sapphirus-case-study.md)
+- [기존 공개 구현·CPU 예제](companions/README.md)
+
+## 최근 학습에서 확인한 것
+
+**Rubrum**은 고정된 SDAR backbone에 LoRA와 self-conditioning 경로를 학습합니다. 최신 검증 완료 단계까지 누적 **32,113,100개 본문 토큰**을 처리했습니다. 고정된 100개 문서·300개 노이즈 조건의 본문 복원 loss는 **2.439341 → 2.432136**입니다. 자유 생성 20건 중 빈 답변이 1건 남았으며, 복원 성적을 대화 품질 성적으로 해석하지 않습니다.
+
+**Sapphirus r7**은 r6 어댑터에서 이어서 **24,030개 대화·24,122개 assistant 학습 대상**을 BF16으로 1 epoch 학습했습니다. 새 24문항 답변 비교의 두 익명 검토는 r7을 더 자주 선호했지만, 짧은 문맥의 정정 반영과 직접 답변에는 약점이 남았습니다. 이 비교는 소규모 주관적 진단입니다.
+
+이 두 실험은 데이터·학습 목표·평가 방식이 다릅니다. 결과를 디퓨전과 AR의 공정한 우열 비교로 해석하지 않습니다.
+
+## 학습 결과와 실행 구성
+
+최근 학습 후보와 Discord 실행 설정은 분리되어 있습니다. 현재 확인한 Discord 코드는 Rubrum의 원본 SDAR와 의미 헤드, Sapphirus의 원본 Qwen3.5-4B LLM.int8를 사용하며, 최근 학습 어댑터를 배포한 증거로 취급하지 않습니다. 실행 설정 확인이 서비스의 현재 접속 상태를 보장하지는 않습니다.
+
+함께 게임하는 다음 목표는 **Minecraft에서 상황·사용자 요청을 읽고 행동을 선택하는 능력**입니다. inZOI는 후속 연결 실험 후보입니다. 이 저장소의 기존 Minecraft 코드는 이전 모델 계보의 구현이며, 최신 두 학습 후보의 게임 플레이 성공을 입증하지 않습니다.
+
+## 공개 범위
+
+이 저장소는 현재 모델 연구의 설명·선별한 집계와 이전 공개 구현을 제공합니다. 최신 학습 코드 전체, 모델 가중치, 학습 원문과 평가 대화 원문은 포함하지 않습니다. 공개 집계의 원본 파일 해시는 추적을 위한 식별값이며, 공개된 파일만으로 최신 학습을 재현할 수 있다는 뜻은 아닙니다.
+
+## 이전 구조와 실험 이력
+
+아래 자료는 BERT 기반 Rubrum과 Qwen3-8B 기반 Sapphirus의 이전 연구 기록입니다. 당시의 ‘현재’, 실행 상태, 성적은 해당 실험 시점을 뜻합니다. 새 기반 모델의 성적으로 이전하지 않습니다.
+
+<details>
+<summary>이전 아키텍처 포트폴리오 펼치기</summary>
+
+## AI Companion Architecture Portfolio — 이전 계보
 
 서로 다른 책임 구조로 동작하는 두 한국어 AI companion을 구현하고 검증하는 개인 연구 포트폴리오입니다.
 
@@ -231,3 +275,6 @@ private artifact로 보관하지만, 사용자 문장과 모델 원문 출력은
 
 모델 학습과 실제 Discord 실행은 별도의 승인·실행 계약을 사용하며 이 저장소의
 예제를 실행하는 것만으로 시작되지 않습니다.
+
+
+</details>

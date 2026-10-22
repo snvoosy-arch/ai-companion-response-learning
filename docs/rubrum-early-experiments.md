@@ -1,5 +1,8 @@
 # Rubrum 초기 실험 안내
 
+> **이전 모델 계보 기록:** 이 문서는 BERT 기반 Rubrum 또는 Qwen3-8B 기반 Sapphirus의 당시 구조·실험을 보존합니다. 현재 SDAR·Qwen3.5 연구와 학습 결과는 [최신 모델 문서](current-model-training.md)를 참고하세요. 아래의 현재 상태·수치는 원래 실험 시점에 한정됩니다.
+
+
 현재 Rubrum은 2026년 6월의 초기 공개 프로토타입에서 크게 변경됐습니다.
 
 초기 단계에서는 완성 답변 규칙, semantic frame, slot bank, 선택적 encoder-decoder 문장화, 여러 분류기를 함께 비교했습니다. 이 과정은 다음 한계를 확인하는 데 사용됐습니다.

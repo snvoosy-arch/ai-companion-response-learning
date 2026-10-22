@@ -1,0 +1,137 @@
+{
+  "schema_version": "companion.model_training_snapshot.v1",
+  "as_of": "2026-10-22",
+  "evidence_scope": "Selected aggregates from private local training and evaluation artifacts; not public reproduction or proof of live deployment.",
+  "rubrum": {
+    "base_model": "JetLM/SDAR-4B-Chat",
+    "base_revision": "56bca3c8d927410589a86e7996ee281b6764fa37",
+    "method": "uniform-token denoising adaptation; frozen backbone; LoRA rank 8 alpha 16; trainable self-conditioning",
+    "run_id": "fineweb_uniform_300steps_20261022",
+    "training": {
+      "stage_content_tokens": 551426,
+      "stage_canvases": 2400,
+      "stage_updates": 300,
+      "cumulative_content_tokens": 32113100,
+      "cumulative_updates": 17549
+    },
+    "reconstruction": {
+      "documents": 100,
+      "corrupted_canvases": 300,
+      "noise_levels": [
+        0.1,
+        0.5,
+        0.9
+      ],
+      "before_content_loss": 2.4393413662020467,
+      "after_content_loss": 2.4321362313432933,
+      "before_content_accuracy": 0.6169443946724004,
+      "after_content_accuracy": 0.619213999880547,
+      "scope": "Fixed reused reconstruction diagnostic, not dialogue quality."
+    },
+    "generation": {
+      "sampled": 20,
+      "empty": 1,
+      "replacement_characters": 0,
+      "seed_used": false,
+      "semantic_quality_requires_review": true
+    },
+    "verification": {
+      "artifact_checks": 51,
+      "status": "passed",
+      "exact_gpu_reload_probes": 3,
+      "checkpoint_sha256": "93166049435234aa35d07f71f41ed79a71a10b89899df1e3f30e94bef275ee58"
+    },
+    "runtime_changed": false
+  },
+  "sapphirus": {
+    "base_model": "Qwen3.5-4B",
+    "method": "autoregressive Korean daily-conversation LoRA SFT; BF16; answer and ending-token supervision",
+    "run_id": "daily_chat_sft_24030_20261018_r7",
+    "executed_on": "2026-10-19",
+    "initial_candidate": "r6",
+    "training": {
+      "dialogues": 24030,
+      "assistant_training_views": 24122,
+      "current_corpus_epochs": 1,
+      "optimizer_steps": 1508,
+      "mean_training_loss": 1.9878339156642495,
+      "total_elapsed_s": 4833.2812873289995,
+      "lora_rank": 8,
+      "lora_alpha": 16,
+      "lora_dropout": 0.05,
+      "parameter_count": 16232448
+    },
+    "diagnostic": {
+      "rows": 100,
+      "before_token_weighted_loss": 2.45223564009056,
+      "after_token_weighted_loss": 2.362163875341858,
+      "reused_not_fresh_holdout": true
+    },
+    "generation_comparison": {
+      "cases": 24,
+      "single_turn_cases": 20,
+      "context_cases": 4,
+      "responses": 48,
+      "identity_blinded": true,
+      "reviewer_type": "not specified in aggregate source; no independent-human-review claim",
+      "primary_preference": {
+        "r6": 3,
+        "r7": 12,
+        "tie": 9
+      },
+      "second_preference": {
+        "r6": 2,
+        "r7": 13,
+        "tie": 9
+      },
+      "dtype": "bf16",
+      "do_sample": false,
+      "normal_eos": 48,
+      "truncated": 0,
+      "limitations": "24 manually selected cases and subjective reviews; not a statistical benchmark or broad capability guarantee. Prompts, authored context, and model responses must never be reused for training."
+    },
+    "verification": {
+      "status": "complete",
+      "cpu_adapter_audit_passed": true,
+      "tensor_count": 496,
+      "full_model_reload_during_training_verification": false,
+      "adapter_sha256": "7e9942cbb3bbebf23e4d06306f90a33dd543deef4fe44425331b260287c303e7"
+    },
+    "promoted": false
+  },
+  "comparison_scope": "Different corpora, objectives and evaluations; not a controlled diffusion-versus-AR ranking.",
+  "source_artifacts": {
+    "rubrum_stage_result": {
+      "artifact": "stage_result.json",
+      "sha256": "e868ffc8f3c8ce3caae2a795b325524c1072049a7011a4601022fa7d7922769e"
+    },
+    "rubrum_final_artifact_audit": {
+      "artifact": "final_artifact_audit.json",
+      "sha256": "6ef4bb53155bc0c91fc91b4220e089452ad3ba40e3a203b2cd506b25dfbded6d"
+    },
+    "rubrum_generation_after_summary": {
+      "artifact": "generation_after_summary.json",
+      "sha256": "879a8203622bb4a21ab07e790f30a34f6c88ce664f663647972caca06dcd2c03"
+    },
+    "rubrum_post_training_comparison_verified": {
+      "artifact": "post_training_comparison_verified.json",
+      "sha256": "014829b32f8c5243c3023ed99809cb3eba7c657d4755c21bcb6e3a3f8a8cafa5"
+    },
+    "rubrum_validation_before_summary": {
+      "artifact": "validation_before_summary.json",
+      "sha256": "1d06038b82aa400a1dfa9385c304102749c77ece0de26c536a5cff0d87cfb2a9"
+    },
+    "rubrum_validation_after_summary": {
+      "artifact": "validation_after_summary.json",
+      "sha256": "e8866033f88aeb2da1885ba198ae80a6fa7de89a4ece387ebecb2cddb316fb48"
+    },
+    "sapphirus_training": {
+      "artifact": "verification.json",
+      "sha256": "ae32d776da5ff9141ac362afd23a426514a435b8668efd0f543a8845d52e75d5"
+    },
+    "sapphirus_quality": {
+      "artifact": "quality_summary.json",
+      "sha256": "7c24bfc6e129d7e4cde95fadd11084fc9de1f575898a03cc3e3109a304d5cee7"
+    }
+  }
+}

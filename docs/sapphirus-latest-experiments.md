@@ -1,5 +1,8 @@
 # Sapphirus — 실행 성공과 답변 품질을 분리한 실험
 
+> **이전 모델 계보 기록:** 이 문서는 BERT 기반 Rubrum 또는 Qwen3-8B 기반 Sapphirus의 당시 구조·실험을 보존합니다. 현재 SDAR·Qwen3.5 연구와 학습 결과는 [최신 모델 문서](current-model-training.md)를 참고하세요. 아래의 현재 상태·수치는 원래 실험 시점에 한정됩니다.
+
+
 2026-09-11 기준. Contract SFT 이후에도 같은 frozen Qwen3-8B 후보를 사용했습니다.
 학습·승격·active runtime 교체 없이 외부 시스템이 보장할 책임을 검증했습니다.
 

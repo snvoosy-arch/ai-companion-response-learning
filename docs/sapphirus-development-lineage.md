@@ -1,5 +1,8 @@
 # Sapphirus 개발 계보
 
+> **이전 모델 계보 기록:** 이 문서는 BERT 기반 Rubrum 또는 Qwen3-8B 기반 Sapphirus의 당시 구조·실험을 보존합니다. 현재 SDAR·Qwen3.5 연구와 학습 결과는 [최신 모델 문서](current-model-training.md)를 참고하세요. 아래의 현재 상태·수치는 원래 실험 시점에 한정됩니다.
+
+
 이 문서는 초기 response-tuning 계보부터 현재 External-First 구조까지의
 의사결정 흐름을 간단히 보존합니다. 현재 구조와 직접 관련 없는 초기 source snapshot은
 main에서 제거하고 `sapphirus-legacy-snapshot-v1` 태그에 고정했습니다.
