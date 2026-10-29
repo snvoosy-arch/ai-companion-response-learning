@@ -33,6 +33,13 @@ class CurrentContractTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.m.validate_proposal(p, set())
 
+    def test_malformed_json_kind_uses_the_same_rejection_contract(self):
+        for kind in [[], {}, True, 17, None]:
+            p = {"decision": "tool_call", "tool": "collect_logs",
+                 "arguments": {"count": 2, "kind": kind}}
+            with self.assertRaises(ValueError):
+                self.m.validate_proposal(p, {"collect_logs"})
+
     def test_completion_requires_same_task_and_external_completion_proof(self):
         receipt = {"task_id": "fixture-task", "status": "completed", "verified_count": 2,
                    "completion_verified": True, "evidence_id": "fixture-receipt"}

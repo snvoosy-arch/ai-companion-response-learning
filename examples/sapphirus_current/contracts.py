@@ -27,8 +27,8 @@ def validate_proposal(proposal: dict, available: set[str]) -> dict:
         if (not {"count"} <= set(args) <= {"count", "kind"}
                 or type(args["count"]) is not int or not 1 <= args["count"] <= 3):
             raise ValueError("count must be an integer in 1..3")
-        if "kind" in args and args["kind"] not in {
-            "oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove"}:
+        if "kind" in args and (not isinstance(args["kind"], str) or args["kind"] not in {
+            "oak", "spruce", "birch", "jungle", "acacia", "dark_oak", "mangrove"}):
             raise ValueError("unsupported log kind")
     else:
         raise ValueError("outside this reference slice")
