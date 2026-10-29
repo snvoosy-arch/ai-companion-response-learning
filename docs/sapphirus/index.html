@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sapphirus Qwen3.5-4B의 실제 학습 전후 답변과 외부 근거를 비교하는 공개 연구 포트폴리오.">
+  <title>Sapphirus — 말과 사실 사이</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="data/comparison.js" defer></script>
+  <script src="comparison-model.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#comparison">실제 답변 비교로 이동</a>
+<div class="page">
+  <header class="masthead">
+    <a class="brand" href="../"><span class="brand-mark" aria-hidden="true">✧</span> SAPPHIRUS <span class="brand-sub">RESEARCH NOTES</span></a>
+    <nav aria-label="관련 자료"><a href="../diffusion-trace/">Rubrum Trace ↗</a><a href="https://github.com/snvoosy-arch/ai-companion-response-learning">GitHub ↗</a></nav>
+  </header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow"><span class="dot"></span> QWEN3.5–4B / AUTOREGRESSIVE <span class="edition">2026.10.30</span></p>
+      <h1>말은 자연스럽게.<br><em>사실은 확인한 만큼.</em></h1>
+      <div class="intro-bottom"><p>같이 대화하고 게임하는 한국어 AI 컴패니언.<br>외부에서 확인한 상태를, 작은 생성형 모델이 어떻게 말하는지 살펴봅니다.</p><a class="text-link" href="#comparison">실제 답변 비교하기 ↓</a></div>
+    </section>
+    <section class="metrics" aria-label="평가와 학습 범위">
+      <div><p class="eyebrow">EVIDENCE-GROUNDED REPLIES</p><p class="metric">26 <span>→</span> 33 <small>/ 50</small></p><p>Minecraft 상태 설명 · 수동 사용 가능 판정</p></div>
+      <div><p class="eyebrow">CONTINUED CHAT TRAINING</p><p class="metric">200 <small>대화</small></p><p>일상 Chat r7 이후 추가 학습 · 1 epoch</p></div>
+      <div><p class="eyebrow">ONE BASE, TWO ROLES</p><p class="metric roles">Chat <span>/</span> Game</p><p>발화와 행동 제안을 별도 LoRA로 학습</p></div>
+    </section>
+    <p class="scope-note">50문항의 오프라인 대화 평가입니다. 실제 게임 수행 성공률이 아닙니다. 아래 6건은 개선과 남은 오류를 설명하기 위해 선별했으며 전체 분포를 대표하지 않습니다.</p>
+
+    <section id="comparison" aria-labelledby="comparison-title">
+      <div class="section-title"><h2 id="comparison-title"><span>01</span> 같은 상태, 두 답변</h2><p>RECORDED OUTPUTS · 새 추론 없음</p></div>
+      <div class="toolbar">
+        <div><label for="case-filter">보기</label><select id="case-filter"><option value="all">전체 사례</option><option value="improved">개선 사례</option><option value="remaining_error">남은 오류</option></select></div>
+        <div class="picker"><label for="case-picker">사례 선택</label><select id="case-picker"></select></div>
+        <div class="pagination"><button id="prev-case" type="button" aria-label="이전 사례">←</button><span id="case-position"></span><button id="next-case" type="button" aria-label="다음 사례">→</button></div>
+      </div>
+      <div class="workspace">
+        <aside class="context-panel" aria-label="입력과 외부 상태">
+          <p class="eyebrow" id="case-id"></p><h3 id="case-title"></h3>
+          <p class="field-label">사용자 메시지</p><blockquote id="user-message"></blockquote>
+          <p class="field-label">외부가 제공한 상태</p><dl id="facts-list"></dl>
+          <details><summary>모델에 전달한 전체 입력</summary><pre id="raw-input"></pre></details>
+        </aside>
+        <div class="reply-panel">
+          <div class="reply-tools"><p>저장된 모델 응답 원문</p><button id="swap-models" type="button">좌우 순서 바꾸기 ⇄</button></div>
+          <div id="answers" class="answers"></div>
+          <p class="grading-note">근거 충족과 표현 품질은 별도 판정입니다. 표현 0 = 사용 가능한 발화 없음 / 1 = 어색함 / 2 = 자연스러움. 사용 가능 = 근거 충족 + 표현 1 이상 + 정상 종료. 자연스러운 오답도 남깁니다.</p>
+        </div>
+      </div>
+      <p id="viewer-status" class="sr-only" aria-live="polite"></p>
+      <noscript><p>JavaScript를 켜거나 <a href="data/comparison.json">공개 JSON</a>에서 사례와 답변을 읽을 수 있습니다.</p></noscript>
+    </section>
+
+    <section class="responsibility" aria-labelledby="responsibility-title">
+      <div class="section-title"><h2 id="responsibility-title"><span>02</span> 어떤 책임을 어디에 두는가</h2><p>EXTERNAL-FIRST</p></div>
+      <ol class="flow">
+        <li><span>01 / PROPOSE</span><h3>Game LoRA</h3><p>요청의 의미와 고수준 행동을 제안합니다.</p></li>
+        <li><span>02 / VERIFY & EXECUTE</span><h3>외부 시스템</h3><p>권한·인자 검증, Mineflayer 실행, 실제 결과 확인을 담당합니다.</p></li>
+        <li><span>03 / EXPRESS</span><h3>Chat LoRA</h3><p>확인된 행동과 결과를 자연어로 표현합니다.</p></li>
+      </ol>
+      <p class="scope-note">통합 목표 구조입니다. Chat 추가 학습과 Game 출력 평가는 완료했지만 최신 두 LoRA의 전체 게임 실행 루프는 연결·검증 전입니다. 기존 실행기는 이동·원목 채집 범위이며, 53개 도구 정의가 53개 실제 실행 기능을 뜻하지 않습니다.</p>
+    </section>
+
+    <section class="record" aria-labelledby="record-title">
+      <div class="section-title"><h2 id="record-title"><span>03</span> 이번 학습에서 확인한 것</h2><p>SMALL-SAMPLE DIAGNOSTICS</p></div>
+      <div class="record-grid">
+        <div><h3>하나의 현재 Chat을 이어서 학습</h3><p>일상 대화 24,030개를 학습한 r7에서 Minecraft 상황 대화 200개를 추가 학습했습니다. 시스템 메시지·공통 자연어 지시 없이, 필요한 상태를 구조화한 사용자 입력으로 전달합니다.</p><p class="lineage">r7 → Minecraft 대화 누적본 → 다음 누적 학습</p><p>현재 기준은 하나입니다. 성공한 학습은 부모 가중치를 확인한 뒤 기준을 갱신하고, 이전 체크포인트는 이력으로 보존합니다. 현재 모델 선택과 실제 서비스 연결은 별개입니다.</p></div>
+        <div class="table-wrap"><table><caption>동일 입력, BF16·greedy · r7 / 누적본</caption><thead><tr><th scope="col">진단</th><th scope="col">이전</th><th scope="col">현재</th></tr></thead><tbody><tr><th scope="row">게임 상태 설명 · 사용 가능</th><td>26 / 50</td><td>33 / 50</td></tr><tr><th scope="row">게임 표현 품질 · 평균 / 2</th><td>1.80</td><td>1.94</td></tr><tr><th scope="row">일상 답변 · 사용 가능</th><td>9 / 12</td><td>11 / 12</td></tr><tr><th scope="row">일상 표현 품질 · 평균 / 2</th><td>1.58</td><td>1.33</td></tr><tr><th scope="row">개발 50문항 · 토큰 가중 loss</th><td>2.1422</td><td>1.6469</td></tr></tbody></table><p class="scope-note">일상 12건은 작은 진단 표본입니다. 점수 차이로 일반 대화 성능의 개선·악화를 확정하지 않습니다. loss와 실제 답변 품질도 구분합니다.</p></div>
+      </div>
+    </section>
+
+    <section id="sources" class="sources" aria-labelledby="sources-title">
+      <div class="section-title"><h2 id="sources-title"><span>04</span> 근거와 공개 범위</h2><p>INSPECT THE RECORD</p></div>
+      <div class="source-grid"><div><h3>실제 생성 기록, 선별 공개</h3><p>직접 작성한 합성 평가 입력의 실제 모델 응답입니다. 전체 62쌍·124답변을 모델 이름을 가린 상태에서 Codex가 수동 판정했습니다. 독립적인 사람 평가나 표준 벤치마크를 주장하지 않습니다.</p><p>평가 자료는 spent 상태이며 재실행·학습 재사용하지 않습니다. 해시는 원본 버전 식별값이며 비공개 원본 전체의 재현성을 보장하지 않습니다. 이 페이지는 모델·게임·Discord에 연결하지 않습니다.</p></div><ul><li><a href="data/comparison.json">선별 입력·답변·판정·원본 해시 ↗</a></li><li><a href="https://github.com/snvoosy-arch/ai-companion-response-learning/blob/main/docs/sapphirus-current-architecture.md">현재 구조와 실행·평가 범위 ↗</a></li><li><a href="https://github.com/snvoosy-arch/ai-companion-response-learning/tree/main/examples/sapphirus_current">GPU 없이 실행하는 계약 예제 ↗</a></li><li><a href="https://github.com/snvoosy-arch/ai-companion-response-learning/blob/main/evidence/model-training/current-summary.json">전체 공개 집계 ↗</a></li></ul></div>
+    </section>
+  </main>
+  <footer><span>SAPPHIRUS / PERSONAL AI COMPANION RESEARCH</span><a href="../">두 프로젝트 살펴보기 ↑</a></footer>
+</div>
+</body>
+</html>

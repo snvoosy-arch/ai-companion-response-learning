@@ -3,12 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="0; url=diffusion-trace/">
-  <title>Rubrum — Diffusion Trace Explorer</title>
+  <meta name="description" content="두 한국어 AI 컴패니언의 실제 생성 기록과 답변 평가를 살펴보는 연구 포트폴리오.">
+  <title>Rubrum &amp; Sapphirus — Companion Research</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f7f7f4;color:#262c38;font:15px/1.8 Arial,'Malgun Gothic',sans-serif}main{max-width:1100px;margin:auto;padding:55px 32px}header{font:12px Consolas,monospace;letter-spacing:2px;border-bottom:1px solid #d4d8df;padding-bottom:25px}h1{font:500 clamp(36px,5vw,60px)/1.3 Georgia,'Batang',serif;letter-spacing:-1.5px;margin:58px 0 22px}.intro{color:#616b7a;max-width:650px}.projects{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:46px 0}.project{border:1px solid #d4d8df;background:#fff;padding:34px;text-decoration:none;border-top:3px solid #8f2938}.project:last-child{border-top-color:#2853a0}.project h2{font:30px Georgia,serif;letter-spacing:1px;margin:15px 0}.project small{font:11px Consolas,monospace;letter-spacing:1px;color:#6a7180}.project p{font-size:14px;color:#616b7a}.project span{display:block;margin-top:32px;font-size:13px}.project:focus-visible,a:focus-visible{outline:3px solid #2853a0;outline-offset:5px}footer{border-top:1px solid #d4d8df;padding-top:24px;font-size:12px;color:#616b7a}footer a{color:inherit;text-underline-offset:4px}@media(max-width:650px){main{padding:30px 20px}.projects{grid-template-columns:1fr;gap:20px;margin-top:32px}h1{margin-top:38px}.project{padding:25px}}
+  </style>
 </head>
 <body>
-  <h1>Rubrum / Diffusion Trace Explorer</h1>
-  <p><a href="diffusion-trace/">문장이 완성되기까지 — 생성 과정 뷰어 열기</a></p>
-  <p><a href="https://github.com/snvoosy-arch/ai-companion-response-learning">포트폴리오 저장소</a></p>
+  <main>
+    <header>PERSONAL AI COMPANION RESEARCH / 2026.10.30</header>
+    <h1>두 가지 생성 방식.<br>직접 들여다보는 실험 기록.</h1>
+    <p class="intro">나와 대화하고 함께 게임하는 한국어 AI 컴패니언을 연구합니다. 저장된 실제 모델 출력을 통해 생성 과정, 학습 전후의 답변, 남아 있는 오류를 살펴볼 수 있습니다.</p>
+    <div class="projects">
+      <a class="project" href="diffusion-trace/"><small>DIFFUSION / SDAR–4B</small><h2>Rubrum</h2><p>256개 토큰이 답변으로 복원되는 실제 생성 과정을 단계별로 탐색합니다. 성공과 오류 사례를 함께 공개합니다.</p><span>기존 디퓨전 Trace 뷰어 열기 →</span></a>
+      <a class="project" href="sapphirus/"><small>AUTOREGRESSIVE / QWEN3.5–4B</small><h2>Sapphirus</h2><p>같은 요청과 외부 상태를 보고 학습 전후 모델이 어떻게 답했는지 비교합니다. 근거와 자연스러움을 따로 살펴봅니다.</p><span>실제 답변 비교 뷰어 열기 →</span></a>
+    </div>
+    <footer>두 모델의 데이터·학습 목표·평가 방식은 다릅니다. 공정한 모델 우열 비교가 아닙니다.<br><a href="https://github.com/snvoosy-arch/ai-companion-response-learning">코드와 전체 연구 문서 ↗</a></footer>
+  </main>
 </body>
 </html>

@@ -1,5 +1,7 @@
 # Sapphirus 공개 구현
 
+**2026-10-30 현재 4B 연구:** [Chat 누적 학습·별도 Game LoRA·실제 검증 범위](../../docs/sapphirus-current-architecture.md) · [실제 답변 비교 뷰어](https://snvoosy-arch.github.io/ai-companion-response-learning/sapphirus/) · [현재 CPU reference](../../examples/sapphirus_current/README.md). 아래 RAG·Minecraft 코드는 이전 계보의 공개 모듈이며 최신 4B host 통합을 뜻하지 않는다.
+
 실제 기능 실험에 사용한 코드 중 독립 실행 가능한 부분을 모았습니다. 모델 가중치,
 원본 학습·평가 자료, 개인 대화, 실행 로그, 계정 정보와 로컬 실행 계약은 포함하지 않습니다.
 

@@ -47,3 +47,7 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Six explicitly selected synthetic evaluation pairs for the public static viewer.
+!docs/sapphirus/data/
+!docs/sapphirus/data/comparison.json
+!docs/sapphirus/data/comparison.js

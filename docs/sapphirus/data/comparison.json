@@ -1,0 +1,360 @@
+{
+  "schema_version": "sapphirus.portfolio.comparison.v1",
+  "as_of": "2026-10-30",
+  "scope": {
+    "kind": "recorded_model_outputs",
+    "synthetic_evaluation": true,
+    "selected_cases": 6,
+    "representative_sample": false,
+    "spent": true,
+    "new_model_requests": 0,
+    "actual_game_success_evaluated": false
+  },
+  "models": {
+    "baseline": {
+      "label": "일상 Chat r7",
+      "run": "daily_chat_sft_24030_20261018_r7",
+      "sha256": "7e9942cbb3bbebf23e4d06306f90a33dd543deef4fe44425331b260287c303e7"
+    },
+    "current": {
+      "label": "Minecraft 대화 추가 누적본",
+      "run": "minecraft_chat_sft_20261029_r1",
+      "sha256": "e2f753c24a51d9e2f42c1560d7cdfef020518a72afa1cced6e54eff0ae326e3f"
+    }
+  },
+  "training": {
+    "train": 200,
+    "dev": 50,
+    "epochs": 1,
+    "optimizer_steps": 13,
+    "train_loss": 1.7401939132843107,
+    "dev_loss_before": 2.142193890470216,
+    "dev_loss_after": 1.6469073369608436,
+    "parameters": 16232448
+  },
+  "aggregate": {
+    "minecraft": {
+      "baseline": {
+        "total": 50,
+        "grounded": 26,
+        "usable": 26,
+        "ended": 50,
+        "natural": 40,
+        "mean_quality": 1.8
+      },
+      "current": {
+        "total": 50,
+        "grounded": 33,
+        "usable": 33,
+        "ended": 50,
+        "natural": 47,
+        "mean_quality": 1.94
+      }
+    },
+    "daily": {
+      "baseline": {
+        "total": 12,
+        "grounded": 9,
+        "usable": 9,
+        "ended": 12,
+        "natural": 8,
+        "mean_quality": 1.583
+      },
+      "current": {
+        "total": 12,
+        "grounded": 11,
+        "usable": 11,
+        "ended": 12,
+        "natural": 4,
+        "mean_quality": 1.333
+      }
+    }
+  },
+  "provenance": {
+    "inputs": "b821ffc5016fccbaf2991b3931db3fdf303e352a9b80e822e1f70db4ed166b2f",
+    "scores": "cd688e46515ac0d98174e34ad3bfecfc62c8b39f90660a3a125f46313b897850",
+    "summary": "6bde182b817662925fd47594c746bbb4175d47128b4444250124ebbfb56a6f52",
+    "registry": "89ddc50c9a58b4d75a9b5b815b4c1128506001bba8d030744006e3f6831c544d"
+  },
+  "cases": [
+    {
+      "id": "mcchat_test_0029",
+      "title": "재고가 있어도, 먹을 수 있는지는 별개",
+      "theme": "improved",
+      "input": {
+        "schema_version": "sapphirus.minecraft.chat.v1",
+        "message": "빵은 두 개 있으니까 하나 먹을 수 있지?",
+        "history": [],
+        "game_context": {
+          "phase": "deferred",
+          "goal": {
+            "tool": "eat_food",
+            "arguments": {
+              "count": 1,
+              "item": "bread"
+            }
+          },
+          "verified_count": 0,
+          "completion_verified": false,
+          "reason_codes": [
+            "food_level_unknown"
+          ],
+          "facts": {
+            "fresh": true,
+            "inventory_known": true,
+            "inventory": {
+              "bread": 2
+            },
+            "food_level": null
+          }
+        }
+      },
+      "outputs": {
+        "baseline": {
+          "text": "빵이 두 개 있으니 하나 먹을 수 있지.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "허기 수치가 미확인인데 재고만으로 먹을 수 있다고 단정해."
+        },
+        "current": {
+          "text": "빵은 두 개 있어. 먹을 수 있는지 확인은 아직 안 됐어.",
+          "grounded": true,
+          "language_quality": 2,
+          "usable": true,
+          "normal_eos": true,
+          "note": "빵 두 개 재고와 섭취 가능 여부의 미확인을 구분해 성급한 실행에 동의하지 않아."
+        }
+      }
+    },
+    {
+      "id": "mcchat_test_0001",
+      "title": "접근 요청을 자연스러운 말로",
+      "theme": "improved",
+      "input": {
+        "schema_version": "sapphirus.minecraft.chat.v1",
+        "message": "난 기다릴 테니까 내 쪽으로 와 줘.",
+        "history": [],
+        "game_context": {
+          "phase": "accepted",
+          "goal": {
+            "tool": "approach_user",
+            "arguments": {}
+          },
+          "verified_count": 0,
+          "completion_verified": false,
+          "reason_codes": [],
+          "facts": {}
+        }
+      },
+      "outputs": {
+        "baseline": {
+          "text": "응, 바로 지나가.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "접수 상태인데 바로 지나간다고 하여 이동을 기정사실화하고 요청 방향도 흐려."
+        },
+        "current": {
+          "text": "응, 네 쪽으로 갈게.",
+          "grounded": true,
+          "language_quality": 2,
+          "usable": true,
+          "normal_eos": true,
+          "note": "사용자 쪽으로 가겠다는 의사만 자연스럽게 밝혀."
+        }
+      }
+    },
+    {
+      "id": "mcchat_test_0012",
+      "title": "대화가 아닌, 접근 작업의 완료",
+      "theme": "improved",
+      "input": {
+        "schema_version": "sapphirus.minecraft.chat.v1",
+        "message": "이번에 나한테 오는 건 마무리된 거야?",
+        "history": [],
+        "game_context": {
+          "phase": "completed",
+          "goal": {
+            "tool": "approach_user",
+            "arguments": {}
+          },
+          "verified_count": 1,
+          "completion_verified": true,
+          "reason_codes": [],
+          "facts": {}
+        }
+      },
+      "outputs": {
+        "baseline": {
+          "text": "응, 이번 대화는 마무리됐어.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "접근 작업 완료를 대화 종료로 잘못 바꿔."
+        },
+        "current": {
+          "text": "응, 이번 접근은 완료됐어.",
+          "grounded": true,
+          "language_quality": 2,
+          "usable": true,
+          "normal_eos": true,
+          "note": "검증된 접근 완료를 정확히 알렸어."
+        }
+      }
+    },
+    {
+      "id": "mcchat_test_0047",
+      "title": "중단과 확인된 수량을 함께 설명",
+      "theme": "improved",
+      "input": {
+        "schema_version": "sapphirus.minecraft.chat.v1",
+        "message": "정글 원목 세 개 채집은 그만해. 얼마나 됐어?",
+        "history": [],
+        "game_context": {
+          "phase": "cancelled",
+          "goal": {
+            "tool": "collect_logs",
+            "arguments": {
+              "count": 3,
+              "kind": "jungle"
+            }
+          },
+          "verified_count": 2,
+          "completion_verified": false,
+          "reason_codes": [
+            "task_cancelled"
+          ],
+          "facts": {
+            "current_step": "stopped"
+          }
+        }
+      },
+      "outputs": {
+        "baseline": {
+          "text": "채집은 두 개까지 했다고 했어?",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "확인된 두 개 성과를 되묻고 작업 중단 상태를 보고하지 않아."
+        },
+        "current": {
+          "text": "정글 원목 채집은 두 개 채집한 뒤 중단됐어.",
+          "grounded": true,
+          "language_quality": 2,
+          "usable": true,
+          "normal_eos": true,
+          "note": "정글 원목 두 개 확보와 확인된 중단을 함께 알려."
+        }
+      }
+    },
+    {
+      "id": "mcchat_test_0010",
+      "title": "수량 확인을 완료 확인으로 혼동",
+      "theme": "remaining_error",
+      "input": {
+        "schema_version": "sapphirus.minecraft.chat.v1",
+        "message": "닭고기 하나 먹었다는 수량이면 완료라고 써도 되겠네?",
+        "history": [],
+        "game_context": {
+          "phase": "running",
+          "goal": {
+            "tool": "eat_food",
+            "arguments": {
+              "count": 1,
+              "item": "cooked_chicken"
+            }
+          },
+          "verified_count": 1,
+          "completion_verified": false,
+          "reason_codes": [],
+          "facts": {
+            "current_step": "checking_completion"
+          }
+        }
+      },
+      "outputs": {
+        "baseline": {
+          "text": "응, \"닭고기 하나 먹었다\"라고 적으면 충분해.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "완료라고 써도 되냐는 질문에 동의하며 미확인 완료 상태를 바로잡지 않아."
+        },
+        "current": {
+          "text": "응, 닭고기 한 개를 먹었다는 수량으로 완료로 표시해도 돼.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "완료 확인이 남았는데 완료로 표시해도 된다고 승인해."
+        }
+      }
+    },
+    {
+      "id": "mcchat_test_0034",
+      "title": "실행할 수 없는 대체 음식 제안",
+      "theme": "remaining_error",
+      "input": {
+        "schema_version": "sapphirus.minecraft.chat.v1",
+        "message": "허기 꽉 찼어도 빵 두 개 먹는 거 처리해 줘.",
+        "history": [],
+        "game_context": {
+          "phase": "deferred",
+          "goal": {
+            "tool": "eat_food",
+            "arguments": {
+              "count": 2,
+              "item": "bread"
+            }
+          },
+          "verified_count": 0,
+          "completion_verified": false,
+          "reason_codes": [
+            "hunger_full",
+            "requested_food_missing"
+          ],
+          "facts": {
+            "fresh": true,
+            "food_level": 20,
+            "inventory_known": true,
+            "inventory": {
+              "bread": 0,
+              "apple": 1
+            }
+          }
+        }
+      },
+      "outputs": {
+        "baseline": {
+          "text": "빵은 두 개가 아니라 사과가 하나만 있어. 빵 두 개를 먹을 수는 없겠네.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "빵 부재만 설명하고 함께 주어진 배부름을 누락해."
+        },
+        "current": {
+          "text": "빵은 재고가 없어. 사과 한 개는 먹을 수 있어.",
+          "grounded": false,
+          "language_quality": 2,
+          "usable": false,
+          "normal_eos": true,
+          "note": "배부름을 무시하고 사과 한 개를 먹을 수 있다고 임의 대체해."
+        }
+      }
+    }
+  ],
+  "review": {
+    "type": "Codex_identity_blinded_manual_review",
+    "pairs": 62,
+    "outputs": 124,
+    "independent_human_evaluation": false,
+    "usable_definition": "grounded and language_quality >= 1 and normal EOS"
+  }
+}

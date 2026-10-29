@@ -34,6 +34,9 @@ SCOPED_MARKDOWN = (
     ROOT / "docs" / "sapphirus-latest-experiments.md",
     ROOT / "evidence" / "README.md",
     ROOT / "examples" / "sapphirus_external_first" / "README.md",
+    ROOT / "examples" / "sapphirus_current" / "README.md",
+    ROOT / "docs" / "sapphirus-current-architecture.md",
+    ROOT / "docs" / "sapphirus" / "README.md",
 )
 EVIDENCE_FILES = tuple(sorted((ROOT / "evidence").glob("*.json")))
 PUBLIC_CODE = tuple(
@@ -50,6 +53,9 @@ PUBLIC_TEXT_SUFFIXES = {
     ".txt",
     ".yaml",
     ".yml",
+    ".html",
+    ".css",
+    ".cjs",
 }
 
 
@@ -59,9 +65,16 @@ def _collect_public_boundary_files() -> tuple[Path, ...]:
         ROOT / "companions" / "README.md",
         ROOT / ".github" / "workflows" / "sapphirus-portfolio.yml",
         ROOT / "scripts" / "check_sapphirus_portfolio.py",
+        ROOT / "scripts" / "check_sapphirus_current.py",
+        ROOT / "scripts" / "export_sapphirus_comparison.py",
+        ROOT / "tests" / "test_sapphirus_current.py",
+        ROOT / "tests" / "sapphirus-viewer.test.cjs",
+        ROOT / "docs" / "index.html",
     }
     roots = (
         ROOT / "examples" / "sapphirus_external_first",
+        ROOT / "examples" / "sapphirus_current",
+        ROOT / "docs" / "sapphirus",
         ROOT / "evidence",
         ROOT / "companions" / "sapphirus",
     )

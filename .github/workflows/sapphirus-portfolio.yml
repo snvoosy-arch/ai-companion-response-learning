@@ -7,9 +7,17 @@ on:
       - "companions/README.md"
       - "companions/sapphirus/**"
       - "docs/sapphirus-*"
+      - "docs/sapphirus/**"
+      - "docs/current-model-training.md"
+      - "docs/index.html"
       - "docs/assets/sapphirus-*"
       - "evidence/**"
       - "examples/sapphirus_external_first/**"
+      - "examples/sapphirus_current/**"
+      - "scripts/check_sapphirus_current.py"
+      - "scripts/export_sapphirus_comparison.py"
+      - "tests/test_sapphirus_current.py"
+      - "tests/sapphirus-viewer.test.cjs"
       - "scripts/check_sapphirus_portfolio.py"
       - ".github/workflows/sapphirus-portfolio.yml"
   pull_request:
@@ -18,9 +26,17 @@ on:
       - "companions/README.md"
       - "companions/sapphirus/**"
       - "docs/sapphirus-*"
+      - "docs/sapphirus/**"
+      - "docs/current-model-training.md"
+      - "docs/index.html"
       - "docs/assets/sapphirus-*"
       - "evidence/**"
       - "examples/sapphirus_external_first/**"
+      - "examples/sapphirus_current/**"
+      - "scripts/check_sapphirus_current.py"
+      - "scripts/export_sapphirus_comparison.py"
+      - "tests/test_sapphirus_current.py"
+      - "tests/sapphirus-viewer.test.cjs"
       - "scripts/check_sapphirus_portfolio.py"
       - ".github/workflows/sapphirus-portfolio.yml"
 
@@ -43,11 +59,18 @@ jobs:
         run: >-
           python -m compileall -q
           examples/sapphirus_external_first
+          examples/sapphirus_current
+          scripts/check_sapphirus_current.py
+          scripts/export_sapphirus_comparison.py
           scripts/check_sapphirus_portfolio.py
       - name: Run Ruff
         run: >-
           python -m ruff check
           examples/sapphirus_external_first
+          examples/sapphirus_current
+          scripts/check_sapphirus_current.py
+          scripts/export_sapphirus_comparison.py
+          tests/test_sapphirus_current.py
           scripts/check_sapphirus_portfolio.py
       - name: Run contract tests
         run: python -m unittest discover -s examples/sapphirus_external_first/tests -v
@@ -55,6 +78,17 @@ jobs:
         run: python scripts/check_sapphirus_portfolio.py
       - name: Run the CPU demonstration
         run: python -m examples.sapphirus_external_first.demo
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Check current Chat reference and recorded comparison
+        run: |
+          python -m unittest discover -s tests -p "test_sapphirus_current.py" -v
+          python -m examples.sapphirus_current.demo
+          python scripts/check_sapphirus_current.py
+          node --test tests/sapphirus-viewer.test.cjs
+          node --check docs/sapphirus/app.js
+          node --check docs/sapphirus/comparison-model.js
 
   verify-functional-modules:
     runs-on: ubuntu-latest

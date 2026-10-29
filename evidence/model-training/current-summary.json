@@ -1,7 +1,7 @@
 {
   "schema_version": "companion.model_training_snapshot.v1",
   "as_of": "2026-10-30",
-  "evidence_scope": "Selected aggregates from private local training and evaluation artifacts; not public reproduction or proof of live deployment.",
+  "evidence_scope": "Selected aggregates from private local training and evaluation artifacts; not public reproduction or proof of live deployment. Includes six selected synthetic Sapphirus evaluation pairs; not live inference or AR token traces.",
   "rubrum": {
     "as_of": "2026-10-30",
     "base_model": "JetLM/SDAR-4B-Chat",
@@ -124,61 +124,176 @@
     }
   },
   "sapphirus": {
+    "as_of": "2026-10-30",
     "base_model": "Qwen3.5-4B",
-    "method": "autoregressive Korean daily-conversation LoRA SFT; BF16; answer and ending-token supervision",
-    "run_id": "daily_chat_sft_24030_20261018_r7",
-    "executed_on": "2026-10-19",
-    "initial_candidate": "r6",
+    "method": "AR Chat cumulative LoRA SFT; separate Minecraft Game LoRA; external authority and execution",
+    "run_id": "minecraft_chat_sft_20261029_r1",
+    "adapter_sha256": "e2f753c24a51d9e2f42c1560d7cdfef020518a72afa1cced6e54eff0ae326e3f",
+    "parent_run_id": "daily_chat_sft_24030_20261018_r7",
+    "selection": "current_chat",
+    "continuation_policy": "latest verified Chat weights; compare parent and advance after valid completion",
+    "optimizer_scheduler_restarted_per_run": true,
     "training": {
-      "dialogues": 24030,
-      "assistant_training_views": 24122,
-      "current_corpus_epochs": 1,
-      "optimizer_steps": 1508,
-      "mean_training_loss": 1.9878339156642495,
-      "total_elapsed_s": 4833.2812873289995,
-      "lora_rank": 8,
-      "lora_alpha": 16,
-      "lora_dropout": 0.05,
-      "parameter_count": 16232448
+      "train": 200,
+      "dev": 50,
+      "epochs": 1,
+      "optimizer_steps": 13,
+      "train_loss": 1.7401939132843107,
+      "dev_loss_before": 2.142193890470216,
+      "dev_loss_after": 1.6469073369608436,
+      "parameters": 16232448
     },
-    "diagnostic": {
-      "rows": 100,
-      "before_token_weighted_loss": 2.45223564009056,
-      "after_token_weighted_loss": 2.362163875341858,
-      "reused_not_fresh_holdout": true
-    },
+    "system_prompt": false,
+    "auxiliary_instruction": false,
+    "structured_state_input": true,
     "generation_comparison": {
-      "cases": 24,
-      "single_turn_cases": 20,
-      "context_cases": 4,
-      "responses": 48,
-      "identity_blinded": true,
-      "reviewer_type": "not specified in aggregate source; no independent-human-review claim",
-      "primary_preference": {
-        "r6": 3,
-        "r7": 12,
-        "tie": 9
+      "minecraft": {
+        "baseline": {
+          "total": 50,
+          "grounded": 26,
+          "usable": 26,
+          "ended": 50,
+          "natural": 40,
+          "mean_quality": 1.8
+        },
+        "current": {
+          "total": 50,
+          "grounded": 33,
+          "usable": 33,
+          "ended": 50,
+          "natural": 47,
+          "mean_quality": 1.94
+        }
       },
-      "second_preference": {
-        "r6": 2,
-        "r7": 13,
-        "tie": 9
+      "daily": {
+        "baseline": {
+          "total": 12,
+          "grounded": 9,
+          "usable": 9,
+          "ended": 12,
+          "natural": 8,
+          "mean_quality": 1.583
+        },
+        "current": {
+          "total": 12,
+          "grounded": 11,
+          "usable": 11,
+          "ended": 12,
+          "natural": 4,
+          "mean_quality": 1.333
+        }
       },
-      "dtype": "bf16",
-      "do_sample": false,
-      "normal_eos": 48,
-      "truncated": 0,
-      "limitations": "24 manually selected cases and subjective reviews; not a statistical benchmark or broad capability guarantee. Prompts, authored context, and model responses must never be reused for training."
+      "review": {
+        "type": "Codex_identity_blinded_manual_review",
+        "pairs": 62,
+        "outputs": 124,
+        "independent_human_evaluation": false,
+        "usable_definition": "grounded and language_quality >= 1 and normal EOS"
+      },
+      "spent": true,
+      "small_sample_general_performance_judgment": "withheld",
+      "actual_game_success_evaluated": false
     },
-    "verification": {
-      "status": "complete",
-      "cpu_adapter_audit_passed": true,
-      "tensor_count": 496,
-      "full_model_reload_during_training_verification": false,
-      "adapter_sha256": "7e9942cbb3bbebf23e4d06306f90a33dd543deef4fe44425331b260287c303e7"
+    "game": {
+      "separate_from_chat": true,
+      "run_id": "minecraft_action_joint53_20261028_r1",
+      "adapter_sha256": "f3eb31bff3fd572c0baac5eb158a33e83083d8697d1dbc0e437992bffa49b4a2",
+      "train": 1000,
+      "dev": 100,
+      "defined_high_level_tools": 53,
+      "new_final": {
+        "total": 50,
+        "json": 50,
+        "contract": 38,
+        "exact": 32,
+        "intent": [
+          14,
+          30
+        ],
+        "selector": [
+          18,
+          20
+        ]
+      },
+      "live_smoke": {
+        "synthetic_direct_host_inputs": 3,
+        "chat_route_passed": 1,
+        "action_arguments_rejected": 2,
+        "actual_movement_or_collection": 0,
+        "ordinary_game_chat_ingress_tested": false
+      },
+      "latest_chat_game_end_to_end_verified": false
     },
-    "promoted": false,
-    "as_of": "2026-10-22"
+    "runtime": {
+      "status": "stopped",
+      "last_discord_test": "2026-10-29 r7 with INT8 base",
+      "next_default": "current cumulative Chat; concrete run/hash pinned at session start",
+      "current_selection_is_live_deployment": false
+    },
+    "new_generic_continuation_entrypoint_gpu_tested": false,
+    "previous_daily_stage": {
+      "base_model": "Qwen3.5-4B",
+      "method": "autoregressive Korean daily-conversation LoRA SFT; BF16; answer and ending-token supervision",
+      "run_id": "daily_chat_sft_24030_20261018_r7",
+      "executed_on": "2026-10-19",
+      "initial_candidate": "r6",
+      "training": {
+        "dialogues": 24030,
+        "assistant_training_views": 24122,
+        "current_corpus_epochs": 1,
+        "optimizer_steps": 1508,
+        "mean_training_loss": 1.9878339156642495,
+        "total_elapsed_s": 4833.2812873289995,
+        "lora_rank": 8,
+        "lora_alpha": 16,
+        "lora_dropout": 0.05,
+        "parameter_count": 16232448
+      },
+      "diagnostic": {
+        "rows": 100,
+        "before_token_weighted_loss": 2.45223564009056,
+        "after_token_weighted_loss": 2.362163875341858,
+        "reused_not_fresh_holdout": true
+      },
+      "generation_comparison": {
+        "cases": 24,
+        "single_turn_cases": 20,
+        "context_cases": 4,
+        "responses": 48,
+        "identity_blinded": true,
+        "reviewer_type": "not specified in aggregate source; no independent-human-review claim",
+        "primary_preference": {
+          "r6": 3,
+          "r7": 12,
+          "tie": 9
+        },
+        "second_preference": {
+          "r6": 2,
+          "r7": 13,
+          "tie": 9
+        },
+        "dtype": "bf16",
+        "do_sample": false,
+        "normal_eos": 48,
+        "truncated": 0,
+        "limitations": "24 manually selected cases and subjective reviews; not a statistical benchmark or broad capability guarantee. Prompts, authored context, and model responses must never be reused for training."
+      },
+      "verification": {
+        "status": "complete",
+        "cpu_adapter_audit_passed": true,
+        "tensor_count": 496,
+        "full_model_reload_during_training_verification": false,
+        "adapter_sha256": "7e9942cbb3bbebf23e4d06306f90a33dd543deef4fe44425331b260287c303e7"
+      },
+      "promoted": false,
+      "as_of": "2026-10-22"
+    },
+    "public_comparison_provenance": {
+      "inputs": "b821ffc5016fccbaf2991b3931db3fdf303e352a9b80e822e1f70db4ed166b2f",
+      "scores": "cd688e46515ac0d98174e34ad3bfecfc62c8b39f90660a3a125f46313b897850",
+      "summary": "6bde182b817662925fd47594c746bbb4175d47128b4444250124ebbfb56a6f52",
+      "registry": "89ddc50c9a58b4d75a9b5b815b4c1128506001bba8d030744006e3f6831c544d"
+    }
   },
   "comparison_scope": "Different corpora, objectives and evaluations; not a controlled diffusion-versus-AR ranking.",
   "source_artifacts": {
@@ -249,6 +364,26 @@
     "rubrum_chat500_daily_after": {
       "artifact": "daily_validation_after_summary.json",
       "sha256": "d20e80e3e4c6222b23f0d8217dc0975b7c5641fbc65d15eeb88665f121339604"
+    },
+    "sapphirus_current_training": {
+      "artifact": "result.json",
+      "sha256": "55846d3007a09a38490501744f35ba717f88b51c4b4d678f75c690c42ab86ac8"
+    },
+    "sapphirus_current_comparison": {
+      "artifact": "summary.json",
+      "sha256": "6bde182b817662925fd47594c746bbb4175d47128b4444250124ebbfb56a6f52"
+    },
+    "sapphirus_current_selection": {
+      "artifact": "chat_model.json",
+      "sha256": "89ddc50c9a58b4d75a9b5b815b4c1128506001bba8d030744006e3f6831c544d"
+    },
+    "sapphirus_game_final": {
+      "artifact": "summary.json",
+      "sha256": "a6d1f7de5f139b0da8a9c0cc4f6ec68d7d76df06418bac50929a9abc1b9c1342"
+    },
+    "sapphirus_game_smoke": {
+      "artifact": "result.json",
+      "sha256": "be5d665a2fa1f939f180799cc0b1cff551f52d60425f3b6a7e2d1beed3007d02"
     }
   },
   "history": {
