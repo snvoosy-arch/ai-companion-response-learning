@@ -1,0 +1,28 @@
+name: Rubrum trace viewer
+
+on:
+  push:
+    paths: ["docs/diffusion-trace/**", "scripts/export_diffusion_trace.py", "tests/**", ".github/workflows/rubrum-trace.yml"]
+  pull_request:
+    paths: ["docs/diffusion-trace/**", "scripts/export_diffusion_trace.py", "tests/**", ".github/workflows/rubrum-trace.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  saved-traces:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Check public trace export and bundle
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+      - name: Check navigation and every recorded frame
+        run: node --test tests/trace-model.test.cjs
+      - name: Check browser script syntax
+        run: node --check docs/diffusion-trace/app.js

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Rubrum의 실제 디퓨전 복원 기록. 256개 토큰이 답변으로 바뀌는 과정과 사실성의 한계를 탐색합니다.">
+  <title>문장이 완성되기까지 — Rubrum Trace</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="trace-model.js"></script>
+  <script defer src="data/traces.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#explorer">복원 기록으로 이동</a>
+  <div class="page">
+    <header class="masthead">
+      <a class="brand" href="https://github.com/snvoosy-arch/ai-companion-response-learning"><span class="brand-mark" aria-hidden="true">R</span> RUBRUM <span class="brand-sub">/ RESEARCH NOTE 01</span></a>
+      <nav aria-label="관련 자료"><a href="../rubrum-current-architecture.md">구조와 근거 ↗</a><a href="https://github.com/snvoosy-arch/ai-companion-response-learning">GitHub ↗</a></nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p class="eyebrow"><span class="dot"></span> DIFFUSION TRACE EXPLORER <span class="edition">2026.10.30</span></p>
+        <h1>문장이<br><em>완성되기까지.</em></h1>
+        <div class="intro-bottom"><p>무작위 토큰이 답변이 되는 과정을 들여다봅니다.<br>그리고, 문장이 완성되어도 <strong>사실이 틀릴 수 있는 이유</strong>를 봅니다.</p><p class="model-note">SDAR–4B + LoRA + SC<br>256 TOKEN CANVAS / SAVED TRACES</p></div>
+      </section>
+
+      <section id="explorer" class="explorer" aria-labelledby="explorer-title">
+        <div class="section-title"><h2 id="explorer-title"><span>01</span> 복원 기록 탐색</h2><p>실제 모델 기록 · 작성된 평가 상황 2개</p></div>
+        <div class="casebar"><label for="case-select">사례 선택</label><select id="case-select"><option value="0">제련 진행 확인 — 관찰과 일치</option><option value="1">수령 미확인 — 근거 없는 단정</option></select><span id="case-id" class="mono"></span></div>
+        <p id="error" class="error" role="alert" hidden></p>
+        <noscript><p class="error">탐색 기능에는 JavaScript가 필요합니다. 같은 폴더의 data/traces.json에서 원본 공개 데이터를 읽을 수 있습니다.</p></noscript>
+        <div class="workspace">
+          <aside class="context-panel">
+            <p class="eyebrow">INPUT / OBSERVATION</p>
+            <h3 id="case-title">제련 진행 확인</h3>
+            <blockquote id="user-text"></blockquote>
+            <details open><summary>제공된 게임 상태</summary><pre id="game-state"></pre></details>
+            <div class="final-answer"><p class="eyebrow">실제 최종 답변</p><p id="final-reply"></p><span id="verdict" class="verdict"></span></div>
+            <p id="case-note" class="case-note"></p>
+          </aside>
+
+          <div class="trace-panel">
+            <div class="trace-heading"><p class="eyebrow">DENOISING CANVAS</p><p class="step-label">STEP <strong id="step-number">14</strong><span id="step-total"> / 14</span></p></div>
+            <div class="draft"><p id="draft-text"></p><span id="draft-caption"></span></div>
+            <div class="transport"><button id="play" type="button" aria-pressed="false">▶ 처음부터 재생</button><button id="previous" type="button" aria-label="이전 복원 단계">←</button><label class="sr-only" for="step-range">복원 단계</label><input id="step-range" type="range" min="0" max="14" value="14"><button id="next" type="button" aria-label="다음 복원 단계">→</button></div>
+            <div class="metrics"><div><span>직전 대비 변경</span><strong id="changed-count"></strong></div><div><span>평균 entropy <small>(nats)</small></span><strong id="entropy-value"></strong></div><div><span>Canvas 첫 종료 위치 <small>(0부터)</small></span><strong id="eos-value"></strong></div></div>
+            <div class="token-toolbar"><h4>토큰 단위로 보기</h4><label><input type="checkbox" id="full-canvas"> 256개 전체 보기</label></div>
+            <div class="legend"><span><i class="changed-key"></i> 이번 단계에서 변경</span><span><i class="end-key"></i> 종료·채움 토큰</span><span>클릭하면 ID와 원시 조각 표시</span></div>
+            <div id="token-grid" class="token-grid" aria-label="Canvas 토큰"></div>
+            <p id="token-detail" class="token-detail" role="status">토큰을 선택해 세부 정보를 확인하세요.</p>
+            <div class="entropy-chart"><div class="chart-heading"><h4>복원 단계별 entropy</h4><span>낮을수록 예측 분포가 집중됨</span></div><svg id="chart" viewBox="0 0 640 100" role="img" aria-label="복원 단계별 전체 canvas 평균 entropy"></svg><p id="stop-note" class="fineprint"></p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="reading-guide" aria-labelledby="guide-title"><div class="section-title"><h2 id="guide-title"><span>02</span> 이 기록을 읽는 법</h2></div><div class="guide-columns">
+        <article><span class="guide-index">A / PROCESS</span><h3>뒤의 토큰도 다시 바뀝니다.</h3><p>왼쪽부터 한 토큰씩 확정하는 AR과 달리, 이 실험은 256칸의 canvas를 함께 복원합니다. 선택된 위치도 다음 단계에서 다시 바뀔 수 있습니다. 이전 예측은 self-conditioning에 반영됩니다.</p></article>
+        <article><span class="guide-index">B / BOUNDARY</span><h3>수렴과 사실성은 다릅니다.</h3><p>Entropy는 모델의 예측 분포를 나타냅니다. 관찰과 일치하는 확률이나 의미 정확도 점수가 아닙니다. 잘못된 수령 주장도 안정적으로 수렴했습니다. 행동 결과와 발화의 대조가 별도로 필요합니다.</p></article>
+        <article><span class="guide-index">C / EVIDENCE</span><h3>생성 과정을 공개합니다.</h3><p>직접 작성한 합성 평가 상황에서 저장한 실제 모델 기록입니다. 개인 Discord 대화나 실제 게임 플레이 로그가 아닙니다. 두 사례는 과정 설명을 위해 선별했으며 전체 성능을 대표하지 않습니다.</p></article>
+      </div></section>
+
+      <section class="provenance"><div><p class="eyebrow">SOURCE & REPRODUCTION</p><h2>기록을 재생할 뿐,<br>모델을 실행하지 않습니다.</h2></div><div class="provenance-text"><p>정적 파일만으로 작동하며 GPU·API 키·모델 서버가 필요 없습니다. 모델 가중치와 전체 학습 코퍼스는 포함하지 않습니다. Trace는 재생할 수 있지만, 공개 파일만으로 학습 전체를 재현할 수 있다는 뜻은 아닙니다.</p><p>토큰은 완성된 단어가 아닐 수 있습니다. 개별 조각의 �는 UTF-8 바이트 조각을 따로 해독한 결과일 수 있으므로, 연결된 텍스트와 토큰 ID를 함께 확인하세요. 초기 노이즈는 정제하지 않았습니다.</p><div class="source-links"><a href="data/traces.json" download>공개 Trace JSON ↓</a><a href="../rubrum-current-architecture.md">현재 구조·실험 범위 ↗</a></div><details><summary>기록 버전과 출처 해시</summary><pre id="provenance"></pre></details></div></section>
+    </main>
+    <footer><span>RUBRUM / PERSONAL AI RESEARCH</span><span>과정을 관찰하고, 주장의 범위를 남깁니다.</span><a href="https://github.com/snvoosy-arch/ai-companion-response-learning">SOURCE ↗</a></footer>
+  </div>
+</body>
+</html>

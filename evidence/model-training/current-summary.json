@@ -1,47 +1,127 @@
 {
   "schema_version": "companion.model_training_snapshot.v1",
-  "as_of": "2026-10-22",
+  "as_of": "2026-10-30",
   "evidence_scope": "Selected aggregates from private local training and evaluation artifacts; not public reproduction or proof of live deployment.",
   "rubrum": {
+    "as_of": "2026-10-30",
     "base_model": "JetLM/SDAR-4B-Chat",
     "base_revision": "56bca3c8d927410589a86e7996ee281b6764fa37",
-    "method": "uniform-token denoising adaptation; frozen backbone; LoRA rank 8 alpha 16; trainable self-conditioning",
-    "run_id": "fineweb_uniform_300steps_20261022",
+    "method": "256-token uniform denoising; frozen BF16 backbone; LoRA r8 alpha16; trainable self-conditioning",
+    "run_id": "minecraft_chat500_uniform_20261029_v1",
+    "parent_run_id": "all_distill_uniform_20261026_v1",
     "training": {
-      "stage_content_tokens": 551426,
-      "stage_canvases": 2400,
-      "stage_updates": 300,
-      "cumulative_content_tokens": 32113100,
-      "cumulative_updates": 17549
+      "unique_rows": 450,
+      "heldout_rows": 50,
+      "current_corpus_epochs": 1,
+      "content_tokens": 7475,
+      "updates": 57,
+      "turn_ending_positions": 450,
+      "fill_positions": 107275,
+      "supervised_positions": 115200,
+      "changed_lora_tensors": 504,
+      "changed_sc_tensors": 6,
+      "system_prompt": false,
+      "auxiliary_instruction": false,
+      "explicit_seed": false
+    },
+    "parent_distillation_stage": {
+      "dialogues": 20830,
+      "assistant_views": 22284,
+      "content_tokens": 691382,
+      "updates": 2786
     },
     "reconstruction": {
-      "documents": 100,
-      "corrupted_canvases": 300,
-      "noise_levels": [
-        0.1,
-        0.5,
-        0.9
-      ],
-      "before_content_loss": 2.4393413662020467,
-      "after_content_loss": 2.4321362313432933,
-      "before_content_accuracy": 0.6169443946724004,
-      "after_content_accuracy": 0.619213999880547,
-      "scope": "Fixed reused reconstruction diagnostic, not dialogue quality."
+      "game": {
+        "questions": 50,
+        "canvases": 150,
+        "before_content_loss": 1.8425049971743865,
+        "after_content_loss": 1.6716226126326441,
+        "before_content_accuracy": 0.6690419635787807,
+        "after_content_accuracy": 0.6920031670625495
+      },
+      "daily": {
+        "questions": 20,
+        "canvases": 60,
+        "before_content_loss": 1.815562483611816,
+        "after_content_loss": 1.8358176407789444,
+        "before_content_accuracy": 0.6824629271437782,
+        "after_content_accuracy": 0.6856866537717602
+      }
     },
-    "generation": {
-      "sampled": 20,
-      "empty": 1,
-      "replacement_characters": 0,
-      "seed_used": false,
-      "semantic_quality_requires_review": true
+    "generation_diagnostic": {
+      "game_questions": 20,
+      "daily_questions": 10,
+      "responses_before_and_after": 60,
+      "game_basic_pass_before": 3,
+      "game_basic_pass_after": 6,
+      "daily_basic_pass_before": 5,
+      "daily_basic_pass_after": 2,
+      "scope": "Small non-blinded manual diagnostic with independent generation noise; no broad improvement/degradation conclusion or automatic rollback."
     },
     "verification": {
-      "artifact_checks": 51,
-      "status": "passed",
-      "exact_gpu_reload_probes": 3,
-      "checkpoint_sha256": "93166049435234aa35d07f71f41ed79a71a10b89899df1e3f30e94bef275ee58"
+      "artifact_checks": 734,
+      "adapter_sha256": "4311647b3a0ecac89be121b5c9b550b0e24ac0bf49cc5d93fa1e57952826ae32",
+      "sc_sha256": "173fc3d3fa42491c3788a39f583d13645dad5c066dca4bd1c1417ebfa6e48b99",
+      "cpu_audit": {
+        "status": "verified",
+        "train_examples": 450,
+        "updates": 57,
+        "trainable_tensors": 510,
+        "initial_checkpoint_matches_parent": true,
+        "final_checkpoint_matches_saved_adapter_sc": true,
+        "changed_adapter_tensors": 504,
+        "changed_sc_tensors": 6,
+        "checkpoint_sha256": {
+          "0": "a3d2d009e4987c9cca4dcafa2c66bff3953769dbd0bfc44d7069ffde68b51482",
+          "57": "d165f62d85c6d8b5ce3df3bab115c43f077fbd0a8bef56f44a36f398bafce0b6"
+        },
+        "validation_identities_and_aggregates_match": true,
+        "generation_first_attempts": 60,
+        "protected_hashes_ok": true,
+        "source_seals_ok": true,
+        "model_loaded": false,
+        "gpu_initialized": false
+      }
     },
-    "runtime_changed": false
+    "semantic_game_adapter": {
+      "run_id": "functions_v3",
+      "training_intent_rows": 840,
+      "evaluation_rows": 200,
+      "after": {
+        "count": 200,
+        "kind_correct": 152,
+        "raw_goal_correct": 117,
+        "validated_goal_correct": 124,
+        "raw_false_execution": 26,
+        "validated_false_execution": 9
+      },
+      "new_function_positive_raw_goal_correct": 2,
+      "new_function_positive_rows": 39,
+      "scope": "Synthetic semantic interpretation, not action execution success; no learned action ranker."
+    },
+    "live_smoke": {
+      "as_of": "2026-10-29",
+      "script_injected_requests": 8,
+      "raw_goal_exact": 4,
+      "executed": [
+        "inspect_inventory",
+        "stop_while_idle",
+        "approach_with_brief_context"
+      ],
+      "displacement_blocks": 3.764798,
+      "final_user_distance_blocks": 1.901804,
+      "inventory_preserved": true,
+      "gather_craft_give_smelt_equip_eat_executed": false,
+      "scope": "Actual server observations and limited execution; authored local requests, not human game-chat ingress or autonomous full play."
+    },
+    "lineage_policy": "Continue from latest completed weights; small diagnostics do not automatically roll back.",
+    "runtime_scope": "Trained chat adapter Discord connection was tested separately and later stopped; this portfolio refresh starts no runtime.",
+    "trace_demo": {
+      "schema": "rubrum.diffusion_trace.v1",
+      "cases": 2,
+      "source_type": "authored_synthetic_evaluation_actual_model_traces",
+      "path": "docs/diffusion-trace/index.html"
+    }
   },
   "sapphirus": {
     "base_model": "Qwen3.5-4B",
@@ -97,7 +177,8 @@
       "full_model_reload_during_training_verification": false,
       "adapter_sha256": "7e9942cbb3bbebf23e4d06306f90a33dd543deef4fe44425331b260287c303e7"
     },
-    "promoted": false
+    "promoted": false,
+    "as_of": "2026-10-22"
   },
   "comparison_scope": "Different corpora, objectives and evaluations; not a controlled diffusion-versus-AR ranking.",
   "source_artifacts": {
@@ -132,6 +213,85 @@
     "sapphirus_quality": {
       "artifact": "quality_summary.json",
       "sha256": "7c24bfc6e129d7e4cde95fadd11084fc9de1f575898a03cc3e3109a304d5cee7"
+    },
+    "rubrum_chat500_training": {
+      "artifact": "training_complete.json",
+      "sha256": "99633e20689158a85b3a1368df1a166aec214c83dea92e714fbb5719262ed8d5"
+    },
+    "rubrum_chat500_verification": {
+      "artifact": "verification.json",
+      "sha256": "f95a5fcc6b908fbf5a6db8f57e711ffa945dfe01a91cecc50c8d9b95fa70a2dc"
+    },
+    "rubrum_chat500_manual_review": {
+      "artifact": "manual_review.json",
+      "sha256": "3c9978727426f2697fef6a86caefd51bbe5ede064810d1566ba255030fc2663f"
+    },
+    "rubrum_semantic_v3_comparison": {
+      "artifact": "comparison.json",
+      "sha256": "3f978dd8e71a57c5d59bd278c118fb8bdca9101e5622e741df98045bb88a9dd0"
+    },
+    "rubrum_live_smoke_verification": {
+      "artifact": "verification.json",
+      "sha256": "49071325198c0c5cc502074f7d0de17a21645b11d10f9045e7ab248b67707b23"
+    },
+    "rubrum_chat500_game_before": {
+      "artifact": "game_validation_before_summary.json",
+      "sha256": "1c54de1aa2e8e1825f1d7b297de5045291cae6377b002c9e59aa583ffeec7866"
+    },
+    "rubrum_chat500_game_after": {
+      "artifact": "game_validation_after_summary.json",
+      "sha256": "8515b648bc679347e9b7d2fcecfa9bf4e098fccb30a97ab2effd5cb6e23519c3"
+    },
+    "rubrum_chat500_daily_before": {
+      "artifact": "daily_validation_before_summary.json",
+      "sha256": "ae82b3628f18756ddc7db63d905ec5d22b01dbad77ec264f19b563b5ab44019f"
+    },
+    "rubrum_chat500_daily_after": {
+      "artifact": "daily_validation_after_summary.json",
+      "sha256": "d20e80e3e4c6222b23f0d8217dc0975b7c5641fbc65d15eeb88665f121339604"
+    }
+  },
+  "history": {
+    "rubrum_20261022": {
+      "base_model": "JetLM/SDAR-4B-Chat",
+      "base_revision": "56bca3c8d927410589a86e7996ee281b6764fa37",
+      "method": "uniform-token denoising adaptation; frozen backbone; LoRA rank 8 alpha 16; trainable self-conditioning",
+      "run_id": "fineweb_uniform_300steps_20261022",
+      "training": {
+        "stage_content_tokens": 551426,
+        "stage_canvases": 2400,
+        "stage_updates": 300,
+        "cumulative_content_tokens": 32113100,
+        "cumulative_updates": 17549
+      },
+      "reconstruction": {
+        "documents": 100,
+        "corrupted_canvases": 300,
+        "noise_levels": [
+          0.1,
+          0.5,
+          0.9
+        ],
+        "before_content_loss": 2.4393413662020467,
+        "after_content_loss": 2.4321362313432933,
+        "before_content_accuracy": 0.6169443946724004,
+        "after_content_accuracy": 0.619213999880547,
+        "scope": "Fixed reused reconstruction diagnostic, not dialogue quality."
+      },
+      "generation": {
+        "sampled": 20,
+        "empty": 1,
+        "replacement_characters": 0,
+        "seed_used": false,
+        "semantic_quality_requires_review": true
+      },
+      "verification": {
+        "artifact_checks": 51,
+        "status": "passed",
+        "exact_gpu_reload_probes": 3,
+        "checkpoint_sha256": "93166049435234aa35d07f71f41ed79a71a10b89899df1e3f30e94bef275ee58"
+      },
+      "runtime_changed": false
     }
   }
 }

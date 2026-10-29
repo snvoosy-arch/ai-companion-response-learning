@@ -26,6 +26,9 @@ logs/
 *.jsonl.tmp
 *.lock
 data/
+!docs/diffusion-trace/data/
+!docs/diffusion-trace/data/traces.json
+!docs/diffusion-trace/data/traces.js
 reports/
 
 # Model artifacts and large generated files
