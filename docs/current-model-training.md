@@ -12,7 +12,7 @@
 
 게임 50문항·일상 20문항 × 3 노이즈 수준의 복원 진단과 전후 총 60개 자유 생성을 구분했습니다. 게임 본문 loss는 1.842505 → 1.671623, 일상은 1.815562 → 1.835818입니다. 작은 비블라인드 생성 표본으로 전체 개선·악화를 단정하지 않고 최신 가중치에서 누적 학습을 이어가는 정책을 유지합니다.
 
-[실제 디퓨전 Trace 뷰어](diffusion-trace/index.html)는 선별한 합성 평가 2건의 초기 노이즈부터 종료까지를 공개합니다. 10월 22일 누적 32,113,100 본문 토큰 기록은 [근거 JSON](../evidence/model-training/current-summary.json)의 history에 보존하며 최신 전체 누적으로 사용하지 않습니다.
+[실제 디퓨전 Trace 뷰어](https://snvoosy-arch.github.io/ai-companion-response-learning/diffusion-trace/)는 선별한 합성 평가 2건의 초기 노이즈부터 종료까지를 공개합니다. 10월 22일 누적 32,113,100 본문 토큰 기록은 [근거 JSON](../evidence/model-training/current-summary.json)의 history에 보존하며 최신 전체 누적으로 사용하지 않습니다.
 
 ## Sapphirus: 한국어 일상 대화 AR SFT
 

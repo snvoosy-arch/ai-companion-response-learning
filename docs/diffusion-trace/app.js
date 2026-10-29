@@ -46,7 +46,7 @@
   function render() {
     const c = currentCase(), s = model.stepAt(c, index);
     index = s.step;
-    $('step-range').value = index; $('step-range').max = c.steps.length - 1;
+    $('step-range').max = c.steps.length - 1; $('step-range').value = index;
     $('step-range').setAttribute('aria-valuetext', `${index} / ${c.steps.length-1} 단계`);
     $('step-number').textContent = index; $('step-total').textContent = ' / '+(c.steps.length-1);
     $('previous').disabled = index === 0; $('next').disabled = index === c.steps.length - 1;

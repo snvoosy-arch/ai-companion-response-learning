@@ -11,9 +11,9 @@
 
 ## 직접 살펴보기: Rubrum 생성 과정
 
-**[디퓨전 Trace 뷰어](docs/diffusion-trace/index.html)** — 256개 토큰이 답변으로 복원되는 실제 저장 기록을 단계별로 살펴봅니다. 제련 수량을 맞힌 사례와 수령을 잘못 단정한 사례를 함께 공개합니다.
+**[디퓨전 Trace 뷰어 실행](https://snvoosy-arch.github.io/ai-companion-response-learning/diffusion-trace/)** — 256개 토큰이 답변으로 복원되는 실제 저장 기록을 단계별로 살펴봅니다. 제련 수량을 맞힌 사례와 수령을 잘못 단정한 사례를 함께 공개합니다.
 
-GPU·API 키 없이 실행되는 정적 HTML입니다. GitHub에서는 소스가 표시되므로 [실행 안내](docs/diffusion-trace/README.md)에 따라 내려받아 열 수 있습니다. 직접 작성한 합성 평가 상황의 실제 모델 출력 2건이며, 전체 성능을 대표하지 않습니다.
+GPU·API 키 없이 실행되는 정적 HTML입니다. GitHub Pages에서 열거나 [실행 안내](docs/diffusion-trace/README.md)에 따라 내려받아 실행할 수 있습니다. 직접 작성한 합성 평가 상황의 실제 모델 출력 2건이며, 전체 성능을 대표하지 않습니다.
 
 ## 먼저 볼 자료
 

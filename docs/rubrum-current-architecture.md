@@ -1,6 +1,6 @@
 # Rubrum — 현재 구조와 확인한 범위
 
-기준일: **2026-10-30** · [포트폴리오](../README.md) · [생성 과정 뷰어](diffusion-trace/index.html) · [집계와 근거 식별값](../evidence/model-training/current-summary.json)
+기준일: **2026-10-30** · [포트폴리오](../README.md) · [생성 과정 뷰어](https://snvoosy-arch.github.io/ai-companion-response-learning/diffusion-trace/) · [집계와 근거 식별값](../evidence/model-training/current-summary.json)
 
 Rubrum은 한국어 대화와 게임 상호작용을 연구하는 개인 AI 컴패니언입니다. 현재 연구는 **SDAR-4B-Chat의 256-token uniform 복원과 self-conditioning(SC)**에 기반합니다. 과거의 BERT 의미 판정·단어 조립 구현은 설계 이력과 공개 CPU 예제로 보존하며, 현재 생성기의 설명과 구분합니다.
 
@@ -65,7 +65,7 @@ SC는 이전 예측 분포 정보를 다음 복원에 반영하는 학습 경로
 
 ## 새 공개 기능: 디퓨전 Trace 뷰어
 
-[뷰어 열기](diffusion-trace/index.html). `index.html`을 직접 열거나 저장소 루트에서 `python -m http.server 8765` 실행 후 `/docs/diffusion-trace/`로 접속합니다. Node·Python 서버는 선택이며 브라우저만으로도 작동합니다.
+[실행 화면 열기](https://snvoosy-arch.github.io/ai-companion-response-learning/diffusion-trace/). 내려받은 [index.html](diffusion-trace/index.html)을 직접 열거나 저장소 루트에서 `python -m http.server 8765` 실행 후 `/docs/diffusion-trace/`로 접속할 수도 있습니다. Node·Python 서버는 선택이며 브라우저만으로도 작동합니다.
 
 - `P076`: 철 6개 중 관찰 산출 3개 → “세 개 나왔어.”, 14 복원 단계.
 - `T078`: 떨어뜨린 수량 2개, 수령 여부 null → “두 개는 받았어.”, 22 복원 단계. 근거 없는 수령 단정입니다.
