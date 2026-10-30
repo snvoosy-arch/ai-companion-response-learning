@@ -1,7 +1,9 @@
 """New synthetic contract fixtures; no spent model inputs or outputs are replayed."""
 import copy
+import hashlib
 import importlib.util
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -102,6 +104,31 @@ class ExportTests(unittest.TestCase):
 
 
 class PublicAuditTests(unittest.TestCase):
+    def test_latest_chat_comparison_binds_current_parent_and_aggregate(self):
+        m = load('scripts/check_sapphirus_current.py')
+        bundle = json.loads((ROOT/'docs/sapphirus/data/multiturn50.json').read_text(encoding='utf-8'))
+        summary = json.loads((ROOT/'evidence/model-training/current-summary.json').read_text(encoding='utf-8'))['sapphirus']
+        self.assertEqual(m.check_multiturn(bundle, summary), [])
+        changed = copy.deepcopy(bundle)
+        changed['models']['after']['sha256'] = 'f'*64
+        self.assertTrue(m.check_multiturn(changed, summary))
+        changed = copy.deepcopy(bundle)
+        changed['aggregate']['pair_preference']['after'] += 1
+        self.assertTrue(m.check_multiturn(changed, summary))
+        changed = copy.deepcopy(bundle)
+        changed['cases'][0]['outputs']['after']['usable'] = False
+        self.assertTrue(m.check_multiturn(changed, summary))
+
+    def test_recorded_pair_identity_survives_a_new_current_checkpoint(self):
+        m = load('scripts/check_sapphirus_current.py')
+        bundle = json.loads((ROOT/'docs/sapphirus/data/comparison.json').read_text(encoding='utf-8'))
+        old = json.loads((ROOT/'evidence/model-training/current-summary.json').read_text(encoding='utf-8'))['sapphirus']
+        archived = copy.deepcopy(old.get('historical_minecraft_comparison', old))
+        latest = dict(run_id='later-checkpoint', adapter_sha256='f'*64,
+                      historical_minecraft_comparison=archived)
+        wrapper = 'window.SAPPHIRUS_COMPARISON = '+json.dumps(bundle)+';\n'
+        self.assertEqual(m.check_data(bundle, latest, wrapper), [])
+
     def test_rejects_mismatched_wrapper_or_aggregate_before_publication(self):
         m = load("scripts/check_sapphirus_current.py")
         bundle = json.loads((ROOT / "docs/sapphirus/data/comparison.json").read_text(encoding="utf-8"))
@@ -112,8 +139,38 @@ class PublicAuditTests(unittest.TestCase):
         corrupted["cases"][0]["outputs"]["current"]["text"] = "changed copy"
         self.assertTrue(m.check_data(corrupted, aggregate, wrapper))
         altered = copy.deepcopy(aggregate)
-        altered["generation_comparison"]["minecraft"]["current"]["usable"] = 50
+        altered.get('historical_minecraft_comparison', altered)["generation_comparison"]["minecraft"]["current"]["usable"] = 50
         self.assertTrue(m.check_data(bundle, altered, wrapper))
+
+
+class ModelFirstSourceTests(unittest.TestCase):
+    def test_topic_words_do_not_remove_recent_pairs(self):
+        m = load('examples/sapphirus_current/context.py')
+        rows = [dict(id='u1', role='user', content='first topic', created=10),
+                dict(id='a1', role='assistant', content='first reply', created=11, reply_to='u1'),
+                dict(id='u2', role='user', content='다른 얘기인데 새 주제야.', created=12),
+                dict(id='a2', role='assistant', content='second reply', created=13, reply_to='u2')]
+        self.assertEqual([r['id'] for r in m.select_context(rows, now=20)], ['u1', 'a1', 'u2', 'a2'])
+        self.assertEqual(m.select_context(rows, now=20, reply_to='foreign-id'), [])
+        self.assertEqual(m.select_context(rows, now=4000), [])
+
+    def test_source_hash_is_required_before_training_rows_are_read(self):
+        m = load('examples/sapphirus_current/data_registry.py')
+        with tempfile.TemporaryDirectory() as folder:
+            project = Path(folder)
+            (project/'training').mkdir()
+            path = project/'training/train.jsonl'
+            path.write_text(json.dumps(dict(id='synthetic', messages=[
+                dict(role='user', content='synthetic input'), dict(role='assistant', content='reply')])), encoding='utf-8')
+            entry = dict(id='source', path='training/train.jsonl', role='chat', split='train',
+                contract_version='sapphirus.chat.messages.v1', review_state='reviewed',
+                exposure='unexposed', allowed_for=['train'], sha256=hashlib.sha256(path.read_bytes()).hexdigest())
+            (project/'training/datasets.json').write_text(json.dumps(dict(schema_version='sapphirus.datasets.v1',
+                sources=[entry], blocked_input_fingerprints=[])), encoding='utf-8')
+            self.assertEqual(m.load_registered(path, 'train', project)[0]['id'], 'synthetic')
+            path.write_text('changed source', encoding='utf-8')
+            with self.assertRaises(ValueError):
+                m.load_registered(path, 'train', project)
 
 
 if __name__ == "__main__":

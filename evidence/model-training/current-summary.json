@@ -1,7 +1,7 @@
 {
   "schema_version": "companion.model_training_snapshot.v1",
   "as_of": "2026-10-30",
-  "evidence_scope": "Selected aggregates from private local training and evaluation artifacts; not public reproduction or proof of live deployment. Includes six selected synthetic Sapphirus evaluation pairs; not live inference or AR token traces.",
+  "evidence_scope": "Selected aggregates from private local artifacts; not proof of live deployment. Includes six archived Minecraft pairs and six selected fresh multiturn pairs. Synthetic authored contexts, actual recorded model replies; no new inference in the page.",
   "rubrum": {
     "as_of": "2026-10-30",
     "base_model": "JetLM/SDAR-4B-Chat",
@@ -127,72 +127,58 @@
     "as_of": "2026-10-30",
     "base_model": "Qwen3.5-4B",
     "method": "AR Chat cumulative LoRA SFT; separate Minecraft Game LoRA; external authority and execution",
-    "run_id": "minecraft_chat_sft_20261029_r1",
-    "adapter_sha256": "e2f753c24a51d9e2f42c1560d7cdfef020518a72afa1cced6e54eff0ae326e3f",
-    "parent_run_id": "daily_chat_sft_24030_20261018_r7",
+    "run_id": "chat_continuation_multiturn250_20261030_r1",
+    "adapter_sha256": "b5f98bae4dd2043110a4d6fdd4bc2af5371268823218e66dcf640b88c71a6901",
+    "parent_run_id": "minecraft_chat_sft_20261029_r1",
     "selection": "current_chat",
     "continuation_policy": "latest verified Chat weights; compare parent and advance after valid completion",
     "optimizer_scheduler_restarted_per_run": true,
     "training": {
       "train": 200,
       "dev": 50,
+      "assistant_train_targets": 450,
+      "assistant_dev_targets": 110,
       "epochs": 1,
-      "optimizer_steps": 13,
-      "train_loss": 1.7401939132843107,
-      "dev_loss_before": 2.142193890470216,
-      "dev_loss_after": 1.6469073369608436,
+      "optimizer_steps": 29,
+      "train_loss": 2.0914077442936594,
+      "dev_loss_before": 2.0651084955648984,
+      "dev_loss_after": 1.9475800479947774,
+      "elapsed_seconds": 1093.673963144,
       "parameters": 16232448
     },
     "system_prompt": false,
     "auxiliary_instruction": false,
     "structured_state_input": true,
     "generation_comparison": {
-      "minecraft": {
-        "baseline": {
-          "total": 50,
-          "grounded": 26,
-          "usable": 26,
-          "ended": 50,
-          "natural": 40,
-          "mean_quality": 1.8
+      "multiturn_final50": {
+        "before": {
+          "questions": 50,
+          "context_pass": 41,
+          "usable": 41,
+          "quality_mean": 1.6,
+          "normal_eos": 50,
+          "delivery_valid": 50
         },
-        "current": {
-          "total": 50,
-          "grounded": 33,
-          "usable": 33,
-          "ended": 50,
-          "natural": 47,
-          "mean_quality": 1.94
+        "after": {
+          "questions": 50,
+          "context_pass": 42,
+          "usable": 42,
+          "quality_mean": 1.62,
+          "normal_eos": 50,
+          "delivery_valid": 50
         }
       },
-      "daily": {
-        "baseline": {
-          "total": 12,
-          "grounded": 9,
-          "usable": 9,
-          "ended": 12,
-          "natural": 8,
-          "mean_quality": 1.583
-        },
-        "current": {
-          "total": 12,
-          "grounded": 11,
-          "usable": 11,
-          "ended": 12,
-          "natural": 4,
-          "mean_quality": 1.333
-        }
+      "pair_preference": {
+        "after": 11,
+        "tie": 25,
+        "before": 14
       },
-      "review": {
-        "type": "Codex_identity_blinded_manual_review",
-        "pairs": 62,
-        "outputs": 124,
-        "independent_human_evaluation": false,
-        "usable_definition": "grounded and language_quality >= 1 and normal EOS"
-      },
+      "responses": 100,
+      "normal_eos": 100,
+      "method": "Codex manual, model names masked before key decoding; not independent human benchmark",
+      "fixed_contexts": true,
       "spent": true,
-      "small_sample_general_performance_judgment": "withheld",
-      "actual_game_success_evaluated": false
+      "conclusion": "Small mixed differences, not an established general quality improvement"
     },
     "game": {
       "separate_from_chat": true,
@@ -230,7 +216,7 @@
       "next_default": "current cumulative Chat; concrete run/hash pinned at session start",
       "current_selection_is_live_deployment": false
     },
-    "new_generic_continuation_entrypoint_gpu_tested": false,
+    "new_generic_continuation_entrypoint_gpu_tested": true,
     "previous_daily_stage": {
       "base_model": "Qwen3.5-4B",
       "method": "autoregressive Korean daily-conversation LoRA SFT; BF16; answer and ending-token supervision",
@@ -288,12 +274,90 @@
       "promoted": false,
       "as_of": "2026-10-22"
     },
-    "public_comparison_provenance": {
-      "inputs": "b821ffc5016fccbaf2991b3931db3fdf303e352a9b80e822e1f70db4ed166b2f",
-      "scores": "cd688e46515ac0d98174e34ad3bfecfc62c8b39f90660a3a125f46313b897850",
-      "summary": "6bde182b817662925fd47594c746bbb4175d47128b4444250124ebbfb56a6f52",
-      "registry": "89ddc50c9a58b4d75a9b5b815b4c1128506001bba8d030744006e3f6831c544d"
-    }
+    "historical_minecraft_comparison": {
+      "run_id": "minecraft_chat_sft_20261029_r1",
+      "adapter_sha256": "e2f753c24a51d9e2f42c1560d7cdfef020518a72afa1cced6e54eff0ae326e3f",
+      "generation_comparison": {
+        "minecraft": {
+          "baseline": {
+            "total": 50,
+            "grounded": 26,
+            "usable": 26,
+            "ended": 50,
+            "natural": 40,
+            "mean_quality": 1.8
+          },
+          "current": {
+            "total": 50,
+            "grounded": 33,
+            "usable": 33,
+            "ended": 50,
+            "natural": 47,
+            "mean_quality": 1.94
+          }
+        },
+        "daily": {
+          "baseline": {
+            "total": 12,
+            "grounded": 9,
+            "usable": 9,
+            "ended": 12,
+            "natural": 8,
+            "mean_quality": 1.583
+          },
+          "current": {
+            "total": 12,
+            "grounded": 11,
+            "usable": 11,
+            "ended": 12,
+            "natural": 4,
+            "mean_quality": 1.333
+          }
+        },
+        "review": {
+          "type": "Codex_identity_blinded_manual_review",
+          "pairs": 62,
+          "outputs": 124,
+          "independent_human_evaluation": false,
+          "usable_definition": "grounded and language_quality >= 1 and normal EOS"
+        },
+        "spent": true,
+        "small_sample_general_performance_judgment": "withheld",
+        "actual_game_success_evaluated": false
+      },
+      "public_comparison_provenance": {
+        "inputs": "b821ffc5016fccbaf2991b3931db3fdf303e352a9b80e822e1f70db4ed166b2f",
+        "scores": "cd688e46515ac0d98174e34ad3bfecfc62c8b39f90660a3a125f46313b897850",
+        "summary": "6bde182b817662925fd47594c746bbb4175d47128b4444250124ebbfb56a6f52",
+        "registry": "89ddc50c9a58b4d75a9b5b815b4c1128506001bba8d030744006e3f6831c544d"
+      }
+    },
+    "previous_training_stage": {
+      "run_id": "minecraft_chat_sft_20261029_r1",
+      "adapter_sha256": "e2f753c24a51d9e2f42c1560d7cdfef020518a72afa1cced6e54eff0ae326e3f",
+      "training": {
+        "train": 200,
+        "dev": 50,
+        "epochs": 1,
+        "optimizer_steps": 13,
+        "train_loss": 1.7401939132843107,
+        "dev_loss_before": 2.142193890470216,
+        "dev_loss_after": 1.6469073369608436,
+        "parameters": 16232448
+      }
+    },
+    "model_first_context": {
+      "lexical_semantic_router": false,
+      "recent_complete_pairs_max": 2,
+      "window_seconds": 1800,
+      "explicit_reply_scope_required": true
+    },
+    "data_provenance": {
+      "registered_role_split_hash": true,
+      "normalized_exact_context_exclusion": true,
+      "semantic_similarity_guarantee": false
+    },
+    "minecraft_this_update": "Skipped at user request; no integration or live game operation"
   },
   "comparison_scope": "Different corpora, objectives and evaluations; not a controlled diffusion-versus-AR ranking.",
   "source_artifacts": {

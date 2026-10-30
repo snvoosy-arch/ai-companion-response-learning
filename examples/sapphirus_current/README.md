@@ -20,4 +20,13 @@ python -m unittest discover -s tests -p "test_sapphirus_current.py" -v
 
 Game 출력의 `clarify`·후보 선택과 전체 53도구를 구현한 reference도 아니다. 두 도구의 제안은 실행 권한이 없고, Chat의 자연어 사실성을 자동 보장하지 않는다. 현재 모델을 갱신하는 것과 서비스를 켜는 것은 독립적이다.
 
+## 모델 우선 문맥과 자료 출처
+
+`context.py`와 `data_registry.py`는 원본 프로젝트의 모델 없는 순수 helper를 그대로 옮겼다. 개인 ID·계정·경로·대화·가중치를 포함하지 않는다.
+
+- `select_context`: 호출자가 사용자/채널로 분리한 기록에서30분 내 완전한 최대2쌍을 고른다. 문장의 의미나 주제 전환을 키워드로 분류하지 않으며 모델에 관련성 해석을 맡긴다. 명시적 답글은 해당 유효 쌍만 선택하고 다른 기록으로 대체하지 않는다.
+- `load_registered`: 임시 또는 지정된 프로젝트에서 등록된 Chat 자료의 역할·split·검토 상태·해시와 보호된 평가 입력 fingerprint를 검사한다. 대화 필터가 아닌 학습 자료의 출처 검사다. 정규화 exact 일치만 다루고 의미 유사도나 수동 작성 과정 전체를 증명하지 않는다.
+
+위 unittest 명령은 새 helper도 검사한다. 이 공개 예제는 모델·실제 기억 DB·학습이나 Discord를 실행하지 않는다.
+
 [현재 구조·평가](../../docs/sapphirus-current-architecture.md) · [실제 모델 답변 뷰어](https://snvoosy-arch.github.io/ai-companion-response-learning/sapphirus/)

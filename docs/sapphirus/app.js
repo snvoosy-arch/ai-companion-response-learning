@@ -24,7 +24,7 @@
     el('answers').replaceChildren(...m.orderedOutputs(item,reverse).map(({key,output:o})=>{
       const card=node('article',undefined,`answer ${key}`);
       const header=node('div',undefined,'answer-heading');
-      header.append(node('span',key==='current'?'CURRENT CHAT':'PREVIOUS CHAT','eyebrow'),node('span',o.usable?'사용 가능 판정':'사용 불가 판정',o.usable?'verdict pass':'verdict fail'));
+      header.append(node('span',key==='current'?'ARCHIVED AFTER':'ARCHIVED BEFORE','eyebrow'),node('span',o.usable?'사용 가능 판정':'사용 불가 판정',o.usable?'verdict pass':'verdict fail'));
       const grades=node('div',undefined,'grades');
       grades.append(node('span',o.grounded?'근거 충족':'근거 오류',o.grounded?'grounded':'unsupported'),node('span',`표현 품질 ${o.language_quality} / 2`),node('span',o.normal_eos?'정상 종료':'종료 미확인'));
       card.append(header,node('h4',d.models[key].label),node('blockquote',o.text || '(빈 답변)','response'),grades,node('p',o.note,'review-note'));

@@ -10,6 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def check_data(bundle: dict, aggregate: dict, wrapper: str) -> list[str]:
     errors = []
+    # This viewer preserves one spent historical comparison even after the
+    # actual current Chat advances. Never relabel its stored answers as new.
+    aggregate = aggregate.get('historical_minecraft_comparison', aggregate)
     prefix = "window.SAPPHIRUS_COMPARISON = "
     try:
         if not wrapper.startswith(prefix) or not wrapper.rstrip().endswith(";"):
@@ -38,6 +41,42 @@ def check_data(bundle: dict, aggregate: dict, wrapper: str) -> list[str]:
             errors.append(f"aggregate mismatch: {group}")
     if aggregate["public_comparison_provenance"] != bundle["provenance"]:
         errors.append("source provenance mismatch")
+    return errors
+
+
+def check_multiturn(bundle: dict, summary: dict) -> list[str]:
+    """Keep the fresh Chat record separate from the spent game comparison."""
+    errors = []
+    if bundle.get('schema_version') != 'sapphirus.multiturn.comparison.v1':
+        errors.append('invalid multiturn schema')
+    expected_scope = dict(kind='recorded_model_outputs', synthetic_evaluation=True,
+                          selected_cases=6, representative_sample=False, spent=True,
+                          new_page_model_requests=0, minecraft_or_discord_tested=False)
+    if bundle['scope'] != expected_scope:
+        errors.append('unexpected multiturn scope')
+    parent = summary['previous_training_stage']
+    for label, run, digest in [('after', summary['run_id'], summary['adapter_sha256']),
+                               ('before', parent['run_id'], parent['adapter_sha256'])]:
+        if bundle['models'][label] != dict(run=run, sha256=digest):
+            errors.append(f'multiturn model identity mismatch: {label}')
+    comparison = summary['generation_comparison']
+    if (bundle['aggregate']['profiles'] != comparison['multiturn_final50']
+            or bundle['aggregate']['pair_preference'] != comparison['pair_preference']):
+        errors.append('multiturn aggregate mismatch')
+    if sum(bundle['aggregate']['pair_preference'].values()) != 50:
+        errors.append('multiturn preference count mismatch')
+    for name, digest in bundle['provenance'].items():
+        if not re.fullmatch(r'[0-9a-f]{64}', digest):
+            errors.append(f'invalid multiturn source digest: {name}')
+    ids = [c['id'] for c in bundle['cases']]
+    if len(ids) != 6 or len(set(ids)) != 6:
+        errors.append('expected six distinct multiturn pairs')
+    for case in bundle['cases']:
+        for label in ['before', 'after']:
+            output = case['outputs'][label]
+            usable = output['context_pass'] and output['quality'] >= 1 and output['normal_eos']
+            if output['usable'] != usable or output['quality'] not in [0, 1, 2]:
+                errors.append(f'inconsistent multiturn grade: {case["id"]}/{label}')
     return errors
 
 
@@ -70,9 +109,10 @@ def main():
     bundle = json.loads((folder / "comparison.json").read_text(encoding="utf-8"))
     aggregate = json.loads((ROOT / "evidence/model-training/current-summary.json").read_text(encoding="utf-8"))["sapphirus"]
     errors = check_data(bundle, aggregate, (folder / "comparison.js").read_text(encoding="utf-8")) + check_links()
+    errors += check_multiturn(json.loads((folder / 'multiturn50.json').read_text(encoding='utf-8')), aggregate)
     if errors:
         raise SystemExit("\n".join(errors))
-    print("Sapphirus current checks passed: six saved pairs, source identities, aggregate, wrapper, page links")
+    print("Sapphirus current checks passed: six latest + six archived pairs, identities, aggregates, wrapper, links")
 
 
 if __name__ == "__main__":

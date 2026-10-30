@@ -1,16 +1,11 @@
 # Sapphirus 답변 비교 뷰어
 
-[공개 화면](https://snvoosy-arch.github.io/ai-companion-response-learning/sapphirus/) · [현재 구조](../sapphirus-current-architecture.md) · [JSON](data/comparison.json)
+[공개 화면](https://snvoosy-arch.github.io/ai-companion-response-learning/sapphirus/) · [현재 구조](../sapphirus-current-architecture.md)
 
-GPU·API 키 없이 동작하는 정적 HTML이다. 저장소 루트에서 `python -m http.server 8080 --bind 127.0.0.1 --directory docs` 후 `http://127.0.0.1:8080/sapphirus/`를 연다. `index.html` 파일을 직접 열어도 포함된 JS 데이터로 동작한다.
+GPU·API 키 없는 정적 HTML이다. 최신 멀티턴50쌍의 전체 집계와 개선2·공통 오류2·후퇴2의 실제 답변을 펼쳐볼 수 있다. [최신 선별 JSON](data/multiturn50.json)은 모델·원본·판정 해시를 포함한다. 같은 고정 문맥에서 각각1회 생성했으며 자율 연속 대화 평가나 일반 성능 상승을 주장하지 않는다.
 
-- 전체/개선/남은 오류 필터, 6건 선택·이전/다음, 좌우 모델 순서 변경.
-- 사용자 입력·외부 상태·전체 구조 입력, 저장된 실제 모델 원문과 별도의 근거/표현 판정.
-- 전체 Minecraft 50문항과 일상 12문항의 집계. 선별 6건의 비율을 전체 성능으로 사용하지 않는다.
-- 화면은 재생된 대화 기록이며 live inference, 게임 실행 또는 토큰 생성 과정이 아니다.
+이전 Minecraft 상태 설명의6건은 별도 보존 뷰어로 유지한다. 전체/개선/오류 필터·사례 전환·좌우 변경이 가능하며 [이전 JSON](data/comparison.json)과 JS wrapper는 같다. 당시 r7/후속 가중치 답변을 최신 current의 응답으로 바꾸어 부르지 않는다.
 
-`scripts/export_sapphirus_comparison.py`는 해시가 고정된 기존 합성 평가 원본에서 허용된 6건·필드만 내보낸다. 비공개 원본은 배포하지 않는다. JSON과 JS wrapper의 데이터는 동일하며, 해시는 원본 버전 식별용이다. 모델 요청과 재채점은 하지 않았다.
+모델 이름을 가린 Codex 수동 판정이며 독립 사람 평가가 아니다. 입력·출력은 spent이고 학습/평가 재실행에 쓰지 않는다. 공개 페이지는 모델·Discord·게임·실제DB에 연결하지 않는다. 개인 대화·계정·가중치·학습 코퍼스는 배포하지 않는다.
 
-평가는 모델 이름을 가린 Codex 수동 검토다. 평가 입력·출력은 spent이며 학습/평가 재실행에 재사용하지 않는다. 이 뷰어의 데이터 계약 검사는 실제 모델 평가가 아니다.
-
-검증: 실제 app.js의 필터·사례 전환·좌우 변경·텍스트 삽입은 Node DOM 하네스에서 확인했다. Windows Computer Use가 현재 브라우저 URL을 확인하지 못해 중단됐으므로 실제 데스크톱·모바일 화면, 브라우저 상호작용과 접근성은 미검증이다.
+저장소 루트에서 `python -m http.server 8080 --bind 127.0.0.1 --directory docs` 후 `http://127.0.0.1:8080/sapphirus/`로 볼 수 있고 파일을 직접 열어도 기존 데이터가 표시된다. CPU 데이터·링크 검사와 기존 Node DOM 하네스를 사용한다. 이번 실제 브라우저 화면 검증 상태는 게시 검증 기록과 구분한다.

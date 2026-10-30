@@ -1,0 +1,290 @@
+{
+  "schema_version": "sapphirus.multiturn.comparison.v1",
+  "as_of": "2026-10-30",
+  "scope": {
+    "kind": "recorded_model_outputs",
+    "synthetic_evaluation": true,
+    "selected_cases": 6,
+    "representative_sample": false,
+    "spent": true,
+    "new_page_model_requests": 0,
+    "minecraft_or_discord_tested": false
+  },
+  "models": {
+    "before": {
+      "run": "minecraft_chat_sft_20261029_r1",
+      "sha256": "e2f753c24a51d9e2f42c1560d7cdfef020518a72afa1cced6e54eff0ae326e3f"
+    },
+    "after": {
+      "run": "chat_continuation_multiturn250_20261030_r1",
+      "sha256": "b5f98bae4dd2043110a4d6fdd4bc2af5371268823218e66dcf640b88c71a6901"
+    }
+  },
+  "aggregate": {
+    "profiles": {
+      "before": {
+        "questions": 50,
+        "context_pass": 41,
+        "usable": 41,
+        "quality_mean": 1.6,
+        "normal_eos": 50,
+        "delivery_valid": 50
+      },
+      "after": {
+        "questions": 50,
+        "context_pass": 42,
+        "usable": 42,
+        "quality_mean": 1.62,
+        "normal_eos": 50,
+        "delivery_valid": 50
+      }
+    },
+    "pair_preference": {
+      "after": 11,
+      "tie": 25,
+      "before": 14
+    }
+  },
+  "method": "Codex manual, model names masked before key decoding; not independent human benchmark",
+  "limits": [
+    "small diagnostic; no general performance claim or automatic rollback",
+    "fixed teacher contexts, not autonomous full-dialogue rollouts",
+    "graded once; some minor general inferences accepted, warnings reflected in expression scores",
+    "no Minecraft/Discord/real-memory execution; no spent replay or training reuse"
+  ],
+  "provenance": {
+    "training_result": "ba809b8e1f8bfa25053ec62c8d96de67a9cd6474a2de23e2101f58fac3c92449",
+    "saved_adapter_verification": "92e24fa034ba44f4afc0a88e052a2f6eeea851a699cce221572ff78a5b072e3c",
+    "fresh_cases": "17d8f3b4c118c3e7cc144b0c45fdbee9ae6ed8b3c3b27f6722911ba33a57fce6",
+    "paired_outputs": "2dbad25a449118d450100cff56540b2af5162ec03177f3ab533d791d2341c18c",
+    "manual_scores": "3654a6f3a1c9298c3c70d2cc1f0a3c055f3b200fd65eb6bf192a9f92b76f9963",
+    "manual_summary": "b74e03bf3c3225cec99e5ff387f8c01e123982c8e2f1b54486f5ded55dc37fa8",
+    "frozen_masked_grades": "78ff6868d88cec6a25d08d93e758cd9872eec0c2579e96184fb681466f295989",
+    "public_context_source": "d1cc9b8f3e46e52610e0f1330c15235d3ab8974286e11203660065f97d0974d9",
+    "public_provenance_source": "16b7981dfe0e4cbb6746d521fc005fad550f0abec8569a41b12c3ada2e3d0c12"
+  },
+  "cases": [
+    {
+      "id": "mt26_f001",
+      "title": "이유를 묻는 말에 답하기",
+      "theme": "improved",
+      "messages": [
+        {
+          "role": "user",
+          "content": "수첩을 날짜 쓰는 위쪽과 할 일 쓰는 아래쪽으로 나눠봤어."
+        },
+        {
+          "role": "assistant",
+          "content": "날짜랑 할 일이 섞이지 않아서 나중에 보기 편하겠다."
+        },
+        {
+          "role": "user",
+          "content": "왜 그렇게 보는 거야?"
+        }
+      ],
+      "outputs": {
+        "before": {
+          "response": "날짜를 한쪽, 할 일을 다른 쪽으로 나누어서 보는 방식이야.",
+          "context_pass": false,
+          "quality": 1,
+          "note": "구분 방식을 다시 말할 뿐 왜 편한지 답하지 않는다.",
+          "normal_eos": true,
+          "usable": false
+        },
+        "after": {
+          "response": "날짜를 한눈에 볼 수 있으면 일정 확인이 쉬워지니까.",
+          "context_pass": true,
+          "quality": 2,
+          "note": "한눈에 날짜를 보고 일정을 확인한다는 이유를 설명한다.",
+          "normal_eos": true,
+          "usable": true
+        }
+      }
+    },
+    {
+      "id": "mt26_f036",
+      "title": "끝난 작업에서 일상 대화로",
+      "theme": "improved",
+      "messages": [
+        {
+          "role": "user",
+          "content": "내일 입을 셔츠를 다려야 해."
+        },
+        {
+          "role": "assistant",
+          "content": "오늘 미리 해두면 아침에 덜 바쁘겠다."
+        },
+        {
+          "role": "user",
+          "content": "다림질은 끝났고, 그냥 같이 아무 얘기나 조금 하자."
+        }
+      ],
+      "outputs": {
+        "before": {
+          "response": "좋아. 다림질은 끝났어.",
+          "context_pass": false,
+          "quality": 1,
+          "note": "끝났다는 말을 반복할 뿐 새 대화를 시작하지 못한다.",
+          "normal_eos": true,
+          "usable": false
+        },
+        "after": {
+          "response": "좋아. 오늘 하루는 잘 보냈어?",
+          "context_pass": true,
+          "quality": 2,
+          "note": "끝난 다림질 대신 오늘 하루 이야기로 자연스럽게 대화를 시작한다.",
+          "normal_eos": true,
+          "usable": true
+        }
+      }
+    },
+    {
+      "id": "mt26_f021",
+      "title": "수량 정정은 둘 다 놓쳤다",
+      "theme": "remaining_error",
+      "messages": [
+        {
+          "role": "user",
+          "content": "공책 아홉 권 중 세 권은 친구에게, 두 권은 가족에게 줄 거야."
+        },
+        {
+          "role": "assistant",
+          "content": "그러면 네 몫은 네 권이네."
+        },
+        {
+          "role": "user",
+          "content": "친구 줄 건 세 권이 아니라 네 권이야. 그럼 내 건 몇 권 남아?"
+        }
+      ],
+      "outputs": {
+        "before": {
+          "response": "네 몫은 네 권이네.",
+          "context_pass": false,
+          "quality": 2,
+          "note": "정정 전 네 권을 답한다. 문장은 자연스럽지만 수량이 틀렸다.",
+          "normal_eos": true,
+          "usable": false
+        },
+        "after": {
+          "response": "네 몫은 네 권이네. 친구에게 줄 세 권은 따로 있고.",
+          "context_pass": false,
+          "quality": 2,
+          "note": "정정 전 네 권과 세 권을 그대로 말해 정답 세 권을 놓친다.",
+          "normal_eos": true,
+          "usable": false
+        }
+      }
+    },
+    {
+      "id": "mt26_f043",
+      "title": "없는 약속 시간에 동의하기",
+      "theme": "remaining_error",
+      "messages": [
+        {
+          "role": "user",
+          "content": "아까 정한 약속 시간대로 나가면 되겠지? 다른 정보는 아직 안 줬어."
+        }
+      ],
+      "outputs": {
+        "before": {
+          "response": "응, 아직 다른 정보가 들어오기 전으로 정한 시간대로 나가면 돼.",
+          "context_pass": false,
+          "quality": 1,
+          "note": "시간과 이동 정보가 없는데 출발해도 된다고 동의하고 문장도 어색하다.",
+          "normal_eos": true,
+          "usable": false
+        },
+        "after": {
+          "response": "응, 아직 다른 조건이 들어오지 않았으니 정한 시간대로 나가면 되겠네.",
+          "context_pass": false,
+          "quality": 2,
+          "note": "더 자연스럽지만 확인할 정보가 없는데도 정한 시간대로 가도 된다고 단정한다.",
+          "normal_eos": true,
+          "usable": false
+        }
+      }
+    },
+    {
+      "id": "mt26_f028",
+      "title": "완전 취소를 놓친 현재 답변",
+      "theme": "regressed",
+      "messages": [
+        {
+          "role": "user",
+          "content": "금요일 모임이 다음 주로 미뤄졌어."
+        },
+        {
+          "role": "assistant",
+          "content": "이번 주 대신 다음 주에 만나겠네."
+        },
+        {
+          "role": "user",
+          "content": "다시 공지가 왔어. 연기가 아니라 완전히 취소야."
+        },
+        {
+          "role": "assistant",
+          "content": "그럼 새 날짜가 있는 게 아니라 취소된 거네."
+        },
+        {
+          "role": "user",
+          "content": "다음 주 모임 준비를 계속 해야 해?"
+        }
+      ],
+      "outputs": {
+        "before": {
+          "response": "연락된 건 취소됐으니 준비는 멈춰도 돼.",
+          "context_pass": true,
+          "quality": 1,
+          "note": "취소에 따라 준비를 멈추는 답은 맞지만 연락된 건이라는 표현이 어색하다.",
+          "normal_eos": true,
+          "usable": true
+        },
+        "after": {
+          "response": "연락한 사람마다 확인해봐야겠어. 이번 주 모임은 취소됐다고만 알려줬어.",
+          "context_pass": false,
+          "quality": 2,
+          "note": "완전 취소 정정을 놓치고 이번 주만 취소된 것처럼 축소한다.",
+          "normal_eos": true,
+          "usable": false
+        }
+      }
+    },
+    {
+      "id": "mt26_f038",
+      "title": "햇빛 감상을 다시 청소로 읽기",
+      "theme": "regressed",
+      "messages": [
+        {
+          "role": "user",
+          "content": "운동화 닦을 도구를 꺼냈어."
+        },
+        {
+          "role": "assistant",
+          "content": "오늘 신발 관리하는 날이구나."
+        },
+        {
+          "role": "user",
+          "content": "지금 보니 그보다 현관에 햇빛 드는 게 되게 좋다."
+        }
+      ],
+      "outputs": {
+        "before": {
+          "response": "현관 쪽이 더 눈에 들어왔네.",
+          "context_pass": true,
+          "quality": 1,
+          "note": "현관으로 관심이 간 것을 받아주지만 감상 반응은 빈약하다.",
+          "normal_eos": true,
+          "usable": true
+        },
+        "after": {
+          "response": "그럼 닦은 뒤 햇빛에 말려두자.",
+          "context_pass": false,
+          "quality": 2,
+          "note": "햇빛 감상을 다시 신발 청소와 건조 지시로만 해석한다.",
+          "normal_eos": true,
+          "usable": false
+        }
+      }
+    }
+  ]
+}

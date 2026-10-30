@@ -1,0 +1,61 @@
+{
+  "training": {
+    "train": 200,
+    "dev": 50,
+    "assistant_train_targets": 450,
+    "assistant_dev_targets": 110,
+    "epochs": 1,
+    "optimizer_steps": 29,
+    "train_loss": 2.0914077442936594,
+    "dev_loss_before": 2.0651084955648984,
+    "dev_loss_after": 1.9475800479947774,
+    "elapsed_seconds": 1093.673963144,
+    "parameters": 16232448
+  },
+  "run_id": "chat_continuation_multiturn250_20261030_r1",
+  "parent_run_id": "minecraft_chat_sft_20261029_r1",
+  "adapter_sha256": "b5f98bae4dd2043110a4d6fdd4bc2af5371268823218e66dcf640b88c71a6901",
+  "evaluation": {
+    "profiles": {
+      "before": {
+        "questions": 50,
+        "context_pass": 41,
+        "usable": 41,
+        "quality_mean": 1.6,
+        "normal_eos": 50,
+        "delivery_valid": 50
+      },
+      "after": {
+        "questions": 50,
+        "context_pass": 42,
+        "usable": 42,
+        "quality_mean": 1.62,
+        "normal_eos": 50,
+        "delivery_valid": 50
+      }
+    },
+    "pair_preference": {
+      "after": 11,
+      "tie": 25,
+      "before": 14
+    }
+  },
+  "selected_record_path": "docs/sapphirus/data/multiturn50.json",
+  "provenance": {
+    "training_result": "ba809b8e1f8bfa25053ec62c8d96de67a9cd6474a2de23e2101f58fac3c92449",
+    "saved_adapter_verification": "92e24fa034ba44f4afc0a88e052a2f6eeea851a699cce221572ff78a5b072e3c",
+    "fresh_cases": "17d8f3b4c118c3e7cc144b0c45fdbee9ae6ed8b3c3b27f6722911ba33a57fce6",
+    "paired_outputs": "2dbad25a449118d450100cff56540b2af5162ec03177f3ab533d791d2341c18c",
+    "manual_scores": "3654a6f3a1c9298c3c70d2cc1f0a3c055f3b200fd65eb6bf192a9f92b76f9963",
+    "manual_summary": "b74e03bf3c3225cec99e5ff387f8c01e123982c8e2f1b54486f5ded55dc37fa8",
+    "frozen_masked_grades": "78ff6868d88cec6a25d08d93e758cd9872eec0c2579e96184fb681466f295989",
+    "public_context_source": "d1cc9b8f3e46e52610e0f1330c15235d3ab8974286e11203660065f97d0974d9",
+    "public_provenance_source": "16b7981dfe0e4cbb6746d521fc005fad550f0abec8569a41b12c3ada2e3d0c12"
+  },
+  "system_prompt": false,
+  "common_instructions": false,
+  "authoring": "literal per-dialogue Codex teacher",
+  "template_expansion": false,
+  "student_output_reuse": false,
+  "minecraft_this_update": false
+}
