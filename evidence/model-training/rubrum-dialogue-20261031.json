@@ -1,0 +1,229 @@
+{
+  "schema_version": "rubrum.dialogue_research_summary.v1",
+  "as_of": "2026-10-31",
+  "evidence_level": "SANITIZED-REPORT",
+  "scope": "Selected local research aggregates and private-channel delivery counts. No source conversations, IDs, logs or weights. Not a public reproduction package.",
+  "architecture": {
+    "base_model": "JetLM/SDAR-4B-Chat",
+    "generation": "256-token uniform denoising with self-conditioning",
+    "shared_backbone": true,
+    "extra_bert_model": false,
+    "meaning_selection": "learned route/speaker/time/context/character-boundary heads",
+    "memory": "scoped SQLite originals, learned record relevance, structural source checks",
+    "grounding_routes": [
+      "MEMORY_QUERY",
+      "CLARIFY"
+    ],
+    "grounding_general_chat": false,
+    "grounding_max_candidates": 2,
+    "existing_surface_attempts_per_candidate": 2,
+    "same_input_on_grounding_retry": true,
+    "system_prompt": false,
+    "auxiliary_instruction": false,
+    "explicit_seed": false,
+    "canonical_launcher_default": "model",
+    "legacy_registry_aliases_promoted": false,
+    "runtime_active_after_test": false
+  },
+  "chat_adaptation": {
+    "run_id": "dialogue_grounded_uniform_20261030_v2",
+    "parent_run_id": "minecraft_chat500_uniform_20261029_v1",
+    "structured_response_train_rows": 64,
+    "structured_response_eval_rows": 16,
+    "existing_daily_replay_train_rows": 40,
+    "unique_training_rows": 104,
+    "independently_corrupted_training_canvases": 312,
+    "optimizer_updates": 39,
+    "changed_lora_sc_tensors": 510,
+    "validation_questions": 16,
+    "fixed_validation_canvases": 48,
+    "validation_noise_levels": [
+      0.1,
+      0.5,
+      0.9
+    ],
+    "validation_loss_before": {
+      "content": 1.713372,
+      "terminator": 0.51793,
+      "tail": 0.001406
+    },
+    "validation_loss_after": {
+      "content": 1.438582,
+      "terminator": 0.535806,
+      "tail": 0.003406
+    },
+    "validation_loss_precision": "Rounded to six decimal places; private source hashes identify exact values.",
+    "adapter_sha256": "861ad52b42b567e8c079d4efa971f789970566377c2f474f1e8361e6a639ca72",
+    "sc_sha256": "96b4a9bda602ff376cd5eb412e786d4f049ebe7953528d49ba3c968e9f20a2a5",
+    "interpretation": "Content loss decreased, termination/tail loss increased. Loss is not dialogue accuracy or naturalness."
+  },
+  "dialogue_heads": {
+    "training_rows": 460,
+    "new_combination_evaluation_rows": 40,
+    "historical_evaluation_rows": 100,
+    "new_combination": {
+      "questions": 40,
+      "route_exact": 34,
+      "speaker_exact": 39,
+      "time_kind_exact": 37,
+      "context_set_exact": 31,
+      "query_char_span_exact": 28,
+      "time_char_span_exact": 38,
+      "positive_query_questions": 24,
+      "positive_query_span_exact": 14
+    },
+    "context_available_subset": {
+      "questions": 15,
+      "exact": 6
+    },
+    "explicit_reply_subset": {
+      "questions": 6,
+      "exact": 0
+    },
+    "historical": {
+      "dialogue_count": 100,
+      "route": 89,
+      "speaker": 94,
+      "time": 90,
+      "selected": 94,
+      "query_span": 71,
+      "time_span": 93,
+      "positive_query_count": 45,
+      "positive_query_exact": 23
+    },
+    "limitations": [
+      "Historical evaluation was previously observed.",
+      "Earlier token-span metrics are not directly comparable to current character-span metrics."
+    ]
+  },
+  "record_relevance": {
+    "training_pairs": 120,
+    "added_hard_negative_pairs": 40,
+    "evaluation": {
+      "count": 20,
+      "correct": 16,
+      "false_accepts": 0
+    },
+    "historical": {
+      "count": 40,
+      "correct": 28,
+      "false_accepts": 0
+    },
+    "before_evaluation_correct": 18,
+    "before_evaluation_questions": 20,
+    "interpretation": "More conservative, fewer correct matches overall; prompted by observed failures, not a pristine independent test."
+  },
+  "response_grounding": {
+    "training_positive_pairs": 55,
+    "training_negative_pairs": 55,
+    "evaluation": {
+      "count": 20,
+      "correct": 19,
+      "false_accepts": 1
+    },
+    "score_kind": "raw uncalibrated logit",
+    "interpretation": "Small binary consistency evaluation with one false accept; not universal factuality proof."
+  },
+  "actual_model_offline_integration": {
+    "cases": 8,
+    "delivered_to_fixture": 5,
+    "meaning_correct_count": null,
+    "transport": "synthetic SQLite/send fixture",
+    "interpretation": "Delivery/check acceptance is not semantic accuracy. Reply-target and query/time errors remain."
+  },
+  "response_audit": {
+    "candidate_text_retained": true,
+    "decoded_text_retained": true,
+    "format_verdict_retained": true,
+    "grounding_verdict_and_raw_score_retained_when_applicable": true,
+    "writes_before_next_candidate": true,
+    "prior_attempt_survives_later_failure": true,
+    "scoped_generation_identifier": true,
+    "delivery_statuses": [
+      "delivered",
+      "not_sent",
+      "unknown_on_transport_error"
+    ],
+    "rejected_candidates_enter_conversation_memory": false,
+    "raw_private_audit_published": false,
+    "automatic_training_ingestion": false,
+    "limitation": "Cannot reconstruct historical text from old hashes; no power-loss durability guarantee."
+  },
+  "related_private_cpu_checks": {
+    "tests": 114,
+    "failures": 0,
+    "errors": 0,
+    "compileall": true,
+    "scope": "Related private Discord/runtime/worker tests, not the full repository or the public CPU slice."
+  },
+  "actual_discord_replay": {
+    "cases": 3,
+    "delivered": 3,
+    "candidate_audit_matches": 3,
+    "delivery_outcome_matches": 3,
+    "inputs": "Existing private user messages replayed with original timestamps and isolated historical memory.",
+    "route": "CHAT",
+    "first_candidate_passes": 3,
+    "grounding_retry_observed": false,
+    "native_user_gateway_ingress_tested": false,
+    "production_memory_unchanged": true,
+    "response_quality": "Short/repetitive; no quality score inferred from successful delivery.",
+    "service_running_after_test": false,
+    "private_text_or_ids_published": false
+  },
+  "known_limits": [
+    "Reply-target selection remains weak (0/6 exact in the explicit reply subset).",
+    "Some query/period interpretation fails before generation.",
+    "Ordinary CHAT is outside the response-grounding guard.",
+    "CLARIFY review_complete representation differs between teacher and runtime inputs; causal impact unproven.",
+    "Original grounding training manifest omits one existing source hash; a later release manifest records the current hash without repairing training-time provenance.",
+    "No learned Minecraft action ranker or autonomous long-term planner was added."
+  ],
+  "source_artifacts": {
+    "chat_training": {
+      "artifact": "training_complete.json",
+      "sha256": "4ca4b021a700be41cd48f0e979922edbe207c3b31371838ca2a231ecee41f4f7",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "validation_before": {
+      "artifact": "validation_before.json",
+      "sha256": "dc047f572ca12a39795e60b2d2cba3cd5f75795c18ae5b178cd2c4b21c20f439",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "validation_after": {
+      "artifact": "validation_after.json",
+      "sha256": "2defbcfe24b36ab518e7477032c8004991ba90278f7e408b5c4eacbea3ca1762",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "dialogue_heads": {
+      "artifact": "result.json",
+      "sha256": "8b5ab93bc350d210be52f9bda4260c8f0a5e54c5ae2330893c25810f353b6092",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "record_relevance": {
+      "artifact": "result.json",
+      "sha256": "6deb4bef8062f20a102a4cb934eb7a84378b9378bc5bb9794cfdf2446bcbc310",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "response_grounding": {
+      "artifact": "grounding_result.json",
+      "sha256": "efafd5cd1f4ed4461e715b4fa95c60725075d441003dce0b2c0bb8212dceb8d7",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "offline_integration": {
+      "artifact": "integration.json",
+      "sha256": "3f8baecd4ed601064a048d81408989d69969929ddd622f70411445206fc03b5c",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "private_cpu_checks": {
+      "artifact": "verification.json",
+      "sha256": "451a4de9cd49eff3cf906e2f622dc8013052c6c882d2e0b9666516b9f9695cfe",
+      "scope": "Private artifact version identifier; original not published."
+    },
+    "private_channel_readback": {
+      "artifact": "replay_final_verification.json",
+      "sha256": "3b12cbb8a64892a2f971f9b772a9e6efff072a62cfd4e88a134a4eab4cf60283",
+      "scope": "Private artifact version identifier; original not published."
+    }
+  }
+}

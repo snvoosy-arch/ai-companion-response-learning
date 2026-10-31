@@ -1,9 +1,9 @@
 {
   "schema_version": "companion.model_training_snapshot.v1",
-  "as_of": "2026-10-30",
+  "as_of": "2026-10-31",
   "evidence_scope": "Selected aggregates from private local artifacts; not proof of live deployment. Includes six archived Minecraft pairs and six selected fresh multiturn pairs. Synthetic authored contexts, actual recorded model replies; no new inference in the page.",
   "rubrum": {
-    "as_of": "2026-10-30",
+    "as_of": "2026-10-31",
     "base_model": "JetLM/SDAR-4B-Chat",
     "base_revision": "56bca3c8d927410589a86e7996ee281b6764fa37",
     "method": "256-token uniform denoising; frozen BF16 backbone; LoRA r8 alpha16; trainable self-conditioning",
@@ -121,6 +121,18 @@
       "cases": 2,
       "source_type": "authored_synthetic_evaluation_actual_model_traces",
       "path": "docs/diffusion-trace/index.html"
+    },
+    "latest_dialogue_transition": {
+      "as_of": "2026-10-31",
+      "summary": "rubrum-dialogue-20261031.json",
+      "chat_child_run_id": "dialogue_grounded_uniform_20261030_v2",
+      "canonical_launcher_default": "model",
+      "earlier_run_id_scope": "run_id/training/reconstruction fields above describe the retained 2026-10-29 parent stage.",
+      "legacy_registry_aliases_promoted": false,
+      "related_private_tests": 114,
+      "private_channel_replays": 3,
+      "broad_dialogue_quality_proven": false,
+      "native_user_ingress_tested": false
     }
   },
   "sapphirus": {
