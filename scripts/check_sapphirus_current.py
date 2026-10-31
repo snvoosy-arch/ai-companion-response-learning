@@ -80,6 +80,130 @@ def check_multiturn(bundle: dict, summary: dict) -> list[str]:
     return errors
 
 
+class _PageTree(HTMLParser):
+    """Small text tree for auditing the static latest-comparison section."""
+    VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link',
+            'meta', 'param', 'source', 'track', 'wbr'}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.root = dict(tag='', attrs={}, children=[])
+        self.stack = [self.root]
+
+    def handle_starttag(self, tag, attrs):
+        node = dict(tag=tag, attrs=dict(attrs), children=[])
+        self.stack[-1]['children'].append(node)
+        if tag not in self.VOID:
+            self.stack.append(node)
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack)-1, 0, -1):
+            if self.stack[index]['tag'] == tag:
+                del self.stack[index:]
+                break
+
+    def handle_data(self, data):
+        self.stack[-1]['children'].append(data)
+
+
+def _elements(node, tag, css=None):
+    for child in node['children']:
+        if isinstance(child, dict):
+            if child['tag'] == tag and (css is None or css in child['attrs'].get('class', '').split()):
+                yield child
+            yield from _elements(child, tag, css)
+
+
+def _text(node):
+    if isinstance(node, str):
+        return node
+    if node['tag'] == 'br':
+        return '\n'
+    return ''.join(_text(child) for child in node['children'])
+
+
+def _visible(text):
+    return ' '.join(text.split())
+
+
+def _single_text(node, tag, css=None):
+    matches = list(_elements(node, tag, css))
+    return _visible(_text(matches[0])) if len(matches) == 1 else None
+
+
+def _pieces(node):
+    if isinstance(node, str):
+        yield node
+    elif node['tag'] == 'br':
+        yield None  # structural separator, distinct from source indentation
+    else:
+        for child in node['children']:
+            yield from _pieces(child)
+
+
+def _paragraph_parts(node):
+    parts = [[]]
+    for piece in _pieces(node):
+        if piece is None:
+            if len(parts) == 1:
+                parts.append([])
+            else:
+                parts[-1].append('\n')
+        else:
+            parts[-1].append(piece)
+    if len(parts) != 2:
+        return None, None
+    return _visible(''.join(parts[0])), _visible(''.join(parts[1]))
+
+
+def check_multiturn_page(page: str, bundle: dict) -> list[str]:
+    """Bind the public HTML copy to public records, without private-source claims."""
+    tree = _PageTree()
+    tree.feed(page)
+    sections = [n for n in _elements(tree.root, 'section')
+                if n['attrs'].get('id') == 'daily-continuation']
+    if len(sections) != 1:
+        return ['expected one latest-comparison section']
+    cards = list(_elements(sections[0], 'details', 'context-panel'))
+    if len(cards) != len(bundle['cases']):
+        return ['latest page case count differs from JSON']
+    errors = []
+    themes = dict(improved='개선 사례', remaining_error='공통 오류', regressed='후퇴 사례')
+    roles = {'사용자': 'user', '제공한 앞 답변': 'assistant'}
+    for card, case in zip(cards, bundle['cases'], strict=True):
+        prefix = 'latest page '+case['id']
+        ids = [n for n in card['children'] if isinstance(n, dict) and n['tag'] == 'p'
+               and 'eyebrow' in n['attrs'].get('class', '').split()]
+        if len(ids) != 1 or _visible(_text(ids[0])) != case['id']:
+            errors.append(prefix+': case identity/order mismatch')
+        title = case['title']+' · '+themes.get(case['theme'], '')
+        if _single_text(card, 'summary') != _visible(title):
+            errors.append(prefix+': title/theme mismatch')
+        messages = []
+        for paragraph in _elements(card, 'p'):
+            label, content = _paragraph_parts(paragraph)
+            if label in roles:
+                messages.append(dict(role=roles[label], content=content))
+        expected = [dict(role=m['role'], content=_visible(m['content'])) for m in case['messages']]
+        if messages != expected:
+            errors.append(prefix+': supplied context mismatch')
+        answers = list(_elements(card, 'article', 'answer'))
+        if len(answers) != 2:
+            errors.append(prefix+': expected before/after answer cards')
+            continue
+        for article, label, heading in zip(answers, ['before', 'after'], ['이전 Chat', '현재 Chat'], strict=True):
+            output = case['outputs'][label]
+            if _single_text(article, 'p', 'eyebrow') != heading:
+                errors.append(prefix+': model label/order mismatch')
+            if _single_text(article, 'blockquote', 'response') != _visible(output['response']):
+                errors.append(prefix+': response mismatch: '+label)
+            grade = '충족' if output['context_pass'] else '미충족'
+            note = f'문맥 {grade} · 표현 {output["quality"]}/2 '+output['note']
+            if _single_text(article, 'p', 'review-note') != _visible(note):
+                errors.append(prefix+': grade/note mismatch: '+label)
+    return errors
+
+
 class Links(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -109,10 +233,12 @@ def main():
     bundle = json.loads((folder / "comparison.json").read_text(encoding="utf-8"))
     aggregate = json.loads((ROOT / "evidence/model-training/current-summary.json").read_text(encoding="utf-8"))["sapphirus"]
     errors = check_data(bundle, aggregate, (folder / "comparison.js").read_text(encoding="utf-8")) + check_links()
-    errors += check_multiturn(json.loads((folder / 'multiturn50.json').read_text(encoding='utf-8')), aggregate)
+    latest = json.loads((folder / 'multiturn50.json').read_text(encoding='utf-8'))
+    errors += check_multiturn(latest, aggregate)
+    errors += check_multiturn_page((ROOT / 'docs/sapphirus/index.html').read_text(encoding='utf-8'), latest)
     if errors:
         raise SystemExit("\n".join(errors))
-    print("Sapphirus current checks passed: six latest + six archived pairs, identities, aggregates, wrapper, links")
+    print("Sapphirus current checks passed: six latest + six archived pairs, HTML/JSON, identities, aggregates, wrapper, links")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,35 @@
 # Sapphirus 현재 경계 — CPU Reference
 
-최신 4B 역할 분리를 설명하는 작은 독립 구현이다. 표준 라이브러리만 사용한다.
+최신 4B의 Chat 문맥 선택과 외부 책임 경계를 설명하는 작은 독립 구현이다. Python 3.10 이상에서 표준 라이브러리만 사용한다.
 
 ```sh
-python -m examples.sapphirus_current.demo
+python -X utf8 -m examples.sapphirus_current.demo
 python -m unittest discover -s tests -p "test_sapphirus_current.py" -v
 ```
 
 데모는 새로 직접 작성한 **가상 fixture**이며 실제 모델 응답·게임 결과가 아니다. 모델·네트워크·DB·학습·Discord를 실행하지 않고 현재 모델 레지스트리도 쓰지 않는다. 답변 비교 화면의 실제 저장 응답과 구분한다.
+
+## 기본 데모: 모델에 어떤 문맥이 전달되는가
+
+실제 순수 helper인 `select_context`를 실행해 각 상황의 `selected_ids`와 최종 `messages`를 출력한다. 앞 assistant 발화도 직접 작성한 fixture다. 새 모델 답변을 생성하거나 질문의 의미를 판정하지 않는다.
+
+| 상황 | 관찰할 결과 |
+| --- | --- |
+| `recent` | 만료된 쌍을 제외하고 최근2쌍을 전달한다. 주제 전환 표현이 있어도 코드가 문맥을 끊지 않는다. |
+| `explicit_reply` | 명시적으로 답글 단 과거 쌍만 선택한다. |
+| `missing_reply` | 범위 안에 없는 답글 대상이면 현재 입력만 전달한다. |
+| `deleted_reply` | 삭제된 입력에 대한 답글이면 현재 입력만 전달한다. |
+| `edited_reply` | 호출자가 수정 전 입력에 의존한 옛 답변을 무효화하면 현재 입력만 전달한다. |
+
+호출자가 먼저 사용자·채널 범위를 분리하고 수정/삭제 의존성을 관리한다. 예제는 한 가상 사용자·채널의 기록을 준다. `edited_reply`에서는 호출자 역할의 fixture가 옛 assistant 기록을 무효화한다. 순수 선택기가 수정 이력을 자동 탐지하거나 실제 DB를 관리하는 기능을 보여주는 것은 아니다. 관련성 해석과 자연어 답변은 모델의 후속 역할이다.
+
+## 기존 계약 fixture
+
+```sh
+python -X utf8 -m examples.sapphirus_current.demo --contracts
+```
+
+이전 고수준 제안·부분 결과·모델 선택 갱신 fixture는 이 옵션으로 보존한다. 도구를 실제로 실행하지 않는다.
 
 | 함수 | 보여주는 책임 | 남은 외부 책임 |
 | --- | --- | --- |

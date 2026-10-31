@@ -3,6 +3,9 @@ import copy
 import hashlib
 import importlib.util
 import json
+import re
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -141,6 +144,121 @@ class PublicAuditTests(unittest.TestCase):
         altered = copy.deepcopy(aggregate)
         altered.get('historical_minecraft_comparison', altered)["generation_comparison"]["minecraft"]["current"]["usable"] = 50
         self.assertTrue(m.check_data(bundle, altered, wrapper))
+
+
+class MultiturnPageTests(unittest.TestCase):
+    def setUp(self):
+        self.m = load('scripts/check_sapphirus_current.py')
+        self.bundle = {'cases': [{'id': 'fixture-1', 'title': 'fixture title', 'theme': 'improved',
+            'messages': [{'role': 'user', 'content': 'A < B & C'},
+                         {'role': 'assistant', 'content': 'fixture context'},
+                         {'role': 'user', 'content': '왜?'}],
+            'outputs': {
+                'before': {'response': 'old <reply> & text', 'context_pass': False,
+                           'quality': 1, 'note': 'before note'},
+                'after': {'response': 'new reply', 'context_pass': True,
+                          'quality': 2, 'note': 'after note'}}}]}
+        self.page = '''<!doctype html><html><body><section id="daily-continuation">
+        <details class="context-panel" open><summary>fixture title · 개선 사례</summary>
+        <p class="eyebrow">fixture-1</p><div class="record-grid"><div>
+        <p><strong>사용자</strong><br>A &lt; B &amp; C</p>
+        <p><strong>제공한 앞 답변</strong><br>fixture context</p>
+        <p><strong>사용자</strong><br>왜?</p></div><div class="answers">
+        <article class="answer"><p class="eyebrow">이전 Chat</p>
+        <blockquote class="response">old &lt;reply&gt; &amp; text</blockquote>
+        <p class="review-note">문맥 미충족 · 표현 1/2<br>before note</p></article>
+        <article class="answer"><p class="eyebrow">현재 Chat</p>
+        <blockquote class="response"><span>new</span> reply</blockquote>
+        <p class="review-note">문맥 충족 · 표현 2/2<br>after note</p></article>
+        </div></div></details></section></body></html>'''
+
+    def test_escaped_visible_content_and_inline_markup_match_the_public_record(self):
+        self.assertEqual(self.m.check_multiturn_page(self.page, self.bundle), [])
+        wrapped = self.page.replace('new</span> reply', 'new</span>\n  reply')
+        self.assertEqual(self.m.check_multiturn_page(wrapped, self.bundle), [])
+
+    def test_drift_in_response_context_grade_label_or_identity_is_rejected(self):
+        changes = [('old &lt;reply&gt; &amp; text', 'wrong response'), ('왜?', 'different question'),
+                   ('문맥 충족 · 표현 2/2', '문맥 충족 · 표현 0/2'),
+                   ('after note', 'wrong note'), ('현재 Chat', '이전 Chat'),
+                   ('fixture-1', 'another-id'), ('fixture title', 'another title')]
+        for old, new in changes:
+            with self.subTest(field=old):
+                self.assertTrue(self.m.check_multiturn_page(self.page.replace(old, new), self.bundle))
+
+    def test_context_labels_allow_indentation_wrapping_and_neutral_spans(self):
+        changes = [('<p><strong>사용자</strong>', '<p>\n  <strong>사용자</strong>'),
+                   ('제공한 앞 답변', '제공한\n  앞 답변'),
+                   ('<strong>사용자</strong>', '<span><strong>사용자</strong></span>'),
+                   ('<strong>사용자</strong><br>', '<span><strong>사용자</strong>\n<br></span>\n')]
+        for old, new in changes:
+            with self.subTest(formatting=new):
+                self.assertEqual(self.m.check_multiturn_page(self.page.replace(old, new), self.bundle), [])
+
+    def test_missing_or_duplicate_cases_and_swapped_cards_are_rejected(self):
+        begin, end = self.page.index('<details'), self.page.index('</details>')+len('</details>')
+        card = self.page[begin:end]
+        for wrong in [self.page.replace(card, ''), self.page.replace(card, card+card),
+                      self.page.replace('daily-continuation', 'unrelated-section'),
+                      self.page.replace('이전 Chat', 'TEMP').replace('현재 Chat', '이전 Chat').replace('TEMP', '현재 Chat')]:
+            self.assertTrue(self.m.check_multiturn_page(wrong, self.bundle))
+
+    def test_real_check_cli_rejects_a_changed_displayed_answer(self):
+        files = ['scripts/check_sapphirus_current.py', 'docs/sapphirus/index.html',
+                 'docs/sapphirus/styles.css', 'docs/sapphirus/app.js',
+                 'docs/sapphirus/comparison-model.js', 'docs/sapphirus/data/comparison.json',
+                 'docs/sapphirus/data/comparison.js', 'docs/sapphirus/data/multiturn50.json',
+                 'evidence/model-training/current-summary.json']
+        with tempfile.TemporaryDirectory() as folder:
+            project = Path(folder)
+            for relative in files:
+                target = project/relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((ROOT/relative).read_bytes())
+            (project/'docs/index.html').write_text('<html></html>', encoding='utf-8')
+            (project/'docs/diffusion-trace').mkdir()
+            command = [sys.executable, '-B', '-X', 'utf8', 'scripts/check_sapphirus_current.py']
+            original = subprocess.run(command, cwd=project, text=True, encoding='utf-8', capture_output=True)
+            self.assertEqual(original.returncode, 0, original.stdout+original.stderr)
+            path = project/'docs/sapphirus/index.html'
+            changed = re.sub(r'(<blockquote class="response">).*?(</blockquote>)',
+                             r'\1changed displayed answer\2', path.read_text(encoding='utf-8'),
+                             count=1, flags=re.S)
+            path.write_text(changed, encoding='utf-8')
+            rejected = subprocess.run(command, cwd=project, text=True, encoding='utf-8', capture_output=True)
+            self.assertNotEqual(rejected.returncode, 0)
+            self.assertIn('response mismatch', rejected.stdout+rejected.stderr)
+
+
+class ChatDemoTests(unittest.TestCase):
+    def run_demo(self, *args):
+        result = subprocess.run([sys.executable, '-B', '-X', 'utf8', '-m', 'examples.sapphirus_current.demo', *args],
+                                cwd=ROOT, text=True, encoding='utf-8', capture_output=True, check=True)
+        return json.loads(result.stdout)
+
+    def test_default_cli_demonstrates_real_recent_and_explicit_context_selection(self):
+        data = self.run_demo()
+        recent = data['scenarios']['recent']
+        self.assertEqual(recent['selected_ids'], ['u1', 'a1', 'u2', 'a2'])
+        self.assertEqual(recent['messages'][-1], {'role': 'user', 'content': '그건 왜 그래?'})
+        self.assertEqual(recent['messages'][2], {'role': 'user', 'content': '다른 얘기인데 수첩을 새로 샀어.'})
+        self.assertEqual(data['scenarios']['explicit_reply']['selected_ids'], ['u1', 'a1'])
+        self.assertEqual(data['scenarios']['explicit_reply']['messages'][0]['content'], '책을 창가에 놓았어.')
+
+    def test_missing_deleted_and_caller_invalidated_edits_do_not_fall_back(self):
+        data = self.run_demo()
+        for name in ['missing_reply', 'deleted_reply', 'edited_reply']:
+            with self.subTest(name=name):
+                self.assertEqual(data['scenarios'][name]['selected_ids'], [])
+                self.assertEqual(data['scenarios'][name]['messages'], [
+                    {'role': 'user', 'content': '그건 왜 그래?'}])
+
+    def test_contracts_cli_preserves_partial_result_and_denies_completion(self):
+        data = self.run_demo('--contracts')
+        self.assertEqual(data['receipt_card']['confirmed_minimum'], 1)
+        self.assertIsNone(data['receipt_card']['physical_total'])
+        self.assertFalse(data['completion_allowed'])
+        self.assertFalse(data['executed'])
 
 
 class ModelFirstSourceTests(unittest.TestCase):
