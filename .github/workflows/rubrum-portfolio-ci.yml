@@ -5,12 +5,22 @@ on:
     paths:
       - "README.md"
       - "docs/rubrum-*.md"
+      - "docs/current-model-training.md"
+      - "evidence/model-training/current-summary.json"
+      - "evidence/model-training/rubrum-dialogue-*.json"
+      - "scripts/check_rubrum_current.py"
+      - "tests/test_rubrum_current.py"
       - "companions/rubrum/**"
       - ".github/workflows/rubrum-portfolio-ci.yml"
   pull_request:
     paths:
       - "README.md"
       - "docs/rubrum-*.md"
+      - "docs/current-model-training.md"
+      - "evidence/model-training/current-summary.json"
+      - "evidence/model-training/rubrum-dialogue-*.json"
+      - "scripts/check_rubrum_current.py"
+      - "tests/test_rubrum_current.py"
       - "companions/rubrum/**"
       - ".github/workflows/rubrum-portfolio-ci.yml"
 
@@ -48,3 +58,12 @@ jobs:
 
       - name: Lint current Rubrum public code
         run: ruff check examples tests scripts
+
+      - name: Validate current Rubrum snapshot and visible claims
+        run: python ../../scripts/check_rubrum_current.py
+
+      - name: Reject drift in current snapshot and documentation
+        run: python -m unittest discover -s ../../tests -p "test_rubrum_current.py" -v
+
+      - name: Lint current snapshot checker and regression tests
+        run: ruff check ../../scripts/check_rubrum_current.py ../../tests/test_rubrum_current.py

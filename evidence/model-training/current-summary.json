@@ -129,10 +129,11 @@
       "canonical_launcher_default": "model",
       "earlier_run_id_scope": "run_id/training/reconstruction fields above describe the retained 2026-10-29 parent stage.",
       "legacy_registry_aliases_promoted": false,
-      "related_private_tests": 114,
+      "related_private_tests": 127,
       "private_channel_replays": 3,
       "broad_dialogue_quality_proven": false,
-      "native_user_ingress_tested": false
+      "native_user_ingress_tested": false,
+      "summary_sha256": "86945158c0434bd575c7c390828c654cc972373ad2bf02da89084fd9f59a9d24"
     }
   },
   "sapphirus": {

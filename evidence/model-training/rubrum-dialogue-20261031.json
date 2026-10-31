@@ -55,7 +55,8 @@
     "validation_loss_precision": "Rounded to six decimal places; private source hashes identify exact values.",
     "adapter_sha256": "861ad52b42b567e8c079d4efa971f789970566377c2f474f1e8361e6a639ca72",
     "sc_sha256": "96b4a9bda602ff376cd5eb412e786d4f049ebe7953528d49ba3c968e9f20a2a5",
-    "interpretation": "Content loss decreased, termination/tail loss increased. Loss is not dialogue accuracy or naturalness."
+    "interpretation": "Content loss decreased, termination/tail loss increased. Loss is not dialogue accuracy or naturalness.",
+    "training_corruptions_per_row": 3
   },
   "dialogue_heads": {
     "training_rows": 460,
@@ -147,10 +148,14 @@
     "rejected_candidates_enter_conversation_memory": false,
     "raw_private_audit_published": false,
     "automatic_training_ingestion": false,
-    "limitation": "Cannot reconstruct historical text from old hashes; no power-loss durability guarantee."
+    "limitation": "Cannot reconstruct historical text from old hashes; no power-loss durability guarantee.",
+    "current_input_version_checked": true,
+    "operational_notice_transport_audited": true,
+    "failed_decision_is_request_owned": true
   },
   "related_private_cpu_checks": {
-    "tests": 114,
+    "tests": 127,
+    "passed": true,
     "failures": 0,
     "errors": 0,
     "compileall": true,
@@ -169,7 +174,9 @@
     "production_memory_unchanged": true,
     "response_quality": "Short/repetitive; no quality score inferred from successful delivery.",
     "service_running_after_test": false,
-    "private_text_or_ids_published": false
+    "private_text_or_ids_published": false,
+    "test_mode": "historical_replay",
+    "revision_scope": "Historical replay before the subsequent current-input/transport/error-audit corrections. Those corrections were CPU-tested, not re-run live."
   },
   "known_limits": [
     "Reply-target selection remains weak (0/6 exact in the explicit reply subset).",
@@ -216,8 +223,8 @@
       "scope": "Private artifact version identifier; original not published."
     },
     "private_cpu_checks": {
-      "artifact": "verification.json",
-      "sha256": "451a4de9cd49eff3cf906e2f622dc8013052c6c882d2e0b9666516b9f9695cfe",
+      "artifact": "runtime_actual_verification.json",
+      "sha256": "5b7d2a7a581ad6d2a03171dd0dbd072c017789c06b0fbe4781438b8b96434fa0",
       "scope": "Private artifact version identifier; original not published."
     },
     "private_channel_readback": {
